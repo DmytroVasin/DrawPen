@@ -1,0 +1,42 @@
+#myCanvas {
+  cursor: crosshair;
+  border: 2px solid black;
+}
+
+#colorPicker {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 0px;
+}
+
+#colorPicker::before {
+  position: absolute;
+  content: '';
+  top: 50%;
+  left: 50%;
+  height: 12px;
+  width: 12px;
+  background: inherit;
+  border-radius: inherit;
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+}
+
+#brushWidth {
+  height: 20px;
+  border: 0px;
+  background-color: grey;
+}
+
+.tool {
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+}
+
+.tool.active {
+  background-color: grey;
+}

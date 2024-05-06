@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+    <style>
+        /* Your CSS styles here */
+        .window-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 5px;
+        }
+        .window-controls button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="window-controls">
+        <button id="minimizeButton">-</button>
+        <button id="maximizeButton">+</button>
+        <button id="closeButton">x</button>
+    </div>
+    <!-- Your content here -->
+    <script>
+        // Your JavaScript here
+        const { remote } = require('electron');
+        const { BrowserWindow } = remote;
+
+        const minimizeButton = document.getElementById('minimizeButton');
+        const maximizeButton = document.getElementById('maximizeButton');
+        const closeButton = document.getElementById('closeButton');
+
+        minimizeButton.addEventListener('click', () => {
+            const window = remote.getCurrentWindow();
+            window.minimize();
+        });
+
+        maximizeButton.addEventListener('click', () => {
+            const window = remote.getCurrentWindow();
+            if (window.isMaximized()) {
+                window.unmaximize();
+            } else {
+                window.maximize();
+            }
+        });
+
+        closeButton.addEventListener('click', () => {
+            const window = remote.getCurrentWindow();
+            window.close();
+        });
+    </script>
+</body>
+</html>

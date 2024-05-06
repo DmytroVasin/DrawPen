@@ -1,0 +1,30 @@
+{
+  "name": "drawpen",
+  "version": "0.0.1",
+  "private": true,
+  "main": "main.js",
+  "dependencies": {
+    "electron": "latest",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "perfect-freehand": "^1.2.2",
+    "lodash.throttle": "^4.1.1"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "react-scripts start"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
