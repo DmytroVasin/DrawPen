@@ -1,5 +1,6 @@
 /* App.css */
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -9,4 +10,5 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  background-color: rgb(14, 185, 185);
 }

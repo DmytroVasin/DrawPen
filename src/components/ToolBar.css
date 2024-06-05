@@ -1,5 +1,175 @@
 #toolbar {
-  border: 5px solid red;
-  margin: 10px;
-  padding: 10px;
+  position: fixed;
+  left: 0;
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(17px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#toolbar svg {
+  fill: #000;
+}
+
+.toolbar__header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.toolbar__header .toolbar__header-buttons {
+  align-self: flex-start;
+}
+
+.toolbar__header-buttons {
+  margin-bottom: 5px;
+}
+
+.toolbar__header-buttons svg {
+  cursor: pointer;
+}
+
+.toolbar__header-buttons button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  pointer-events: all;
+}
+
+.toolbar__items {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toolbar__items li {
+  margin: 3px 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toolbar__items .active {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 5px;
+}
+
+.toolbar__items li button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  pointer-events: all;
+}
+
+.toolbar__items li button:focus {
+  outline: none;
+}
+
+.toolbar__items li button svg {
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.toolbar__items hr {
+  border-color: #4c4c4c;
+  margin: 10px 8px;
+  width: calc(100% - 16px);
+}
+
+.toolbar__bottom {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  transform: rotate(90);
+  margin-bottom: 5px;
+}
+
+/* Drag Lines: */
+
+.draglines {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+}
+
+.draglines hr {
+  border: 1px solid black;
+  margin: 0;
+  margin-top: 5px;
+  border-radius: 15px;
+}
+
+.draglines hr:nth-child(1) {
+  width: 75%;
+}
+
+.draglines hr:nth-child(2) {
+  width: 85%;
+}
+
+.draglines hr:nth-child(3) {
+  width: 95%;
+}
+
+.toolbar__bottom .draglines hr:nth-child(1) {
+  width: 95%;
+}
+
+.toolbar__bottom .draglines hr:nth-child(2) {
+  width: 85%;
+}
+
+.toolbar__bottom .draglines hr:nth-child(3) {
+  width: 75%;
+
+  margin-bottom: 5px;
+}
+
+#colorPicker {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0px;
+}
+
+#colorPicker::before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  height: 20px;
+  width: 20px;
+  background: inherit;
+  border-radius: inherit;
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
 }
