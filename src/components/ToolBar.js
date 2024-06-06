@@ -7,20 +7,11 @@ import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 
-const DragLines = ({ className = "" }) => {
-  return (
-    <div className={`draglines ${className}`}>
-      <div />
-      <div />
-      <div />
-    </div>
-  );
-};
-
 const ToolBar = ({
   activeTool,
   activeColorIndex,
   activeWidthIndex,
+  handleReset,
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
@@ -41,13 +32,17 @@ const ToolBar = ({
 
   return (
     <aside id="toolbar">
+      <div className="window__buttons">
+        <button>
+          <MdOutlineCancel size={15} />
+        </button>
+      </div>
       <div className="toolbar__header">
-        <div className="toolbar__header-buttons">
-          <button>
-            <MdOutlineCancel />
-          </button>
+        <div className="draglines">
+          <div />
+          <div />
+          <div />
         </div>
-        <DragLines />
       </div>
       <ul className="toolbar__items">
         <li className={activeTool === "arrow" ? "active" : ""}>
@@ -72,7 +67,7 @@ const ToolBar = ({
         </li>
         <li className={activeTool === "line" ? "active" : ""}>
           <button name="line" onClick={onChangeTool}>
-            <AiOutlineLine />
+            <AiOutlineLine transform="rotate(45)" />
           </button>
         </li>
         <li className={activeTool === "flashlight" ? "active" : ""}>
@@ -94,30 +89,21 @@ const ToolBar = ({
           />
         </li>
         <li>
-          <button
-            onClick={onChangeWidth}
-            style={{
-              border: "2px solid #000",
-              borderRadius: "50%",
-              width: 28,
-              height: 28,
-            }}
-          >
+          <button className="toolbar__width-button" onClick={onChangeWidth}>
             <div
               style={{
                 width: widthList[activeWidthIndex].width / 3,
-                height: 18,
-                backgroundColor: "black",
-                transform: "rotate(45deg)",
-                borderRadius: "5px",
-                position: "relative",
               }}
-            ></div>
+            />
           </button>
         </li>
       </ul>
       <div className="toolbar__bottom">
-        <DragLines className="rotated" />
+        <div className="draglines rotated">
+          <div />
+          <div />
+          <div />
+        </div>
       </div>
     </aside>
   );

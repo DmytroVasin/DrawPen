@@ -1,5 +1,5 @@
 #toolbar {
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   width: 40px;
@@ -26,8 +26,24 @@
   margin-top: 5px;
 }
 
-.toolbar__header .toolbar__header-buttons {
-  align-self: flex-start;
+.window__buttons {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.window__buttons button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+  pointer-events: all;
 }
 
 .toolbar__header-buttons {
@@ -162,4 +178,19 @@
   border-radius: inherit;
   border: 2px solid #fff;
   transform: translate(-50%, -50%);
+}
+
+.toolbar__width-button {
+  height: 28px !important;
+  width: 28 !important;
+  border: 2px solid #000 !important;
+  border-radius: 50% !important;
+}
+
+.toolbar__width-button div {
+  height: 18px;
+  background-color: black;
+  transform: rotate(45deg);
+  border-radius: 5px;
+  position: relative;
 }
