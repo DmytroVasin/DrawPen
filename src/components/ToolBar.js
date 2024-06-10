@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
@@ -92,7 +92,7 @@ const ToolBar = ({
           <button className="toolbar__width-button" onClick={onChangeWidth}>
             <div
               style={{
-                width: widthList[activeWidthIndex].width / 3,
+                width: `${widthList[activeWidthIndex].width / 3}px`,
               }}
             />
           </button>

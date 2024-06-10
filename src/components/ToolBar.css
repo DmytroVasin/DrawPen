@@ -1,36 +1,19 @@
 #toolbar {
   position: absolute;
-  left: 0;
   top: 0;
-  width: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  left: 0;
+  width: 70px;
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(17px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-#toolbar svg {
-  fill: #000;
-}
-
-.toolbar__header {
-  width: 100%;
+.toolbar__header,
+.toolbar__bottom {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  margin-top: 5px;
-}
-
-.window__buttons {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  margin: 0;
+  padding: 5px 0;
 }
 
 .window__buttons button {
@@ -43,40 +26,17 @@
   padding: 2px;
   width: 20px;
   height: 20px;
-  pointer-events: all;
-}
-
-.toolbar__header-buttons {
-  margin-bottom: 5px;
-}
-
-.toolbar__header-buttons svg {
-  cursor: pointer;
-}
-
-.toolbar__header-buttons button {
-  background: none;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2px;
-  cursor: pointer;
-  width: 18px;
-  height: 18px;
-  pointer-events: all;
 }
 
 .toolbar__items {
   padding: 0;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .toolbar__items li {
-  margin: 3px 0;
+  margin: 5px 0;
   width: 30px;
   height: 30px;
   display: flex;
@@ -84,8 +44,8 @@
   align-items: center;
 }
 
-.toolbar__items .active {
-  background-color: rgba(255, 255, 255, 1);
+.toolbar__items li.active {
+  background-color: #fff;
   border-radius: 5px;
 }
 
@@ -95,11 +55,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2px;
   cursor: pointer;
-  width: 30px;
-  height: 30px;
-  pointer-events: all;
 }
 
 .toolbar__items li button:focus {
@@ -114,32 +70,21 @@
 
 .toolbar__items hr {
   border-color: #4c4c4c;
-  margin: 10px 8px;
-  width: calc(100% - 16px);
+  width: 80%;
 }
-
-.toolbar__bottom {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 5px;
-}
-
-/* Drag Lines: */
 
 .draglines {
   width: 75%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  height: 15px;
   cursor: move;
 }
 
 .draglines div {
-  border: 1px solid black;
-  margin: 0;
-  margin-top: 5px;
+  border: 1px solid #000;
   border-radius: 15px;
 }
 
@@ -164,7 +109,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 0px;
+  border: none;
 }
 
 #colorPicker::before {
@@ -172,25 +117,24 @@
   content: "";
   top: 50%;
   left: 50%;
-  height: 20px;
   width: 20px;
+  height: 20px;
   background: inherit;
-  border-radius: inherit;
+  border-radius: 50%;
   border: 2px solid #fff;
   transform: translate(-50%, -50%);
 }
 
-.toolbar__width-button {
-  height: 28px !important;
-  width: 28 !important;
-  border: 2px solid #000 !important;
-  border-radius: 50% !important;
+#toolbar .toolbar__width-button {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #000;
+  border-radius: 50%;
 }
 
-.toolbar__width-button div {
+.toolbar__width-button > div {
   height: 18px;
-  background-color: black;
+  background-color: #000;
   transform: rotate(45deg);
   border-radius: 5px;
-  position: relative;
 }
