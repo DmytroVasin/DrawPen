@@ -1,5 +1,140 @@
 #toolbar {
-  border: 5px solid red;
-  margin: 10px;
-  padding: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(17px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toolbar__header,
+.toolbar__bottom {
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+}
+
+.window__buttons button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+}
+
+.toolbar__items {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toolbar__items li {
+  margin: 5px 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toolbar__items li.active {
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.toolbar__items li button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toolbar__items li button:focus {
+  outline: none;
+}
+
+.toolbar__items li button svg {
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.toolbar__items hr {
+  border-color: #4c4c4c;
+  width: 80%;
+}
+
+.draglines {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 15px;
+  cursor: move;
+}
+
+.draglines div {
+  border: 1px solid #000;
+  border-radius: 15px;
+}
+
+.draglines div:nth-child(1) {
+  width: 75%;
+}
+
+.draglines div:nth-child(2) {
+  width: 85%;
+}
+
+.draglines div:nth-child(3) {
+  width: 95%;
+}
+
+.rotated {
+  transform: rotate(180deg);
+}
+
+#colorPicker {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+}
+
+#colorPicker::before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: inherit;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+}
+
+#toolbar .toolbar__width-button {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #000;
+  border-radius: 50%;
+}
+
+.toolbar__width-button > div {
+  height: 18px;
+  background-color: #000;
+  transform: rotate(45deg);
+  border-radius: 5px;
 }
