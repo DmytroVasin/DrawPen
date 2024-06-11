@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
@@ -20,26 +20,32 @@ const ToolBar = ({
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  const onMouseDown = (e) => {
-    setDragging(true);
-    setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-  };
+  const onMouseDown = useCallback(
+    (e) => {
+      setDragging(true);
+      setOffset({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      });
+    },
+    [position]
+  );
 
-  const onMouseMove = (e) => {
-    if (dragging) {
+  const onMouseMove = useCallback(
+    (e) => {
+      if (!dragging) return;
+
       setPosition({
         x: e.clientX - offset.x,
         y: e.clientY - offset.y,
       });
-    }
-  };
+    },
+    [dragging, offset]
+  );
 
-  const onMouseUp = () => {
+  const onMouseUp = useCallback(() => {
     setDragging(false);
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener("mousemove", onMouseMove);
