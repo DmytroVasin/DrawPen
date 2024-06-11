@@ -20,28 +20,22 @@ const ToolBar = ({
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  const onMouseDown = useCallback(
-    (e) => {
-      setDragging(true);
-      setOffset({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
-      });
-    },
-    [position]
-  );
+  const onMouseDown = useCallback((e) => {
+    setDragging(true);
+    setOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  }, [position]);
 
-  const onMouseMove = useCallback(
-    (e) => {
-      if (!dragging) return;
+  const onMouseMove = useCallback((e) => {
+    if (!dragging) return;
 
-      setPosition({
-        x: e.clientX - offset.x,
-        y: e.clientY - offset.y,
-      });
-    },
-    [dragging, offset]
-  );
+    setPosition({
+      x: e.clientX - offset.x,
+      y: e.clientY - offset.y,
+    });
+  }, [dragging, offset]);
 
   const onMouseUp = useCallback(() => {
     setDragging(false);
