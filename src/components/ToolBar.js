@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
@@ -16,6 +16,41 @@ const ToolBar = ({
   handleChangeWidth,
   handleChangeTool,
 }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  const onMouseDown = (e) => {
+    setDragging(true);
+    setOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  };
+
+  const onMouseMove = (e) => {
+    if (dragging) {
+      setPosition({
+        x: e.clientX - offset.x,
+        y: e.clientY - offset.y,
+      });
+    }
+  };
+
+  const onMouseUp = () => {
+    setDragging(false);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [dragging, offset]);
+
   const onChangeTool = (event) => {
     handleChangeTool(event.target.name);
   };
@@ -31,14 +66,14 @@ const ToolBar = ({
   };
 
   return (
-    <aside id="toolbar">
+    <aside id="toolbar" style={{ left: position.x, top: position.y }}>
       <div className="window__buttons">
         <button>
           <MdOutlineCancel size={15} />
         </button>
       </div>
       <div className="toolbar__header">
-        <div className="draglines">
+        <div className="draglines" onMouseDown={onMouseDown}>
           <div />
           <div />
           <div />
@@ -99,7 +134,7 @@ const ToolBar = ({
         </li>
       </ul>
       <div className="toolbar__bottom">
-        <div className="draglines rotated">
+        <div className="draglines rotated" onMouseDown={onMouseDown}>
           <div />
           <div />
           <div />
