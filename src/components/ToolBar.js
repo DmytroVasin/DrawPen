@@ -7,6 +7,8 @@ import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 
+const STICKY_DISTANCE = 10;
+
 const ToolBar = ({
   activeTool,
   activeColorIndex,
@@ -31,10 +33,31 @@ const ToolBar = ({
   const onMouseMove = useCallback((e) => {
     if (!dragging) return;
 
-    setPosition({
-      x: e.clientX - offset.x,
-      y: e.clientY - offset.y,
-    });
+    let newX = e.clientX - offset.x;
+    let newY = e.clientY - offset.y;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const toolbar = document.getElementById("toolbar");
+    const toolbarWidth = toolbar.offsetWidth;
+    const toolbarHeight = toolbar.offsetHeight;
+
+    if (newX > windowWidth - toolbarWidth) newX = windowWidth - toolbarWidth;
+    if (newY > windowHeight - toolbarHeight) newY = windowHeight - toolbarHeight;
+
+    if (newX < STICKY_DISTANCE) {
+      newX = 0;
+    } else if (windowWidth - newX - toolbarWidth < STICKY_DISTANCE) {
+      newX = windowWidth - toolbarWidth;
+    }
+
+    if (newY < STICKY_DISTANCE) {
+      newY = 0;
+    } else if (windowHeight - newY - toolbarHeight < STICKY_DISTANCE) {
+      newY = windowHeight - toolbarHeight;
+    }
+
+    setPosition({ x: newX, y: newY });
   }, [dragging, offset]);
 
   const onMouseUp = useCallback(() => {
@@ -49,7 +72,7 @@ const ToolBar = ({
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-  }, [dragging, offset]);
+  }, [onMouseMove, onMouseUp]);
 
   const onChangeTool = (event) => {
     handleChangeTool(event.target.name);
