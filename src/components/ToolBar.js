@@ -45,13 +45,13 @@ const ToolBar = ({
 
     if (newX < STICKY_DISTANCE) {
       newX = 0;
-    } else if (windowWidth - newX - toolbarWidth < STICKY_DISTANCE) {
+    } else if (newX > windowWidth - toolbarWidth - STICKY_DISTANCE) {
       newX = windowWidth - toolbarWidth;
     }
 
     if (newY < STICKY_DISTANCE) {
       newY = 0;
-    } else if (windowHeight - newY - toolbarHeight < STICKY_DISTANCE) {
+    } else if (newY > windowHeight - toolbarHeight - STICKY_DISTANCE) {
       newY = windowHeight - toolbarHeight;
     }
 
