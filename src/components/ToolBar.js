@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
@@ -7,7 +7,7 @@ import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 
-const STICKY_DISTANCE = 10;
+const STICKY_DISTANCE = 25;
 
 const ToolBar = ({
   activeTool,
@@ -21,6 +21,7 @@ const ToolBar = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const toolbarRef = useRef()
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -38,12 +39,9 @@ const ToolBar = ({
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const toolbar = document.getElementById("toolbar");
+    const toolbar = toolbarRef.current
     const toolbarWidth = toolbar.offsetWidth;
     const toolbarHeight = toolbar.offsetHeight;
-
-    if (newX > windowWidth - toolbarWidth) newX = windowWidth - toolbarWidth;
-    if (newY > windowHeight - toolbarHeight) newY = windowHeight - toolbarHeight;
 
     if (newX < STICKY_DISTANCE) {
       newX = 0;
@@ -89,7 +87,7 @@ const ToolBar = ({
   };
 
   return (
-    <aside id="toolbar" style={{ left: position.x, top: position.y }}>
+    <aside id="toolbar" ref={toolbarRef} style={{ left: position.x, top: position.y }}>
       <div className="window__buttons">
         <button>
           <MdOutlineCancel size={15} />
