@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
@@ -6,6 +6,8 @@ import { AiOutlineLine } from "react-icons/ai";
 import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
+
+const STICKY_DISTANCE = 25;
 
 const ToolBar = ({
   activeTool,
@@ -19,6 +21,7 @@ const ToolBar = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const toolbarRef = useRef()
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -31,10 +34,28 @@ const ToolBar = ({
   const onMouseMove = useCallback((e) => {
     if (!dragging) return;
 
-    setPosition({
-      x: e.clientX - offset.x,
-      y: e.clientY - offset.y,
-    });
+    let newX = e.clientX - offset.x;
+    let newY = e.clientY - offset.y;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const toolbar = toolbarRef.current
+    const toolbarWidth = toolbar.offsetWidth;
+    const toolbarHeight = toolbar.offsetHeight;
+
+    if (newX < STICKY_DISTANCE) {
+      newX = 0;
+    } else if (newX > windowWidth - toolbarWidth - STICKY_DISTANCE) {
+      newX = windowWidth - toolbarWidth;
+    }
+
+    if (newY < STICKY_DISTANCE) {
+      newY = 0;
+    } else if (newY > windowHeight - toolbarHeight - STICKY_DISTANCE) {
+      newY = windowHeight - toolbarHeight;
+    }
+
+    setPosition({ x: newX, y: newY });
   }, [dragging, offset]);
 
   const onMouseUp = useCallback(() => {
@@ -49,7 +70,7 @@ const ToolBar = ({
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-  }, [dragging, offset]);
+  }, [onMouseMove, onMouseUp]);
 
   const onChangeTool = (event) => {
     handleChangeTool(event.target.name);
@@ -66,7 +87,7 @@ const ToolBar = ({
   };
 
   return (
-    <aside id="toolbar" style={{ left: position.x, top: position.y }}>
+    <aside id="toolbar" ref={toolbarRef} style={{ left: position.x, top: position.y }}>
       <div className="window__buttons">
         <button>
           <MdOutlineCancel size={15} />
