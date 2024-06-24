@@ -1,12 +1,55 @@
+:root {
+  --toolbar-width: 70px;
+  --toolbar-height: 400px;
+}
+
 #toolbar {
   position: absolute;
   top: 0;
   left: 0;
-  width: 70px;
+  width: var(--toolbar-width);
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(17px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  height: var(--toolbar-height);
+  overflow: hidden;
+}
+
+#mainview,
+#toolGroup,
+#colorGroup,
+#widthGroup {
+  width: 100%;
+  height: calc(100% - 30px);
+  position: absolute;
+  transition: .3s;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+}
+
+#toolGroup,
+#colorGroup,
+#widthGroup {
+  left: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+}
+
+#toolbar.slide-tool #mainview,
+#toolbar.slide-color #mainview,
+#toolbar.slide-width #mainview {
+  left: -70px;
+}
+
+#mainview,
+#toolbar.slide-tool #toolGroup,
+#toolbar.slide-color #colorGroup,
+#toolbar.slide-width #widthGroup {
+  left: 0;
 }
 
 .toolbar__header,
@@ -14,6 +57,7 @@
   display: flex;
   justify-content: center;
   padding: 5px 0;
+  z-index: 6;
 }
 
 .window__buttons button {
@@ -26,6 +70,13 @@
   padding: 2px;
   width: 20px;
   height: 20px;
+}
+
+.toolbar__container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100% - 30px);
 }
 
 .toolbar__items {
