@@ -3,7 +3,7 @@
   --toolbar-height: 400px;
 }
 
-#toolbar {
+.toolbar {
   position: absolute;
   top: 0;
   left: 0;
@@ -16,39 +16,42 @@
   overflow: hidden;
 }
 
-#mainview,
-#toolGroup,
-#colorGroup,
-#widthGroup {
-  width: 100%;
+.mainview,
+.toolGroup,
+.colorGroup,
+.widthGroup,
+.toolbar__container {
+  display: flex; 
   height: calc(100% - 30px);
+}
+
+.mainview,
+.toolGroup,
+.colorGroup,
+.widthGroup {
+  width: 100%;
   position: absolute;
   transition: .3s;
-  display: flex;
   justify-content: center;
   align-items: center; 
 }
 
-#toolGroup,
-#colorGroup,
-#widthGroup {
+.toolGroup,
+.colorGroup,
+.widthGroup {
   left: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 5;
 }
 
-#toolbar.slide-tool #mainview,
-#toolbar.slide-color #mainview,
-#toolbar.slide-width #mainview {
+.toolbar.tool-slide .mainview,
+.toolbar.color-slide .mainview,
+.toolbar.width-slide .mainview {
   left: -70px;
 }
 
-#mainview,
-#toolbar.slide-tool #toolGroup,
-#toolbar.slide-color #colorGroup,
-#toolbar.slide-width #widthGroup {
+.mainview,
+.toolbar.tool-slide .toolGroup,
+.toolbar.color-slide .colorGroup,
+.toolbar.width-slide .widthGroup {
   left: 0;
 }
 
@@ -73,10 +76,8 @@
 }
 
 .toolbar__container {
-  display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: calc(100% - 30px);
 }
 
 .toolbar__items {
@@ -176,7 +177,7 @@
   transform: translate(-50%, -50%);
 }
 
-#toolbar .toolbar__width-button {
+.toolbar .toolbar__width-button {
   width: 28px;
   height: 28px;
   border: 2px solid #000;
