@@ -116,12 +116,11 @@ const ToolBar = ({
 
   return (
     <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
-      <div className="window__buttons">
+      <div className="toolbar__buttons">
         <button>
           <MdOutlineCancel size={15} />
         </button>
       </div>
-      <div className="toolbar__container">
       <div className="toolbar__header">
         <div className="draglines" onMouseDown={onMouseDown}>
           <div />
@@ -129,53 +128,92 @@ const ToolBar = ({
           <div />
         </div>
       </div>
-      <div className="mainview">
-      <ul className="toolbar__items">
-        <li className={activeTool === "arrow" ? "active" : ""}>
-          <button onClick={() => handleChangeTool("arrow")}>
-            <FaArrowRight />
-          </button>
-        </li>
-        <li className={activeTool === "pen" ? "active" : ""}>
-          <button onClick={() => handleChangeTool("pen")}>
-            <FaPaintBrush />
-          </button>
-        </li>
-        <li className={["rectangle", "oval", "line"].includes(activeTool) ? "active" : ""}>
-          <button
-            onClick={() => switchView("tool-slide")}
-          >
-            {renderGroupIcon()}
-          </button>
-        </li>
-        <li className={activeTool === "flashlight" ? "active" : ""}>
-          <button  onClick={() => handleChangeTool("flashlight")}>
-            <IoFlashlight />
-          </button>
-        </li>
-        <li className={activeTool === "laser" ? "active" : ""}>
-          <button onClick={() => handleChangeTool("laser")}>
-            <GiLaserBurst />
-          </button>
-        </li>
-        <hr />
-        <li>
-          <button
-            id="colorPicker"
-            onClick={() => switchView("color-slide")}
-            style={{ backgroundColor: colorList[activeColorIndex].color }}
-          />
-        </li>
-        <li>
-          <button className="toolbar__width-button" onClick={() => switchView("width-slide")}>
-            <div
-              style={{
-                width: `${widthList[activeWidthIndex].width / 3}px`,
-              }}
-            />
-          </button>
-        </li>
-      </ul>
+      <div className="toolbar__container"> 
+        <div className="toolbar__body">
+          <ul className="toolbar__items">
+            <li className={activeTool === "arrow" && "active"}>
+              <button onClick={() => handleChangeTool("arrow")}>
+                <FaArrowRight />
+              </button>
+            </li>
+            <li className={activeTool === "pen" && "active"}>
+              <button onClick={() => handleChangeTool("pen")}>
+                <FaPaintBrush />
+              </button>
+            </li>
+            <li className={["rectangle", "oval", "line"].includes(activeTool) && "active"}>
+              <button onClick={() => switchView("tool-slide")}>
+                {renderGroupIcon()}
+              </button>
+            </li>
+            <li className={activeTool === "flashlight" && "active"}>
+              <button  onClick={() => handleChangeTool("flashlight")}>
+                <IoFlashlight />
+              </button>
+            </li>
+            <li className={activeTool === "laser" && "active"}>
+              <button onClick={() => handleChangeTool("laser")}>
+                <GiLaserBurst />
+              </button>
+            </li>
+            <hr />
+            <li>
+              <button
+                id="colorPicker"
+                onClick={() => switchView("color-slide")}
+                style={{ backgroundColor: colorList[activeColorIndex].color }}
+              />
+            </li>
+            <li>
+              <button className="toolbar__width-button" onClick={() => switchView("width-slide")}>
+                <div style={{ width: `${widthList[activeWidthIndex].width / 3}px` }} />
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div id="colorGroup" className="side-view-body">
+          <ul className="toolbar__items">
+            {colorList.map((color, index) => (
+              <li key={index}>
+                <button
+                  id="colorPicker"
+                  onClick={() => onChangeColor(index)}
+                  style={{ backgroundColor: color.color }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>             
+        <div id="toolGroup" className="side-view-body">
+          <ul className="toolbar__items">
+            <li className={activeTool === "rectangle" && "active"}>
+              <button onClick={() => handleToolChange("rectangle")}>
+                <FaSquare />
+              </button>
+            </li>
+            <li className={activeTool === "oval" && "active"}>
+              <button onClick={() => handleToolChange("oval")}>
+                <FaCircle />
+              </button>
+            </li>
+            <li className={activeTool === "line" && "active"}>
+              <button onClick={() => handleToolChange("line")}>
+                <AiOutlineLine />
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div id="widthGroup" className="side-view-body">
+          <ul className="toolbar__items">
+            {widthList.map((width, index) => (
+              <li key={index}>
+                <button className="toolbar__width-button" onClick={() => onChangeWidth(index)}>
+                  <div style={{ width: `${width.width / 3}px` }} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <div className="toolbar__bottom">
         <div className="draglines rotated" onMouseDown={onMouseDown}>
@@ -183,50 +221,6 @@ const ToolBar = ({
           <div />
           <div />
         </div>
-      </div>
-      <div className="colorGroup">
-        <ul className={`toolbar__items`}>
-          {colorList.map((color, index) => (
-            <li key={index}>
-              <button
-                id="colorPicker"
-                onClick={() => onChangeColor(index)}
-                style={{ backgroundColor: color.color }}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>             
-      <div className="toolGroup">
-        <ul className={`toolbar__items`}>
-          <li className={activeTool === "rectangle" ? "active" : ""}>
-            <button onClick={() => handleToolChange("rectangle")}>
-              <FaSquare />
-            </button>
-          </li>
-          <li className={activeTool === "oval" ? "active" : ""}>
-            <button onClick={() => handleToolChange("oval")}>
-              <FaCircle />
-            </button>
-          </li>
-          <li className={activeTool === "line" ? "active" : ""}>
-            <button onClick={() => handleToolChange("line")}>
-              <AiOutlineLine />
-            </button>
-          </li>
-        </ul>
-      </div>
-      <div className="widthGroup">
-        <ul className={`toolbar__items`}>
-          {widthList.map((width, index) => (
-            <li key={index}>
-              <button className="toolbar__width-button" onClick={() => onChangeWidth(index)}>
-                <div style={{ width: `${width.width / 3}px` }} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
       </div>
     </aside>
   );

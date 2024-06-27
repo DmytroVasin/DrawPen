@@ -8,27 +8,23 @@
   top: 0;
   left: 0;
   width: var(--toolbar-width);
-  border-radius: 10px;
+  height: var(--toolbar-height);
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(17px);
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  height: var(--toolbar-height);
   overflow: hidden;
 }
 
-.mainview,
-.toolGroup,
-.colorGroup,
-.widthGroup,
+.toolbar__body,
+.side-view-body,
 .toolbar__container {
   display: flex; 
-  height: calc(100% - 30px);
+  height: calc(100% - 80px);
 }
 
-.mainview,
-.toolGroup,
-.colorGroup,
-.widthGroup {
+.toolbar__body,
+.side-view-body {
   width: 100%;
   position: absolute;
   transition: .3s;
@@ -36,22 +32,20 @@
   align-items: center; 
 }
 
-.toolGroup,
-.colorGroup,
-.widthGroup {
+.side-view-body {
   left: 70px;
 }
 
-.toolbar.tool-slide .mainview,
-.toolbar.color-slide .mainview,
-.toolbar.width-slide .mainview {
+.toolbar.tool-slide .toolbar__body,
+.toolbar.color-slide .toolbar__body,
+.toolbar.width-slide .toolbar__body {
   left: -70px;
 }
 
-.mainview,
-.toolbar.tool-slide .toolGroup,
-.toolbar.color-slide .colorGroup,
-.toolbar.width-slide .widthGroup {
+.toolbar__body,
+.toolbar.tool-slide #toolGroup,
+.toolbar.color-slide #colorGroup, 
+.toolbar.width-slide #widthGroup {
   left: 0;
 }
 
@@ -60,10 +54,9 @@
   display: flex;
   justify-content: center;
   padding: 5px 0;
-  z-index: 6;
 }
 
-.window__buttons button {
+.toolbar__buttons button {
   background: none;
   border: none;
   display: flex;
