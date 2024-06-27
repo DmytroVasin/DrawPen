@@ -1,12 +1,52 @@
-#toolbar {
+:root {
+  --toolbar-width: 70px;
+  --toolbar-height: 400px;
+}
+
+.toolbar {
   position: absolute;
   top: 0;
   left: 0;
-  width: 70px;
-  border-radius: 10px;
+  width: var(--toolbar-width);
+  height: var(--toolbar-height);
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(17px);
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.toolbar__body,
+.side-view-body,
+.toolbar__container {
+  display: flex; 
+  height: calc(100% - 80px);
+}
+
+.toolbar__body,
+.side-view-body {
+  width: 100%;
+  position: absolute;
+  transition: .3s;
+  justify-content: center;
+  align-items: center; 
+}
+
+.side-view-body {
+  left: 70px;
+}
+
+.toolbar.tool-slide .toolbar__body,
+.toolbar.color-slide .toolbar__body,
+.toolbar.width-slide .toolbar__body {
+  left: -70px;
+}
+
+.toolbar__body,
+.toolbar.tool-slide #toolGroup,
+.toolbar.color-slide #colorGroup, 
+.toolbar.width-slide #widthGroup {
+  left: 0;
 }
 
 .toolbar__header,
@@ -16,7 +56,7 @@
   padding: 5px 0;
 }
 
-.window__buttons button {
+.toolbar__buttons button {
   background: none;
   border: none;
   display: flex;
@@ -26,6 +66,11 @@
   padding: 2px;
   width: 20px;
   height: 20px;
+}
+
+.toolbar__container {
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .toolbar__items {
@@ -125,7 +170,7 @@
   transform: translate(-50%, -50%);
 }
 
-#toolbar .toolbar__width-button {
+.toolbar .toolbar__width-button {
   width: 28px;
   height: 28px;
   border: 2px solid #000;
