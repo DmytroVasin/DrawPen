@@ -56,6 +56,11 @@
   padding: 5px 0;
 }
 
+.toolbar__buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
 .toolbar__buttons button {
   background: none;
   border: none;
@@ -66,6 +71,10 @@
   padding: 2px;
   width: 20px;
   height: 20px;
+}
+
+.toolbar__buttons button svg {
+  pointer-events: none;
 }
 
 .toolbar__container {
@@ -113,9 +122,11 @@
   pointer-events: none;
 }
 
-.toolbar__items hr {
-  border-color: #4c4c4c;
+.toolbar__items > div {
+  background-color: #4c4c4c;
   width: 80%;
+  height: 2px;
+  margin: 5px 0;
 }
 
 .draglines {
@@ -182,4 +193,90 @@
   background-color: #000;
   transform: rotate(45deg);
   border-radius: 5px;
+}
+
+.horizontal {
+  width: var(--toolbar-height);
+  height: var(--toolbar-width);
+  display: flex;
+}
+
+.horizontal .toolbar__buttons {
+  flex-direction: column-reverse;
+}
+
+.horizontal .toolbar__header,
+.horizontal .toolbar__bottom {
+  height: var(--toolbar-width);
+  padding: 0 5px;
+  align-items: center;
+}
+
+.horizontal .draglines {
+  height: 75%;
+  width: 15px;
+  flex-direction: row;
+  cursor: move;
+}
+
+.horizontal .draglines div {
+  width: 0;
+}
+
+.horizontal .draglines div:nth-child(1) {
+  height: 75%;
+}
+
+.horizontal .draglines div:nth-child(2) {
+  height: 85%;
+}
+
+.horizontal .draglines div:nth-child(3) {
+  height: 95%;
+}
+
+.horizontal .toolbar__container {
+  width: 100%;
+  position: relative;
+  justify-content: center;
+}
+
+.horizontal .toolbar__items {
+  margin: 0;
+  flex-direction: row;
+}
+
+.horizontal .toolbar__items li {
+  margin: 0 5px;
+}
+
+.horizontal .toolbar__items > div {
+  height: 26px;
+  width: 2px;
+  margin: 0 5px;
+}
+
+.horizontal .toolbar__body,
+.horizontal .side-view-body,
+.horizontal .toolbar__container {
+  height: 100%;
+}
+
+.horizontal .side-view-body {
+  top: 70px;
+  left: 0;
+}
+
+.horizontal.toolbar.tool-slide .toolbar__body,
+.horizontal.toolbar.color-slide .toolbar__body,
+.horizontal.toolbar.width-slide .toolbar__body {
+  top: -70px;
+  left: 0;
+}
+
+.horizontal .toolbar__body,
+.horizontal.toolbar.tool-slide #toolGroup,
+.horizontal.toolbar.color-slide #colorGroup, 
+.horizontal.toolbar.width-slide #widthGroup {
+  top: 0;
 }

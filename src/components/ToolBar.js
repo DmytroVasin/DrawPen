@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
-import { AiOutlineLine } from "react-icons/ai";
+import { AiOutlineLine, AiOutlineRotateRight } from "react-icons/ai";
 import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -24,6 +24,7 @@ const ToolBar = ({
   const toolbarRef = useRef()
   const [slide, setSlide] = useState("");
   const [lastActiveFigure, setLastActiveFigure] = useState("rectangle");
+  const [isHorizontal, setIsHorizontal] = useState(false);
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -92,6 +93,29 @@ const ToolBar = ({
     switchView("")
   };
 
+  const handleHorizontal = () => {
+    setIsHorizontal(prev => !prev)
+
+    // NOT WORKING:
+
+    /* const toolbar = toolbarRef.current.getBoundingClientRect();
+    const button = e.target.getBoundingClientRect();
+
+    const distance = !isHorizontal && button.x - toolbar.x
+  
+    console.log(`Toolbar:\n`, toolbar, `\n\nButton:\n`, button, `\nDistance`, distance);
+  
+    setOffset(prev => ({
+      x: !isHorizontal ? distance : prev.x,
+      y: prev.y
+    }))
+
+    setPosition(prev => ({
+      x: isHorizontal ? offset.x : button.left,
+      y: prev.y
+    })); */
+  }
+
   const getIconByToolName = (toolName) => {
     switch (toolName) {
       case "rectangle":
@@ -115,10 +139,13 @@ const ToolBar = ({
   };
 
   return (
-    <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
+    <aside ref={toolbarRef} className={`toolbar ${slide} ${isHorizontal && "horizontal"}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button>
           <MdOutlineCancel size={15} />
+        </button>
+        <button onClick={handleHorizontal}>
+          <AiOutlineRotateRight size={15} />
         </button>
       </div>
       <div className="toolbar__header">
@@ -156,7 +183,7 @@ const ToolBar = ({
                 <GiLaserBurst />
               </button>
             </li>
-            <hr />
+            <div />
             <li>
               <button
                 id="colorPicker"
