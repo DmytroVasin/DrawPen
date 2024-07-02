@@ -236,7 +236,7 @@
 }
 
 .horizontal .toolbar__container {
-  width: 100%;
+  width: calc(100% - 80px);
   position: relative;
   justify-content: center;
 }

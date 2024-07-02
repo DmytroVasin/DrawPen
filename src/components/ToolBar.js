@@ -24,7 +24,7 @@ const ToolBar = ({
   const toolbarRef = useRef()
   const [slide, setSlide] = useState("");
   const [lastActiveFigure, setLastActiveFigure] = useState("rectangle");
-  const [isHorizontal, setIsHorizontal] = useState(false);
+  const [toolbarDirection, setToolbarDirection] = useState("vertical");
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -93,28 +93,35 @@ const ToolBar = ({
     switchView("")
   };
 
-  const handleHorizontal = () => {
-    setIsHorizontal(prev => !prev)
-
-    // NOT WORKING:
-
-    /* const toolbar = toolbarRef.current.getBoundingClientRect();
-    const button = e.target.getBoundingClientRect();
-
-    const distance = !isHorizontal && button.x - toolbar.x
+  const handleHorizontal = (e) => {
+    setToolbarDirection(prev => prev === "horizontal" ? "vertical" : "horizontal");
   
-    console.log(`Toolbar:\n`, toolbar, `\n\nButton:\n`, button, `\nDistance`, distance);
+    const buttonWidth = e.target.getBoundingClientRect().width;
   
-    setOffset(prev => ({
-      x: !isHorizontal ? distance : prev.x,
-      y: prev.y
-    }))
-
+    const toolbar = toolbarRef.current;
+    const width = toolbarDirection === "vertical" ? toolbar.offsetWidth - buttonWidth : toolbar.offsetHeight - buttonWidth;
+  
+    const getNewPosition = (prev, axis) => {
+      if (axis === 'x') {
+        if (toolbarDirection === "vertical") {
+          return (window.innerWidth - (prev + width)) < STICKY_DISTANCE ? window.innerWidth - toolbar.offsetHeight : prev + width;
+        } else {
+          return (prev - width) < 0 ? 0 : prev - width;
+        }
+      } else if (axis === 'y') {
+        if (toolbarDirection === "horizontal" && (window.innerHeight - (prev + width)) < STICKY_DISTANCE) {
+          return window.innerHeight - toolbar.offsetWidth;
+        } else {
+          return prev;
+        }
+      }
+    };
+  
     setPosition(prev => ({
-      x: isHorizontal ? offset.x : button.left,
-      y: prev.y
-    })); */
-  }
+      x: getNewPosition(prev.x, 'x'),
+      y: getNewPosition(prev.y, 'y')
+    }));
+  };
 
   const getIconByToolName = (toolName) => {
     switch (toolName) {
@@ -139,7 +146,7 @@ const ToolBar = ({
   };
 
   return (
-    <aside ref={toolbarRef} className={`toolbar ${slide} ${isHorizontal && "horizontal"}`} style={{ left: position.x, top: position.y }}>
+    <aside ref={toolbarRef} className={`toolbar ${slide} ${toolbarDirection}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button>
           <MdOutlineCancel size={15} />
