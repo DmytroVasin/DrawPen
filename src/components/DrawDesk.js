@@ -189,10 +189,10 @@ const DrawDesk = ({
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
     const arrowWeights = [
-      [[-15, 5], [-20, 16]], // TODO: Rethink!
-      [[-30, 10], [-40, 32]],
-      [[-45, 15], [-60, 48]],
-      [[-10, 3], [-14, 11]], // TODO: WTF: Active color
+      [[-18, 6], [-20, 21]], 
+      [[-38, 12], [-40, 36]], 
+      [[-58, 17], [-60, 48]],
+      [[-13, 3], [-14, 13]],
     ]
 
     const [startX, startY] = pointA;
@@ -204,8 +204,10 @@ const DrawDesk = ({
     let sin = diffX / len;
     let cos = diffY / len;
 
+    let arrowWidth = width + 5;
+
     let arrowPoints = [];
-    arrowPoints.push([0, 0]);
+    arrowPoints.push([0, -arrowWidth / 2]);
 
     const controlPoints = arrowWeights[width];
 
@@ -215,7 +217,7 @@ const DrawDesk = ({
 
       arrowPoints.push([
         x < 0 ? len + x : x,
-        y,
+        -y,
       ]);
     });
 
@@ -226,11 +228,11 @@ const DrawDesk = ({
 
       arrowPoints.push([
         x < 0 ? len + x : x,
-        -y,
+        y,
       ]);
     });
 
-    arrowPoints.push([0, 0]);
+    arrowPoints.push([0, arrowWidth / 2]);
 
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -240,6 +242,27 @@ const DrawDesk = ({
 
     ctx.beginPath();
 
+    let borderRadius = 0
+
+    if (width === 0) {
+      borderRadius = 1
+    } else if (width === 1) {
+      borderRadius = 2
+    } else if (width === 2) {
+      borderRadius = 3
+    } else {
+      borderRadius = 1
+    }
+
+    const addArc = (x1, y1, x2, y2, x3, y3) => {
+      const angle = Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y1 - y2, x1 - x2);
+      if (Math.abs(angle) < Math.PI / 3) {
+        ctx.arcTo(x2, y2, x3, y3, borderRadius);
+      } else {
+        ctx.lineTo(x2, y2);
+      }
+    };
+
     arrowPoints.forEach((point, index) => {
       let x = startX + point[0] * sin - point[1] * cos;
       let y = startY + point[0] * cos + point[1] * sin;
@@ -247,13 +270,36 @@ const DrawDesk = ({
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
-        ctx.lineTo(x, y);
+        let prevPoint = arrowPoints[index - 1];
+        let prevX = startX + prevPoint[0] * sin - prevPoint[1] * cos;
+        let prevY = startY + prevPoint[0] * cos + prevPoint[1] * sin;
+  
+        if (index < arrowPoints.length - 1) {
+          let nextPoint = arrowPoints[index + 1];
+          let nextX = startX + nextPoint[0] * sin - nextPoint[1] * cos;
+          let nextY = startY + nextPoint[0] * cos + nextPoint[1] * sin;
+          addArc(prevX, prevY, x, y, nextX, nextY);
+        } else {
+          ctx.lineTo(x, y);
+        }
       }
     });
 
+    ctx.closePath()
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
+
+    let midX = startX + (endX - startX) * 0.8; 
+    let midY = startY + (endY - startY) * 0.8;
+
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width + 5;
+    ctx.lineCap = "round"
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(midX, midY);
+    ctx.stroke();
   }
 
   const drawArrowActive = (ctx, pointA, pointB) => {
