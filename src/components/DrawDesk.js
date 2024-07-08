@@ -189,11 +189,13 @@ const DrawDesk = ({
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
     const arrowWeights = [
-      [[-18, 6], [-20, 21]], 
+      [[-18, 9], [-20, 21]], 
       [[-38, 12], [-40, 36]], 
       [[-58, 17], [-60, 48]],
       [[-13, 3], [-14, 13]],
     ]
+
+    const maxScaleFactors = [1.5, 1.2, 1.0, 0.7];
 
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
@@ -204,7 +206,11 @@ const DrawDesk = ({
     let sin = diffX / len;
     let cos = diffY / len;
 
-    let arrowWidth = width + 5;
+    const baseScaleFactor = len / 300;
+    const maxScaleFactor = maxScaleFactors[width];
+    const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
+
+    let arrowWidth = Math.max(0, scaleFactor * 10);
 
     let arrowPoints = [];
     arrowPoints.push([0, -arrowWidth / 2]);
@@ -212,8 +218,8 @@ const DrawDesk = ({
     const controlPoints = arrowWeights[width];
 
     controlPoints.forEach((control) => {
-      let x = control[0];
-      let y = control[1];
+      let x = control[0] * scaleFactor;
+      let y = control[1] * scaleFactor;
 
       arrowPoints.push([
         x < 0 ? len + x : x,
@@ -223,8 +229,8 @@ const DrawDesk = ({
 
     arrowPoints.push([len, 0]);
     controlPoints.reverse().forEach((control) => {
-      let x = control[0];
-      let y = control[1];
+      let x = control[0] * scaleFactor;
+      let y = control[1] * scaleFactor;
 
       arrowPoints.push([
         x < 0 ? len + x : x,
@@ -242,17 +248,8 @@ const DrawDesk = ({
 
     ctx.beginPath();
 
-    let borderRadius = 0
-
-    if (width === 0) {
-      borderRadius = 1
-    } else if (width === 1) {
-      borderRadius = 2
-    } else if (width === 2) {
-      borderRadius = 3
-    } else {
-      borderRadius = 1
-    }
+    const borderRadiusValues = [1, 1.5, 2, 0.5];
+    let borderRadius = borderRadiusValues[width];
 
     const addArc = (x1, y1, x2, y2, x3, y3) => {
       const angle = Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y1 - y2, x1 - x2);
@@ -295,8 +292,8 @@ const DrawDesk = ({
 
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.lineWidth = width + 5;
-    ctx.lineCap = "round"
+    ctx.lineWidth = Math.max(1, scaleFactor * 10);
+    ctx.lineCap = "round";
     ctx.moveTo(startX, startY);
     ctx.lineTo(midX, midY);
     ctx.stroke();
@@ -306,7 +303,7 @@ const DrawDesk = ({
     const color = '#FFF'
     const width = 3 // Active color
 
-    drawArrow(ctx, pointA, pointB, color, width)
+    // drawArrow(ctx, pointA, pointB, color, width)
 
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
