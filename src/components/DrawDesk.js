@@ -187,58 +187,57 @@ const DrawDesk = ({
     ctx.fill();
   }
 
-  const drawArrow = (ctx, pointA, pointB, color, width) => {
+  const getArrowParams = (pointA, pointB, width) => {
     const arrowWeights = [
       [[-18, 9], [-20, 21]], 
       [[-38, 12], [-40, 36]], 
       [[-58, 17], [-60, 48]],
       [[-13, 3], [-14, 13]],
-    ]
-
-    const maxScaleFactors = [1.5, 1.2, 1.0, 0.7];
-
+    ];
+  
+    const maxScaleFactors = [0.8, 0.9, 1, 0.7];
+    
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
-
+  
     let diffX = endX - startX;
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
     let sin = diffX / len;
     let cos = diffY / len;
-
+  
     const baseScaleFactor = len / 300;
     const maxScaleFactor = maxScaleFactors[width];
     const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
-
-    let arrowWidth = Math.max(0, scaleFactor * 10);
-
-    let arrowPoints = [];
-    arrowPoints.push([0, -arrowWidth / 2]);
-
+    const pointWidth = [5, 7, 9, 4]
+  
+    let arrowWidth = Math.max(0, scaleFactor * pointWidth[width]);
+    let arrowPoints = [[0, -arrowWidth / 2]];
+  
     const controlPoints = arrowWeights[width];
-
     controlPoints.forEach((control) => {
       let x = control[0] * scaleFactor;
       let y = control[1] * scaleFactor;
-
-      arrowPoints.push([
-        x < 0 ? len + x : x,
-        -y,
-      ]);
+      arrowPoints.push([x < 0 ? len + x : x, -y]);
     });
-
+  
     arrowPoints.push([len, 0]);
     controlPoints.reverse().forEach((control) => {
       let x = control[0] * scaleFactor;
       let y = control[1] * scaleFactor;
-
-      arrowPoints.push([
-        x < 0 ? len + x : x,
-        y,
-      ]);
+      arrowPoints.push([x < 0 ? len + x : x, y]);
     });
-
+  
     arrowPoints.push([0, arrowWidth / 2]);
+  
+    const borderRadiusValues = [1, 1.5, 2, 0.5];
+    let borderRadius = borderRadiusValues[width];
+  
+    return { arrowPoints, borderRadius, startX, startY, sin, cos, len, scaleFactor, pointWidth };
+  };
+
+  const drawArrow = (ctx, pointA, pointB, color, width) => {
+    const { arrowPoints, borderRadius, startX, startY, sin, cos, len, scaleFactor, pointWidth } = getArrowParams(pointA, pointB, width);
 
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -247,9 +246,6 @@ const DrawDesk = ({
     ctx.shadowOffsetY = 1;
 
     ctx.beginPath();
-
-    const borderRadiusValues = [1, 1.5, 2, 0.5];
-    let borderRadius = borderRadiusValues[width];
 
     const addArc = (x1, y1, x2, y2, x3, y3) => {
       const angle = Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y1 - y2, x1 - x2);
@@ -287,12 +283,12 @@ const DrawDesk = ({
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
 
-    let midX = startX + (endX - startX) * 0.8; 
-    let midY = startY + (endY - startY) * 0.8;
+    let midX = startX + (len * 0.8 * sin);
+    let midY = startY + (len * 0.8 * cos);
 
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.lineWidth = Math.max(1, scaleFactor * 10);
+    ctx.lineWidth = Math.max(1, scaleFactor * pointWidth[width]);
     ctx.lineCap = "round";
     ctx.moveTo(startX, startY);
     ctx.lineTo(midX, midY);
