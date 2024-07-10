@@ -237,55 +237,35 @@ const DrawDesk = ({
   };
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
-    const { arrowPoints, borderRadius, startX, startY, sin, cos, len, scaleFactor, pointWidth } = getArrowParams(pointA, pointB, width);
-
+    const { arrowPoints, startX, startY, sin, cos, len, scaleFactor, pointWidth } = getArrowParams(pointA, pointB, width);
+  
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
     ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
-
+  
     ctx.beginPath();
-
-    const addArc = (x1, y1, x2, y2, x3, y3) => {
-      const angle = Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y1 - y2, x1 - x2);
-      if (Math.abs(angle) < Math.PI / 3) {
-        ctx.arcTo(x2, y2, x3, y3, borderRadius);
-      } else {
-        ctx.lineTo(x2, y2);
-      }
-    };
-
+  
     arrowPoints.forEach((point, index) => {
       let x = startX + point[0] * sin - point[1] * cos;
       let y = startY + point[0] * cos + point[1] * sin;
-
+  
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
-        let prevPoint = arrowPoints[index - 1];
-        let prevX = startX + prevPoint[0] * sin - prevPoint[1] * cos;
-        let prevY = startY + prevPoint[0] * cos + prevPoint[1] * sin;
-  
-        if (index < arrowPoints.length - 1) {
-          let nextPoint = arrowPoints[index + 1];
-          let nextX = startX + nextPoint[0] * sin - nextPoint[1] * cos;
-          let nextY = startY + nextPoint[0] * cos + nextPoint[1] * sin;
-          addArc(prevX, prevY, x, y, nextX, nextY);
-        } else {
-          ctx.lineTo(x, y);
-        }
+        ctx.lineTo(x, y);
       }
     });
-
-    ctx.closePath()
+  
+    ctx.closePath();
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
-
+  
     let midX = startX + (len * 0.8 * sin);
     let midY = startY + (len * 0.8 * cos);
-
+  
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = Math.max(1, scaleFactor * pointWidth[width]);
@@ -293,7 +273,7 @@ const DrawDesk = ({
     ctx.moveTo(startX, startY);
     ctx.lineTo(midX, midY);
     ctx.stroke();
-  }
+  };
 
   const drawArrowActive = (ctx, pointA, pointB) => {
     const color = '#FFF'
