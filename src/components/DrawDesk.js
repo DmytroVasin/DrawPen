@@ -189,7 +189,7 @@ const DrawDesk = ({
 
   const getArrowParams = (pointA, pointB, width) => {
     const arrowWeights = [
-      [[-18, 9], [-20, 21]], 
+      [[-18, 7], [-20, 24]], 
       [[-38, 12], [-40, 36]], 
       [[-58, 17], [-60, 48]],
       [[-13, 3], [-14, 13]],
