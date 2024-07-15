@@ -3,12 +3,12 @@
   --toolbar-height: 400px;
 }
 
+/* Common */
+
 .toolbar {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--toolbar-width);
-  height: var(--toolbar-height);
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(17px);
   border-radius: 10px;
@@ -16,11 +16,27 @@
   overflow: hidden;
 }
 
+.toolbar button {
+  background: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.toolbar button svg {
+  pointer-events: none;
+}
+
+.toolbar button:focus {
+  outline: none;
+}
+
 .toolbar__body,
 .side-view-body,
 .toolbar__container {
   display: flex; 
-  height: calc(100% - 80px);
 }
 
 .toolbar__body,
@@ -32,28 +48,8 @@
   align-items: center; 
 }
 
-.side-view-body {
-  left: 70px;
-}
-
-.toolbar.tool-slide .toolbar__body,
-.toolbar.color-slide .toolbar__body,
-.toolbar.width-slide .toolbar__body {
-  left: -70px;
-}
-
-.toolbar__body,
-.toolbar.tool-slide #toolGroup,
-.toolbar.color-slide #colorGroup, 
-.toolbar.width-slide #widthGroup {
-  left: 0;
-}
-
-.toolbar__header,
-.toolbar__bottom {
+.toolbar__draglines {
   display: flex;
-  justify-content: center;
-  padding: 5px 0;
 }
 
 .toolbar__buttons {
@@ -62,58 +58,32 @@
 }
 
 .toolbar__buttons button {
-  background: none;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
   padding: 2px;
   width: 20px;
   height: 20px;
 }
 
-.toolbar__buttons button svg {
-  pointer-events: none;
-}
-
 .toolbar__container {
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .toolbar__items {
-  padding: 0;
   display: flex;
-  flex-direction: column;
+  padding: 0;
   align-items: center;
 }
 
 .toolbar__items li {
-  margin: 5px 0;
-  width: 30px;
-  height: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 30px;
+  height: 30px;
 }
 
 .toolbar__items li.active {
   background-color: #fff;
   border-radius: 5px;
-}
-
-.toolbar__items li button {
-  background: none;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.toolbar__items li button:focus {
-  outline: none;
 }
 
 .toolbar__items li button svg {
@@ -122,38 +92,20 @@
   pointer-events: none;
 }
 
-.toolbar__items > div {
+.toolbar__items .cross-line {
   background-color: #4c4c4c;
-  width: 80%;
-  height: 2px;
-  margin: 5px 0;
 }
 
 .draglines {
-  width: 75%;
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 15px;
   cursor: move;
 }
 
 .draglines div {
   border: 1px solid #000;
   border-radius: 15px;
-}
-
-.draglines div:nth-child(1) {
-  width: 75%;
-}
-
-.draglines div:nth-child(2) {
-  width: 85%;
-}
-
-.draglines div:nth-child(3) {
-  width: 95%;
 }
 
 .rotated {
@@ -195,18 +147,94 @@
   border-radius: 5px;
 }
 
-.horizontal {
+/* Vertical */
+
+.vertical.toolbar {
+  width: var(--toolbar-width);
+  height: var(--toolbar-height);
+}
+
+.vertical .toolbar__body,
+.vertical .side-view-body,
+.vertical .toolbar__container {
+  height: calc(100% - 80px);
+}
+
+.vertical .side-view-body {
+  left: 70px;
+}
+
+.vertical.toolbar.tool-slide .toolbar__body,
+.vertical.toolbar.color-slide .toolbar__body,
+.vertical.toolbar.width-slide .toolbar__body {
+  left: -70px;
+}
+
+.vertical .toolbar__body,
+.vertical.toolbar.tool-slide #toolGroup,
+.vertical.toolbar.color-slide #colorGroup, 
+.vertical.toolbar.width-slide #widthGroup {
+  left: 0;
+}
+
+.vertical .toolbar__draglines {
+  justify-content: center;
+  padding: 5px 0;
+}
+
+.vertical .toolbar__buttons {
+  justify-content: space-between;
+}
+
+.vertical .toolbar__container {
+  justify-content: space-between;
+}
+
+.vertical .toolbar__items {
+  flex-direction: column;
+}
+
+.vertical .toolbar__items li {
+  margin: 5px 0;
+}
+
+.vertical .toolbar__items .cross-line {
+  height: 2px;
+  width: 80%;
+  margin: 5px 0;
+}
+
+.vertical .draglines {
+  width: 75%;
+  height: 15px;
+  flex-direction: column;
+}
+
+.vertical .draglines div:nth-child(1) {
+  width: 75%;
+}
+
+.vertical .draglines div:nth-child(2) {
+  width: 85%;
+}
+
+.vertical .draglines div:nth-child(3) {
+  width: 95%;
+}
+
+/* Horizontal */
+
+.horizontal.toolbar {
+  display: flex;
   width: var(--toolbar-height);
   height: var(--toolbar-width);
-  display: flex;
 }
 
 .horizontal .toolbar__buttons {
   flex-direction: column-reverse;
 }
 
-.horizontal .toolbar__header,
-.horizontal .toolbar__bottom {
+.horizontal .toolbar__draglines {
   height: var(--toolbar-width);
   padding: 0 5px;
   align-items: center;
@@ -216,7 +244,6 @@
   height: 75%;
   width: 15px;
   flex-direction: row;
-  cursor: move;
 }
 
 .horizontal .draglines div {
@@ -250,8 +277,8 @@
   margin: 0 5px;
 }
 
-.horizontal .toolbar__items > div {
-  height: 26px;
+.horizontal .toolbar__items .cross-line {
+  height: 24px;
   width: 2px;
   margin: 0 5px;
 }

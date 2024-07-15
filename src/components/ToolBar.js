@@ -93,33 +93,17 @@ const ToolBar = ({
     switchView("")
   };
 
-  const handleHorizontal = (e) => {
+  const handleRotateToolbar = (e) => {
     setToolbarDirection(prev => prev === "horizontal" ? "vertical" : "horizontal");
   
     const buttonWidth = e.target.getBoundingClientRect().width;
   
     const toolbar = toolbarRef.current;
     const width = toolbarDirection === "vertical" ? toolbar.offsetWidth - buttonWidth : toolbar.offsetHeight - buttonWidth;
-  
-    const getNewPosition = (prev, axis) => {
-      if (axis === 'x') {
-        if (toolbarDirection === "vertical") {
-          return (window.innerWidth - (prev + width)) < STICKY_DISTANCE ? window.innerWidth - toolbar.offsetHeight : prev + width;
-        } else {
-          return (prev - width) < 0 ? 0 : prev - width;
-        }
-      } else if (axis === 'y') {
-        if (toolbarDirection === "horizontal" && (window.innerHeight - (prev + width)) < STICKY_DISTANCE) {
-          return window.innerHeight - toolbar.offsetWidth;
-        } else {
-          return prev;
-        }
-      }
-    };
-  
+    
     setPosition(prev => ({
-      x: getNewPosition(prev.x, 'x'),
-      y: getNewPosition(prev.y, 'y')
+      x: toolbarDirection === "vertical" ? prev.x + width : prev.x - width,
+      y: prev.y
     }));
   };
 
@@ -151,11 +135,11 @@ const ToolBar = ({
         <button>
           <MdOutlineCancel size={15} />
         </button>
-        <button onClick={handleHorizontal}>
+        <button onClick={handleRotateToolbar}>
           <AiOutlineRotateRight size={15} />
         </button>
       </div>
-      <div className="toolbar__header">
+      <div className="toolbar__draglines">
         <div className="draglines" onMouseDown={onMouseDown}>
           <div />
           <div />
@@ -190,7 +174,7 @@ const ToolBar = ({
                 <GiLaserBurst />
               </button>
             </li>
-            <div />
+            <div className="cross-line" />
             <li>
               <button
                 id="colorPicker"
@@ -249,7 +233,7 @@ const ToolBar = ({
           </ul>
         </div>
       </div>
-      <div className="toolbar__bottom">
+      <div className="toolbar__draglines">
         <div className="draglines rotated" onMouseDown={onMouseDown}>
           <div />
           <div />
