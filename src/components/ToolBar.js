@@ -95,12 +95,12 @@ const ToolBar = ({
 
   const handleRotateToolbar = (e) => {
     setToolbarDirection(prev => prev === "horizontal" ? "vertical" : "horizontal");
-  
+
     const buttonWidth = e.target.getBoundingClientRect().width;
-  
+
     const toolbar = toolbarRef.current;
     const width = toolbarDirection === "vertical" ? toolbar.offsetWidth - buttonWidth : toolbar.offsetHeight - buttonWidth;
-    
+
     setPosition(prev => ({
       x: toolbarDirection === "vertical" ? prev.x + width : prev.x - width,
       y: prev.y
@@ -121,8 +121,7 @@ const ToolBar = ({
   };
 
   const renderGroupIcon = () => {
-    const currentTool = lastActiveFigure;
-    return getIconByToolName(currentTool);
+    return getIconByToolName(lastActiveFigure);
   };
 
   const switchView = (name) => {
@@ -146,7 +145,7 @@ const ToolBar = ({
           <div />
         </div>
       </div>
-      <div className="toolbar__container"> 
+      <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
             <li className={activeTool === "arrow" && "active"}>
@@ -189,7 +188,7 @@ const ToolBar = ({
             </li>
           </ul>
         </div>
-        <div id="colorGroup" className="side-view-body">
+        <div className="side-view-body color-group">
           <ul className="toolbar__items">
             {colorList.map((color, index) => (
               <li key={index}>
@@ -201,8 +200,8 @@ const ToolBar = ({
               </li>
             ))}
           </ul>
-        </div>             
-        <div id="toolGroup" className="side-view-body">
+        </div>
+        <div className="side-view-body tool-group">
           <ul className="toolbar__items">
             <li className={activeTool === "rectangle" && "active"}>
               <button onClick={() => handleToolChange("rectangle")}>
@@ -221,7 +220,7 @@ const ToolBar = ({
             </li>
           </ul>
         </div>
-        <div id="widthGroup" className="side-view-body">
+        <div className="side-view-body width-group">
           <ul className="toolbar__items">
             {widthList.map((width, index) => (
               <li key={index}>
