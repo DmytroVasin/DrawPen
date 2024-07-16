@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
-import { AiOutlineLine } from "react-icons/ai";
+import { AiOutlineLine, AiOutlineRotateRight } from "react-icons/ai";
 import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -24,6 +24,7 @@ const ToolBar = ({
   const toolbarRef = useRef()
   const [slide, setSlide] = useState("");
   const [lastActiveFigure, setLastActiveFigure] = useState("rectangle");
+  const [toolbarDirection, setToolbarDirection] = useState("vertical");
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -92,6 +93,20 @@ const ToolBar = ({
     switchView("")
   };
 
+  const handleRotateToolbar = (e) => {
+    setToolbarDirection(prev => prev === "horizontal" ? "vertical" : "horizontal");
+
+    const buttonWidth = e.target.getBoundingClientRect().width;
+
+    const toolbar = toolbarRef.current;
+    const width = toolbarDirection === "vertical" ? toolbar.offsetWidth - buttonWidth : toolbar.offsetHeight - buttonWidth;
+
+    setPosition(prev => ({
+      x: toolbarDirection === "vertical" ? prev.x + width : prev.x - width,
+      y: prev.y
+    }));
+  };
+
   const getIconByToolName = (toolName) => {
     switch (toolName) {
       case "rectangle":
@@ -106,8 +121,7 @@ const ToolBar = ({
   };
 
   const renderGroupIcon = () => {
-    const currentTool = lastActiveFigure;
-    return getIconByToolName(currentTool);
+    return getIconByToolName(lastActiveFigure);
   };
 
   const switchView = (name) => {
@@ -115,20 +129,23 @@ const ToolBar = ({
   };
 
   return (
-    <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
+    <aside ref={toolbarRef} className={`toolbar ${slide} ${toolbarDirection}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button>
           <MdOutlineCancel size={15} />
         </button>
+        <button onClick={handleRotateToolbar}>
+          <AiOutlineRotateRight size={15} />
+        </button>
       </div>
-      <div className="toolbar__header">
+      <div className="toolbar__draglines">
         <div className="draglines" onMouseDown={onMouseDown}>
           <div />
           <div />
           <div />
         </div>
       </div>
-      <div className="toolbar__container"> 
+      <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
             <li className={activeTool === "arrow" && "active"}>
@@ -156,7 +173,7 @@ const ToolBar = ({
                 <GiLaserBurst />
               </button>
             </li>
-            <hr />
+            <div className="cross-line" />
             <li>
               <button
                 id="colorPicker"
@@ -171,7 +188,7 @@ const ToolBar = ({
             </li>
           </ul>
         </div>
-        <div id="colorGroup" className="side-view-body">
+        <div className="side-view-body color-group">
           <ul className="toolbar__items">
             {colorList.map((color, index) => (
               <li key={index}>
@@ -183,8 +200,8 @@ const ToolBar = ({
               </li>
             ))}
           </ul>
-        </div>             
-        <div id="toolGroup" className="side-view-body">
+        </div>
+        <div className="side-view-body tool-group">
           <ul className="toolbar__items">
             <li className={activeTool === "rectangle" && "active"}>
               <button onClick={() => handleToolChange("rectangle")}>
@@ -203,7 +220,7 @@ const ToolBar = ({
             </li>
           </ul>
         </div>
-        <div id="widthGroup" className="side-view-body">
+        <div className="side-view-body width-group">
           <ul className="toolbar__items">
             {widthList.map((width, index) => (
               <li key={index}>
@@ -215,7 +232,7 @@ const ToolBar = ({
           </ul>
         </div>
       </div>
-      <div className="toolbar__bottom">
+      <div className="toolbar__draglines">
         <div className="draglines rotated" onMouseDown={onMouseDown}>
           <div />
           <div />
