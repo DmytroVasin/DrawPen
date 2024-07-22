@@ -229,15 +229,19 @@ const DrawDesk = ({
     });
   
     arrowPoints.push([0, arrowWidth / 2]);
+
+    let transformedPoints = arrowPoints.map(([x, y]) => {
+      return [
+        startX + x * sin - y * cos,
+        startY + x * cos + y * sin
+      ];
+    });
   
-    const borderRadiusValues = [1, 1.5, 2, 0.5];
-    let borderRadius = borderRadiusValues[width];
-  
-    return { arrowPoints, borderRadius, startX, startY, sin, cos, len, scaleFactor, pointWidth };
+    return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
-    const { arrowPoints, startX, startY, sin, cos, len, scaleFactor, pointWidth } = getArrowParams(pointA, pointB, width);
+    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
   
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -247,9 +251,8 @@ const DrawDesk = ({
   
     ctx.beginPath();
   
-    arrowPoints.forEach((point, index) => {
-      let x = startX + point[0] * sin - point[1] * cos;
-      let y = startY + point[0] * cos + point[1] * sin;
+    transformedPoints.forEach((point, index) => {
+      let [x, y] = point;
   
       if (index === 0) {
         ctx.moveTo(x, y);
@@ -263,23 +266,17 @@ const DrawDesk = ({
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
   
-    let midX = startX + (len * 0.8 * sin);
-    let midY = startY + (len * 0.8 * cos);
-  
     ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = Math.max(1, scaleFactor * pointWidth[width]);
-    ctx.lineCap = "round";
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(midX, midY);
-    ctx.stroke();
+    ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
+    ctx.closePath();
+    ctx.fill();
   };
 
   const drawArrowActive = (ctx, pointA, pointB) => {
     const color = '#FFF'
     const width = 3 // Active color
 
-    // drawArrow(ctx, pointA, pointB, color, width)
+    drawArrow(ctx, pointA, pointB, color, width)
 
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
