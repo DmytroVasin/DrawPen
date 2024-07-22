@@ -189,45 +189,45 @@ const DrawDesk = ({
 
   const getArrowParams = (pointA, pointB, width) => {
     const arrowWeights = [
-      [[-18, 7], [-20, 24]], 
-      [[-38, 12], [-40, 36]], 
+      [[-18, 7], [-20, 24]],
+      [[-38, 12], [-40, 36]],
       [[-58, 17], [-60, 48]],
       [[-13, 3], [-14, 13]],
     ];
-  
+
     const maxScaleFactors = [0.8, 0.9, 1, 0.7];
-    
+
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
-  
+
     let diffX = endX - startX;
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
     let sin = diffX / len;
     let cos = diffY / len;
-  
+
     const baseScaleFactor = len / 300;
     const maxScaleFactor = maxScaleFactors[width];
     const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
     const pointWidth = [5, 7, 9, 4]
-  
+
     let arrowWidth = Math.max(0, scaleFactor * pointWidth[width]);
     let arrowPoints = [[0, -arrowWidth / 2]];
-  
+
     const controlPoints = arrowWeights[width];
     controlPoints.forEach((control) => {
       let x = control[0] * scaleFactor;
       let y = control[1] * scaleFactor;
       arrowPoints.push([x < 0 ? len + x : x, -y]);
     });
-  
+
     arrowPoints.push([len, 0]);
     controlPoints.reverse().forEach((control) => {
       let x = control[0] * scaleFactor;
       let y = control[1] * scaleFactor;
       arrowPoints.push([x < 0 ? len + x : x, y]);
     });
-  
+
     arrowPoints.push([0, arrowWidth / 2]);
 
     let transformedPoints = arrowPoints.map(([x, y]) => {
@@ -236,36 +236,36 @@ const DrawDesk = ({
         startY + x * cos + y * sin
       ];
     });
-  
+
     return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
     const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
-  
+
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
     ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
-  
+
     ctx.beginPath();
-  
+
     transformedPoints.forEach((point, index) => {
       let [x, y] = point;
-  
+
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
         ctx.lineTo(x, y);
       }
     });
-  
+
     ctx.closePath();
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
-  
+
     ctx.beginPath();
     ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
     ctx.closePath();
