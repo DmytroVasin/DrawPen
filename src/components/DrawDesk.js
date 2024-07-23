@@ -70,7 +70,7 @@ const DrawDesk = ({
         drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex, figure)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure.points[0], figure.points[1], figure)
+          drawArrowActive(ctx, figure.points[0], figure.points[1], figure.widthIndex, figureColor)
         }
       }
 
@@ -299,8 +299,8 @@ const DrawDesk = ({
     return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
-  const drawArrow = (ctx, pointA, pointB, color, width, figure) => {
-    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width, figure);
+  const drawArrow = (ctx, pointA, pointB, color, width, active = false) => {
+    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
 
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -329,13 +329,39 @@ const DrawDesk = ({
     ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
     ctx.closePath();
     ctx.fill();
+
+    if (active) {
+      drawArrowOutline(ctx, transformedPoints, startX, startY, arrowWidth, angle)
+    }
   };
 
-  const drawArrowActive = (ctx, pointA, pointB, figure) => {
-    const color = '#FFF'
-    const width = 3 // Active color
+  const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
+    ctx.strokeStyle = '#38abe0';
+    ctx.lineWidth = 2;
 
-    const newPointB = getResizableDotParams(pointA, pointB)
+    ctx.beginPath();
+
+    points.forEach((point, index) => {
+      let [x, y] = point;
+
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
+    ctx.closePath();
+    ctx.stroke();
+  };
+
+  const drawArrowActive = (ctx, pointA, pointB, width, color) => {
+    drawArrow(ctx, pointA, pointB, color, width, true)
 
     drawArrow(ctx, pointA, pointB, color, width, figure)
 
