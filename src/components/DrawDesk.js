@@ -197,12 +197,12 @@ const DrawDesk = ({
 
     ctx.beginPath();
     ctx.arc(x, y, 10, 0, Math.PI*2, true);
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#fff';
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI*2, true);
-    ctx.fillStyle = 'red';
+    ctx.arc(x, y, 7, 0, Math.PI*2, true);
+    ctx.fillStyle = '#6cc3e2';
     ctx.fill();
   }
 
@@ -232,10 +232,9 @@ const DrawDesk = ({
       [[-18, 7], [-20, 24]],
       [[-38, 12], [-40, 36]],
       [[-58, 17], [-60, 48]],
-      [[-13, 3], [-14, 13]],
     ];
 
-    const maxScaleFactors = [0.8, 0.9, 1, 0.7];
+    const maxScaleFactors = [0.8, 0.9, 1];
 
     const [startX, startY] = pointA;
     let [endX, endY] = pointB;
@@ -268,7 +267,7 @@ const DrawDesk = ({
     const baseScaleFactor = len / 300;
     const maxScaleFactor = maxScaleFactors[width];
     const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
-    const pointWidth = [5, 7, 9, 4]
+    const pointWidth = [5, 7, 9]
 
     let arrowWidth = Math.max(0, scaleFactor * pointWidth[width]);
     let arrowPoints = [[0, -arrowWidth / 2]];
@@ -336,8 +335,10 @@ const DrawDesk = ({
   };
 
   const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
-    ctx.strokeStyle = '#38abe0';
+    ctx.strokeStyle = '#6cc3e2';
     ctx.lineWidth = 2;
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
 
     ctx.beginPath();
 
