@@ -198,11 +198,24 @@ const DrawDesk = ({
     const maxScaleFactors = [0.8, 0.9, 1, 0.7];
 
     const [startX, startY] = pointA;
-    const [endX, endY] = pointB;
+    let [endX, endY] = pointB;
 
     let diffX = endX - startX;
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
+    let hasAdjusted = false;
+
+    const minLength = 15
+    if (len < minLength) {
+      let factor = minLength / len;
+      diffX *= factor;
+      diffY *= factor;
+      endX = startX + diffX;
+      endY = startY + diffY;
+      len = minLength;
+      hasAdjusted = true
+    }
+
     let sin = diffX / len;
     let cos = diffY / len;
 
@@ -273,16 +286,30 @@ const DrawDesk = ({
   };
 
   const drawArrowActive = (ctx, pointA, pointB) => {
+    const minDistance = 15;
     const color = '#FFF'
     const width = 3 // Active color
-
-    drawArrow(ctx, pointA, pointB, color, width)
 
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
 
-    resiableDot(ctx, [startX, startY])
-    resiableDot(ctx, [endX, endY])
+    let diffX = endX - startX;
+    let diffY = endY - startY;
+    let distance = Math.sqrt(diffX ** 2 + diffY ** 2);
+
+    if (distance < minDistance) {
+      const scaleFactor = minDistance / distance;
+
+      const newEndX = startX + diffX * scaleFactor;
+      const newEndY = startY + diffY * scaleFactor;
+
+      pointB = [newEndX, newEndY];
+    }
+
+    drawArrow(ctx, pointA, pointB, color, width)
+
+    resiableDot(ctx, pointA)
+    resiableDot(ctx, pointB)
   }
 
   const drawOval = (ctx, pointA, pointB, color, width) => {
