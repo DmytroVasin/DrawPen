@@ -11,6 +11,7 @@ import {
 
 const DrawDesk = ({
   allFigures,
+  setAllFigures,
   allLaserFigures,
   activeFigureInfo,
   flashlightFigure,
@@ -52,10 +53,10 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'arrow') {
-        drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex)
+        drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex, figure)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure.points[0], figure.points[1])
+          drawArrowActive(ctx, figure.points[0], figure.points[1], figure)
         }
       }
 
@@ -187,7 +188,28 @@ const DrawDesk = ({
     ctx.fill();
   }
 
-  const getArrowParams = (pointA, pointB, width) => {
+  const getResizableDotParams = (pointA, pointB) => {
+    const minDistance = 15;
+    const [startX, startY] = pointA;
+    const [endX, endY] = pointB;
+
+    let diffX = endX - startX;
+    let diffY = endY - startY;
+    let distance = Math.sqrt(diffX ** 2 + diffY ** 2);
+
+    if (distance < minDistance) {
+      const scaleFactor = minDistance / distance;
+
+      const newEndX = startX + diffX * scaleFactor;
+      const newEndY = startY + diffY * scaleFactor;
+
+      pointB = [newEndX, newEndY];
+    }
+
+    return pointB
+  }
+
+  const getArrowParams = (pointA, pointB, width, figure) => {
     const arrowWeights = [
       [[-18, 7], [-20, 24]],
       [[-38, 12], [-40, 36]],
@@ -203,17 +225,23 @@ const DrawDesk = ({
     let diffX = endX - startX;
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
-    let hasAdjusted = false;
 
     const minLength = 15
-    if (len < minLength) {
-      let factor = minLength / len;
-      diffX *= factor;
-      diffY *= factor;
-      endX = startX + diffX;
-      endY = startY + diffY;
-      len = minLength;
-      hasAdjusted = true
+
+    if (len > minLength && !figure.hasExceededLimit) {
+      setAllFigures((prevFigures) => prevFigures.map((fig) =>
+        fig.id === figure.id ? { ...fig, hasExceededLimit: true } : fig
+      ));
+    }
+
+    if (figure && figure.hasExceededLimit && len < minLength) {
+      const scaleFactor = minLength / len;
+      endX = startX + diffX * scaleFactor;
+      endY = startY + diffY * scaleFactor;
+
+      diffX = endX - startX;
+      diffY = endY - startY;
+      len = Math.sqrt(diffX ** 2 + diffY ** 2);
     }
 
     let sin = diffX / len;
@@ -253,8 +281,8 @@ const DrawDesk = ({
     return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
-  const drawArrow = (ctx, pointA, pointB, color, width) => {
-    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
+  const drawArrow = (ctx, pointA, pointB, color, width, figure) => {
+    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width, figure);
 
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -285,31 +313,16 @@ const DrawDesk = ({
     ctx.fill();
   };
 
-  const drawArrowActive = (ctx, pointA, pointB) => {
-    const minDistance = 15;
+  const drawArrowActive = (ctx, pointA, pointB, figure) => {
     const color = '#FFF'
     const width = 3 // Active color
 
-    const [startX, startY] = pointA;
-    const [endX, endY] = pointB;
+    const newPointB = getResizableDotParams(pointA, pointB)
 
-    let diffX = endX - startX;
-    let diffY = endY - startY;
-    let distance = Math.sqrt(diffX ** 2 + diffY ** 2);
-
-    if (distance < minDistance) {
-      const scaleFactor = minDistance / distance;
-
-      const newEndX = startX + diffX * scaleFactor;
-      const newEndY = startY + diffY * scaleFactor;
-
-      pointB = [newEndX, newEndY];
-    }
-
-    drawArrow(ctx, pointA, pointB, color, width)
+    drawArrow(ctx, pointA, pointB, color, width, figure)
 
     resiableDot(ctx, pointA)
-    resiableDot(ctx, pointB)
+    resiableDot(ctx, newPointB)
   }
 
   const drawOval = (ctx, pointA, pointB, color, width) => {
