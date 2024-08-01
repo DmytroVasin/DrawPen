@@ -189,7 +189,7 @@ const DrawDesk = ({
   }
 
   const getResizableDotParams = (pointA, pointB) => {
-    const minDistance = 15;
+    const minDistance = 30;
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
 
@@ -226,7 +226,7 @@ const DrawDesk = ({
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-    const minLength = 15
+    const minLength = 30
 
     if (len > minLength && !figure.hasExceededLimit) {
       setAllFigures((prevFigures) => prevFigures.map((fig) =>
