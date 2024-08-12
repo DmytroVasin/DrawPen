@@ -31,7 +31,7 @@ const DrawDesk = ({
   const animateCircles = () => {
     setWaveCircles((prevCircles) =>
       prevCircles
-        .map(circle => ({ ...circle, radius: circle.radius + 2, alpha: Math.max(circle.alpha - 0.02, 0) }))
+        .map(circle => ({ ...circle, radius: circle.radius + 1.5, alpha: Math.max(circle.alpha - 0.02, 0) }))
         .filter(circle => circle.alpha > 0)
     );
     requestAnimationFrame(animateCircles);
@@ -41,7 +41,7 @@ const DrawDesk = ({
     requestAnimationFrame(animateCircles);
   }, []);
 
-  const draw = (allFigures, allLaserFigures, flashlightFigure, activeFigureInfo) => {
+  const draw = (allFigures, allLaserFigures, activeFigureInfo) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
