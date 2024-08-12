@@ -1,6 +1,6 @@
 import './DrawDesk.css';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke } from '../utils/general.js';
 
@@ -20,10 +20,14 @@ const DrawDesk = ({
   handleMouseMove,
   handleMouseUp,
   handleScroll,
+  activeColorIndex,
+  activeTool,
+  Icons,
 }) => {
   // console.log('DrawDesk render');
   const canvasRef = useRef(null);
   const [waveCircles, setWaveCircles] = useState([])
+  const cursorIconRef = useRef()
 
   useEffect(() => {
     draw(allFigures, allLaserFigures, flashlightFigure, activeFigureInfo)
@@ -144,11 +148,39 @@ const DrawDesk = ({
 
   const onMouseMove = (event) => {
     handleMouseMove(getMouseCoordinates(event));
+    const width = cursorIconRef.current.offsetWidth
+    const mouseX = event.clientX + width - 5
+    const mouseY = event.clientY - width - 10
+
+    if (cursorIconRef.current) {
+      cursorIconRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`
+    }
   }
 
   const onScroll = (event) => {
     handleScroll(event.deltaY);
   }
+
+  const getIconByToolName = (toolName) => {
+    switch (toolName) {
+      case "pen":
+        return <Icons.FaPaintBrush fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '36' }} />
+      case "arrow":
+        return <Icons.FaArrowRight fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '32' }} />
+      case "flashlight":
+        return <Icons.IoFlashlight size={20} style={{ stroke: '#fff', strokeWidth: '36' }} />
+      case "laser":
+        return <Icons.GiLaserBurst size={20} style={{ stroke: '#fff', strokeWidth: '8' }} />
+      case "rectangle":
+        return <Icons.FaSquare fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '36' }} />;
+      case "oval":
+        return <Icons.FaCircle fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '36' }} />;
+      case "line":
+        return <Icons.AiOutlineLine fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '20' }} />;
+      default:
+        return <Icons.FaSquare fill={colorList[activeColorIndex].color} size={20} style={{ stroke: '#fff', strokeWidth: '36' }} />;
+    }
+  };
 
   // ========================== Canvas Drawing....
   const drawPen = (ctx, points, color, width) => {
@@ -450,18 +482,23 @@ const DrawDesk = ({
   }
 
   return (
-    <canvas
-      id="myCanvas"
-      width="800"
-      height="600"
-      ref={canvasRef}
-      style={{ cursor: cursorType }}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onWheel={onScroll}
-    />
+    <>
+      <canvas
+        id="myCanvas"
+        width="800"
+        height="600"
+        ref={canvasRef}
+        style={{ cursor: cursorType }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={onScroll}
+      />
+      <div ref={cursorIconRef} className='cursor_icon'>
+        {getIconByToolName(activeTool)}
+      </div>
+    </>
   );
 };
 

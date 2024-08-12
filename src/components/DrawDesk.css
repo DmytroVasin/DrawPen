@@ -2,3 +2,10 @@
   cursor: crosshair;
   border: 2px solid black;
 }
+
+.cursor_icon {
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  top: 0;
+}

@@ -1,11 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
-import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
-import { AiOutlineLine, AiOutlineRotateRight } from "react-icons/ai";
-import { IoFlashlight } from "react-icons/io5";
-import { GiLaserBurst } from "react-icons/gi";
-import { MdOutlineCancel } from "react-icons/md";
 
 const STICKY_DISTANCE = 25;
 
@@ -17,6 +12,7 @@ const ToolBar = ({
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
+  Icons
 }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
@@ -110,13 +106,13 @@ const ToolBar = ({
   const getIconByToolName = (toolName) => {
     switch (toolName) {
       case "rectangle":
-        return <FaSquare />;
+        return <Icons.FaSquare />;
       case "oval":
-        return <FaCircle />;
+        return <Icons.FaCircle />;
       case "line":
-        return <AiOutlineLine />;
+        return <Icons.AiOutlineLine />;
       default:
-        return <FaSquare />;
+        return <Icons.FaSquare />;
     }
   };
 
@@ -132,10 +128,10 @@ const ToolBar = ({
     <aside ref={toolbarRef} className={`toolbar ${slide} ${toolbarDirection}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button>
-          <MdOutlineCancel size={15} />
+          <Icons.MdOutlineCancel size={15} />
         </button>
         <button onClick={handleRotateToolbar}>
-          <AiOutlineRotateRight size={15} />
+          <Icons.AiOutlineRotateRight size={15} />
         </button>
       </div>
       <div className="toolbar__draglines">
@@ -150,12 +146,12 @@ const ToolBar = ({
           <ul className="toolbar__items">
             <li className={activeTool === "arrow" && "active"}>
               <button onClick={() => handleChangeTool("arrow")}>
-                <FaArrowRight />
+                <Icons.FaArrowRight />
               </button>
             </li>
             <li className={activeTool === "pen" && "active"}>
               <button onClick={() => handleChangeTool("pen")}>
-                <FaPaintBrush />
+                <Icons.FaPaintBrush />
               </button>
             </li>
             <li className={["rectangle", "oval", "line"].includes(activeTool) && "active"}>
@@ -165,12 +161,12 @@ const ToolBar = ({
             </li>
             <li className={activeTool === "flashlight" && "active"}>
               <button  onClick={() => handleChangeTool("flashlight")}>
-                <IoFlashlight />
+                <Icons.IoFlashlight />
               </button>
             </li>
             <li className={activeTool === "laser" && "active"}>
               <button onClick={() => handleChangeTool("laser")}>
-                <GiLaserBurst />
+                <Icons.GiLaserBurst />
               </button>
             </li>
             <div className="cross-line" />
@@ -205,17 +201,17 @@ const ToolBar = ({
           <ul className="toolbar__items">
             <li className={activeTool === "rectangle" && "active"}>
               <button onClick={() => handleToolChange("rectangle")}>
-                <FaSquare />
+                <Icons.FaSquare />
               </button>
             </li>
             <li className={activeTool === "oval" && "active"}>
               <button onClick={() => handleToolChange("oval")}>
-                <FaCircle />
+                <Icons.FaCircle />
               </button>
             </li>
             <li className={activeTool === "line" && "active"}>
               <button onClick={() => handleToolChange("line")}>
-                <AiOutlineLine />
+                <Icons.AiOutlineLine />
               </button>
             </li>
           </ul>
