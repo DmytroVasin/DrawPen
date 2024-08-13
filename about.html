@@ -7,12 +7,56 @@
     <title>About</title>
     <style>
         /* Your CSS styles here */
+        body {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            height: 100vh; /* Full viewport height */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1, p, a {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h1 {
+            font-size: 16px;
+        }
+
+        p, a {
+            font-size: 12px;
+        }
+
+        a {
+            font-weight: 700;
+            color: #1d76dc;
+        }
+
+        img {
+            width: 52px;
+            margin-bottom: 15px;
+        }
+
         .window-controls {
             position: absolute;
             top: 0;
             right: 0;
             padding: 5px;
         }
+
         .window-controls button {
             background: none;
             border: none;
@@ -21,12 +65,18 @@
     </style>
 </head>
 <body>
-    <div class="window-controls">
-        <button id="minimizeButton">-</button>
-        <button id="maximizeButton">+</button>
-        <button id="closeButton">x</button>
-    </div>
     <!-- Your content here -->
+    <div class="container">
+        <img src="./fill_16.png" alt="img">
+        <h1>Spectacle</h1>
+        <p style="margin: 10px 0; font-size: 10px;">Version 1.2 (672)</p>
+        <h1 style="line-height: 20px;">Credits</h1>
+        <p>Icons and other artwork: <a href="">Iiro Jappinen</a></p>
+        <p style="margin-top: 15px;">Source code available on <a href="">GitHub</a></p>
+        <a href="">@spectacleapp</a>
+        <p style="margin-top: 15px; font-size: 10px;">Copyright &copy; 2016 Eric Czarny</p>
+    </div>
+
     <script>
         // Your JavaScript here
         const { remote } = require('electron');
