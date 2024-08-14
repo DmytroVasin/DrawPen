@@ -45,6 +45,7 @@ function updateContextMenu() {
             height: 300,
             resizable: false,
             minimizable: false,
+            autoHideMenuBar: true,
             webPreferences: {
               nodeIntegration: true
             }
