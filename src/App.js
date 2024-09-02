@@ -248,6 +248,10 @@ const App = () => {
       points: [[x, y]],
     };
 
+    if (activeTool === "arrow" && isDrawing) {
+        newFigure.hasExceededLimit = false
+      }
+
     if (['line', 'arrow', 'oval', 'rectangle'].includes(newFigure.type)) {
       newFigure.points.push([x, y]);
     }
@@ -343,6 +347,7 @@ const App = () => {
     <Fragment>
       <DrawDesk
         allFigures={allFigures}
+        setAllFigures={setAllFigures}
         allLaserFigures={allLaserFigures}
         activeFigureInfo={activeFigureInfo}
         cursorType={cursorType}
