@@ -41,10 +41,11 @@ function updateContextMenu() {
         } else {
           // Create the window if it doesn't exist
           aboutWindow = new BrowserWindow({
-            width: 200,
-            height: 200,
+            width: 300,
+            height: 300,
             resizable: false,
             minimizable: false,
+            autoHideMenuBar: true,
             webPreferences: {
               nodeIntegration: true
             }
