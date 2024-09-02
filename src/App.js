@@ -14,10 +14,27 @@ import {
   IsOnTwoDots,
   IsOnFourDots,
 } from './utils/figureDetection.js';
+import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
+import { AiOutlineLine, AiOutlineRotateRight } from "react-icons/ai";
+import { IoFlashlight } from "react-icons/io5";
+import { GiLaserBurst } from "react-icons/gi";
+import { MdOutlineCancel } from "react-icons/md";
 
 import {
   laserTime,
 } from './constants.js'
+
+const Icons = {
+  FaPaintBrush,
+  FaSquare,
+  FaCircle,
+  FaArrowRight,
+  AiOutlineLine,
+  AiOutlineRotateRight,
+  IoFlashlight,
+  GiLaserBurst,
+  MdOutlineCancel
+};
 
 const App = () => {
   // console.log('App render');
@@ -356,6 +373,9 @@ const App = () => {
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
         handleScroll={handleScroll}
+        activeColorIndex={activeColorIndex}
+        activeTool={activeTool}
+        Icons={Icons}
       />
       <ToolBar
         activeTool={activeTool}
@@ -365,6 +385,7 @@ const App = () => {
         handleChangeColor={handleChangeColor}
         handleChangeWidth={handleChangeWidth}
         handleChangeTool={handleChangeTool}
+        Icons={Icons}
       />
     </Fragment>
   );
