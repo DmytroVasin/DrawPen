@@ -70,7 +70,7 @@ const DrawDesk = ({
         drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex, figure)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure.points[0], figure.points[1], figure)
+          drawArrowActive(ctx, figure.points[0], figure.points[1], figure.widthIndex, figureColor)
         }
       }
 
@@ -197,12 +197,12 @@ const DrawDesk = ({
 
     ctx.beginPath();
     ctx.arc(x, y, 10, 0, Math.PI*2, true);
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#fff';
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI*2, true);
-    ctx.fillStyle = 'red';
+    ctx.arc(x, y, 7, 0, Math.PI*2, true);
+    ctx.fillStyle = '#6cc3e2';
     ctx.fill();
   }
 
@@ -232,10 +232,9 @@ const DrawDesk = ({
       [[-18, 7], [-20, 24]],
       [[-38, 12], [-40, 36]],
       [[-58, 17], [-60, 48]],
-      [[-13, 3], [-14, 13]],
     ];
 
-    const maxScaleFactors = [0.8, 0.9, 1, 0.7];
+    const maxScaleFactors = [0.8, 0.9, 1];
 
     const [startX, startY] = pointA;
     let [endX, endY] = pointB;
@@ -268,7 +267,7 @@ const DrawDesk = ({
     const baseScaleFactor = len / 300;
     const maxScaleFactor = maxScaleFactors[width];
     const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
-    const pointWidth = [5, 7, 9, 4]
+    const pointWidth = [5, 7, 9]
 
     let arrowWidth = Math.max(0, scaleFactor * pointWidth[width]);
     let arrowPoints = [[0, -arrowWidth / 2]];
@@ -299,8 +298,8 @@ const DrawDesk = ({
     return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
-  const drawArrow = (ctx, pointA, pointB, color, width, figure) => {
-    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width, figure);
+  const drawArrow = (ctx, pointA, pointB, color, width, active = false) => {
+    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
 
     ctx.fillStyle = color;
     ctx.shadowColor = '#777';
@@ -329,13 +328,41 @@ const DrawDesk = ({
     ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
     ctx.closePath();
     ctx.fill();
+
+    if (active) {
+      drawArrowOutline(ctx, transformedPoints, startX, startY, arrowWidth, angle)
+    }
   };
 
-  const drawArrowActive = (ctx, pointA, pointB, figure) => {
-    const color = '#FFF'
-    const width = 3 // Active color
+  const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
+    ctx.strokeStyle = '#6cc3e2';
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
 
-    const newPointB = getResizableDotParams(pointA, pointB)
+    ctx.beginPath();
+
+    points.forEach((point, index) => {
+      let [x, y] = point;
+
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
+    ctx.closePath();
+    ctx.stroke();
+  };
+
+  const drawArrowActive = (ctx, pointA, pointB, width, color) => {
+    drawArrow(ctx, pointA, pointB, color, width, true)
 
     drawArrow(ctx, pointA, pointB, color, width, figure)
 
