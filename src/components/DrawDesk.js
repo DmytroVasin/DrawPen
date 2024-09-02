@@ -1,6 +1,6 @@
 import './DrawDesk.css';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke } from '../utils/general.js';
 
@@ -23,26 +23,12 @@ const DrawDesk = ({
 }) => {
   // console.log('DrawDesk render');
   const canvasRef = useRef(null);
-  const [waveCircles, setWaveCircles] = useState([])
 
   useEffect(() => {
     draw(allFigures, allLaserFigures, flashlightFigure, activeFigureInfo)
-  }, [allFigures, allLaserFigures, flashlightFigure, activeFigureInfo, waveCircles]);
+  }, [allFigures, allLaserFigures, flashlightFigure, activeFigureInfo]);
 
-  const animateCircles = () => {
-    setWaveCircles((prevCircles) =>
-      prevCircles
-        .map(circle => ({ ...circle, radius: circle.radius + 1.5, alpha: Math.max(circle.alpha - 0.02, 0) }))
-        .filter(circle => circle.alpha > 0)
-    );
-    requestAnimationFrame(animateCircles);
-  };
-
-  useEffect(() => {
-    requestAnimationFrame(animateCircles);
-  }, []);
-
-  const draw = (allFigures, allLaserFigures, activeFigureInfo) => {
+  const draw = (allFigures, allLaserFigures, flashlightFigure, activeFigureInfo) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
@@ -116,13 +102,18 @@ const DrawDesk = ({
       ctx.shadowColor = 'transparent'; // Reset shadows
     })
 
-    waveCircles.forEach(circle => {
+    if (flashlightFigure.active && flashlightFigure.x && flashlightFigure.y) {
+      let { x, y, radius } = flashlightFigure;
+
+      let path = new Path2D();
+      path.rect(0, 0, canvasRef.width, canvasRef.height);
+      path.arc(x, y, radius, 0, 2 * Math.PI);
+
       ctx.beginPath();
-      ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
-      ctx.fillStyle = `rgba(149, 132, 136, ${circle.alpha})`;
-      ctx.fill();
+      ctx.fillStyle = 'rgba(85, 85, 85, 0.5)';
+      ctx.fill(path, 'evenodd');
       ctx.closePath();
-    });
+    }
   };
 
   const getMouseCoordinates = (event) => {
@@ -130,16 +121,7 @@ const DrawDesk = ({
   };
 
   const onMouseDown = (event) => {
-    const coords = getMouseCoordinates(event);
-
-    if (flashlightFigure.active) {
-      setWaveCircles(prevCircles => [
-        ...prevCircles,
-        { x: coords.x, y: coords.y, radius: 0, alpha: 1 },
-      ]);
-    } else {
-      handleMouseDown(coords);
-    }
+    handleMouseDown(getMouseCoordinates(event));
   }
 
   const onMouseMove = (event) => {
