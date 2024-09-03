@@ -9,6 +9,8 @@ let isActive = true
 let activeIcon = path.resolve('assets/icon_draw_white.png')
 let disabledIcon = path.resolve('assets/icon_ghost_white.png')
 
+let activeIcon1 = path.resolve('assets/icon.svg');
+
 
 function toggleWindow() {
   if (isActive) {
@@ -26,10 +28,16 @@ function toggleWindow() {
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: isActive ? 'Deactivate' : 'Activate',
+      label: isActive ? 'Hide DrawPen' : 'Show DrawPen',
       accelerator: 'Space',
       click: () => {
         toggleWindow();
+      }
+    },
+    {
+      label: 'Enter/Exit Ghost Mode',
+      click: () => {
+        // TODO:...
       }
     },
     { type: 'separator' },
@@ -51,7 +59,8 @@ function updateContextMenu() {
             }
           });
 
-          aboutWindow.loadFile('./src/about.html')
+          // aboutWindow.loadFile('./src/about.html')
+          aboutWindow.loadURL(ABOUT_WINDOW_WEBPACK_ENTRY);
 
           // Prevent the window from being minimized to the dock
           aboutWindow.on('minimize', (event) => {
@@ -78,7 +87,12 @@ function updateContextMenu() {
         // TODO: ....
       }
     },
-    { label: 'Quit', click: () => app.quit() }
+    {
+      label: 'Quit',
+      click: () => {
+        app.quit()
+      }
+    }
   ]);
 
   tray.setContextMenu(contextMenu);

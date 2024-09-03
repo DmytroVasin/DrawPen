@@ -41,7 +41,12 @@ module.exports = {
               preload: {
                 js: path.join(rootDir, 'src/renderer/preload.js'),
               },
-            }
+            },
+            {
+              name: 'about_window',
+              html: path.join(rootDir, 'src/renderer/about_page/about.html'),
+              js: path.join(rootDir, 'src/renderer/about_page/about.js')
+            },
           ]
         },
         devServer: {

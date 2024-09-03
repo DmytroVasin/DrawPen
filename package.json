@@ -7,7 +7,6 @@
   "main": ".webpack/main",
   "scripts": {
     "start": "NODE_ENV=development electron-forge start",
-    "dev": "react-scripts start",
     "package": "electron-forge package",
     "publish": "electron-forge publish"
   },
@@ -26,6 +25,7 @@
     "@electron-forge/plugin-webpack": "^7.4.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "babel-loader": "^9.1.3",
+    "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "electron": "^32.0.1",
     "node-loader": "^2.0.0",
