@@ -1,9 +1,9 @@
-import './App.css';
+import './Application.css';
 
 import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { throttle } from 'lodash';
-import DrawDesk from './components/DrawDesk';
-import ToolBar from './components/ToolBar';
+import DrawDesk from './components/DrawDesk.js';
+import ToolBar from './components/ToolBar.js';
 import { filterClosePoints } from './utils/general.js';
 import {
   IsOnCurve,
@@ -36,8 +36,8 @@ const Icons = {
   MdOutlineCancel
 };
 
-const App = () => {
-  // console.log('App render');
+const Application = () => {
+  console.log('App render');
 
   const [allFigures, setAllFigures] = useState([]);
   const [allLaserFigures, setLaserFigure] = useState([]);
@@ -391,4 +391,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Application;

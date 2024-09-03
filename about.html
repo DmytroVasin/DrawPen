@@ -1,15 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About</title>
     <style>
         /* Your CSS styles here */
         body {
-            max-width: 300px;
-            max-height: 300px;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -67,43 +62,40 @@
 <body>
     <!-- Your content here -->
     <div class="container">
-        <img src="./fill_16.png" alt="img">
+        <img src="./assets/fill_16.png" alt="img">
         <h1>Spectacle</h1>
-        <p style="margin: 10px 0; font-size: 10px;">Version 1.2 (672)</p>
-        <h1 style="line-height: 20px;">Credits</h1>
-        <p>Icons and other artwork: <a href="">Iiro Jappinen</a></p>
-        <p style="margin-top: 15px;">Source code available on <a href="">GitHub</a></p>
-        <a href="">@spectacleapp</a>
-        <p style="margin-top: 15px; font-size: 10px;">Copyright &copy; 2016 Eric Czarny</p>
+        <p style="margin: 10px 0; font-size: 10px;">Version 1.2.3</p>
+        <p style="margin-top: 15px;">Source code available on <a href="https://github.com/DmytroVasin/DrawPen">GitHub</a></p>
+        <p style="margin-top: 15px; font-size: 10px;">Copyright &copy; 2024 <a href="https://www.linkedin.com/in/dmytro-vasin/">Dmytro Vasin</a></p>
     </div>
 
     <script>
         // Your JavaScript here
-        const { remote } = require('electron');
-        const { BrowserWindow } = remote;
+        // const { remote } = require('electron');
+        // const { BrowserWindow } = remote;
 
-        const minimizeButton = document.getElementById('minimizeButton');
-        const maximizeButton = document.getElementById('maximizeButton');
-        const closeButton = document.getElementById('closeButton');
+        // const minimizeButton = document.getElementById('minimizeButton');
+        // const maximizeButton = document.getElementById('maximizeButton');
+        // const closeButton = document.getElementById('closeButton');
 
-        minimizeButton.addEventListener('click', () => {
-            const window = remote.getCurrentWindow();
-            window.minimize();
-        });
+        // minimizeButton.addEventListener('click', () => {
+        //     const window = remote.getCurrentWindow();
+        //     window.minimize();
+        // });
 
-        maximizeButton.addEventListener('click', () => {
-            const window = remote.getCurrentWindow();
-            if (window.isMaximized()) {
-                window.unmaximize();
-            } else {
-                window.maximize();
-            }
-        });
+        // maximizeButton.addEventListener('click', () => {
+        //     const window = remote.getCurrentWindow();
+        //     if (window.isMaximized()) {
+        //         window.unmaximize();
+        //     } else {
+        //         window.maximize();
+        //     }
+        // });
 
-        closeButton.addEventListener('click', () => {
-            const window = remote.getCurrentWindow();
-            window.close();
-        });
+        // closeButton.addEventListener('click', () => {
+        //     const window = remote.getCurrentWindow();
+        //     window.close();
+        // });
     </script>
 </body>
 </html>

@@ -1,13 +1,13 @@
-const { app, Tray, Menu, nativeImage, BrowserWindow, screen, globalShortcut } = require('electron/main')
-const path = require('node:path')
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut } from 'electron';
+import path from 'path';
 
 let tray
 let mainWindow
 let aboutWindow
 
 let isActive = true
-let activeIcon = path.join(__dirname, 'empty_16.png')
-let disabledIcon = path.join(__dirname, 'fill_16.png')
+let activeIcon = path.resolve('assets/empty_16.png')
+let disabledIcon = path.resolve('assets/fill_16.png')
 
 
 function toggleWindow() {
@@ -41,8 +41,8 @@ function updateContextMenu() {
         } else {
           // Create the window if it doesn't exist
           aboutWindow = new BrowserWindow({
-            width: 300,
-            height: 300,
+            width: 250,
+            height: 250,
             resizable: false,
             minimizable: false,
             autoHideMenuBar: true,
@@ -64,10 +64,6 @@ function updateContextMenu() {
             aboutWindow = null;
           });
         }
-
-
-
-
       }
     },
     { label: 'Quit', click: () => app.quit() }
@@ -83,13 +79,19 @@ function createWindow () {
   console.log('height', height)
 
   mainWindow = new BrowserWindow({
-    width: width,
-    height: height,
+    width: 800,
+    height: 600,
+    // width: width,
+    // height: height,
     transparent: true,
     frame: false,
     webPreferences: {
-      nodeIntegration: true,
-      preload: path.join(__dirname, 'preload.js')
+      nodeIntegration: false,
+      contextIsolation: true,
+      nodeIntegrationInWorker: false,
+      nodeIntegrationInSubFrames: false,
+      preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      sandbox: false,
     }
   })
 
@@ -97,7 +99,8 @@ function createWindow () {
   mainWindow.setAlwaysOnTop(true) // , "screen-saver"
   mainWindow.setVisibleOnAllWorkspaces(true)
 
-  mainWindow.loadFile('index.html')
+  // Load the index.html of the app window.
+  mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
   mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', function () {

@@ -1,31 +1,51 @@
 {
   "name": "drawpen",
   "version": "0.0.1",
+  "description": "DrawPen is a simple screen annotation",
   "private": true,
-  "main": "main.js",
+  "license": "MIT",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "NODE_ENV=development electron-forge start",
+    "dev": "react-scripts start",
+    "package": "electron-forge package",
+    "publish": "electron-forge publish"
+  },
+  "config": {
+    "forge": "./tools/forge/forge.config.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-webpack": "^7.4.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^7.1.2",
+    "electron": "^32.0.1",
+    "node-loader": "^2.0.0",
+    "sass": "^1.77.8",
+    "sass-loader": "^14.2.1",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.93.0"
+  },
   "dependencies": {
-    "electron": "latest",
+    "electron-squirrel-startup": "^1.0.1",
+    "lodash.throttle": "^4.1.1",
+    "perfect-freehand": "^1.2.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1",
     "react-icons": "^5.2.1",
-    "perfect-freehand": "^1.2.2",
-    "lodash.throttle": "^4.1.1"
-  },
-  "scripts": {
-    "start": "electron .",
-    "dev": "react-scripts start"
+    "react-scripts": "5.0.1"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 chrome version"
     ]
   }
 }

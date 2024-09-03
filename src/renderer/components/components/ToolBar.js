@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.css";
 import { colorList, widthList } from "../constants.js";
 
