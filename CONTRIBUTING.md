@@ -21,3 +21,14 @@ npm run dev -- --open
 
 Electron:
 npm start
+
+
+
+ICON
+https://www.svgrepo.com/svg/79739/draw-a-picture
+https://www.svgviewer.dev/svg-to-png
+
+
+https://github.com/rampatra/presentify-localization
+
+https://github.com/weiameili/Pensela

@@ -1,4 +1,4 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut } from 'electron';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell } from 'electron';
 import path from 'path';
 
 let tray
@@ -6,8 +6,8 @@ let mainWindow
 let aboutWindow
 
 let isActive = true
-let activeIcon = path.resolve('assets/empty_16.png')
-let disabledIcon = path.resolve('assets/fill_16.png')
+let activeIcon = path.resolve('assets/icon_draw_white.png')
+let disabledIcon = path.resolve('assets/icon_ghost_white.png')
 
 
 function toggleWindow() {
@@ -34,7 +34,7 @@ function updateContextMenu() {
     },
     { type: 'separator' },
     {
-      label: 'About',
+      label: 'About DrawPen',
       click: () => {
         if (aboutWindow) {
           aboutWindow.focus();
@@ -56,14 +56,26 @@ function updateContextMenu() {
           // Prevent the window from being minimized to the dock
           aboutWindow.on('minimize', (event) => {
             event.preventDefault();
-            // aboutWindow.restore();
           });
 
           // Clear the reference when the window is closed
           aboutWindow.on('closed', () => {
             aboutWindow = null;
           });
+
+          // Open URL in user's browser.
+          aboutWindow.webContents.setWindowOpenHandler((details) => {
+            shell.openExternal(details.url);
+
+            return { action: "deny" }; // Prevent the app from opening the URL.
+          })
         }
+      }
+    },
+    {
+      label: 'Check for Updates',
+      click: () => {
+        // TODO: ....
       }
     },
     { label: 'Quit', click: () => app.quit() }
