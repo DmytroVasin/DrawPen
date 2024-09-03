@@ -51,7 +51,7 @@ function updateContextMenu() {
             }
           });
 
-          aboutWindow.loadFile('about.html')
+          aboutWindow.loadFile('./src/about.html')
 
           // Prevent the window from being minimized to the dock
           aboutWindow.on('minimize', (event) => {

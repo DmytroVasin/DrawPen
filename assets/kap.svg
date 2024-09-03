@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.1 (51147) - http://www.bohemiancoding.com/sketch -->
+    <title>16-kap</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="linearGradient-1">
+            <stop stop-color="#7247FF" offset="0%"></stop>
+            <stop stop-color="#00FFBE" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Branding" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Desktop-HD" transform="translate(-1072.000000, -760.000000)" fill="url(#linearGradient-1)">
+            <path d="M1080,776 C1075.58172,776 1072,772.418278 1072,768 C1072,763.581722 1075.58172,760 1080,760 C1084.41828,760 1088,763.581722 1088,768 C1088,772.418278 1084.41828,776 1080,776 Z M1080,775 C1083.86599,775 1087,771.865993 1087,768 C1087,764.134007 1083.86599,761 1080,761 C1076.13401,761 1073,764.134007 1073,768 C1073,771.865993 1076.13401,775 1080,775 Z" id="16-kap"></path>
+        </g>
+    </g>
+</svg>
