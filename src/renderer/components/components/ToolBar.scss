@@ -1,0 +1,188 @@
+.toolbar {
+  width: 400px;
+  height: 70px;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(180, 180, 180, 0.95);
+  border-radius: 10px;
+  border: 1px solid rgba(180, 180, 180, 0.95);
+  overflow: hidden;
+
+  button {
+    background: none;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    svg {
+      pointer-events: none;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .toolbar__buttons {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+      padding: 2px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .toolbar__draglines {
+    display: flex;
+    height: var(--toolbar-width);
+    padding: 0 5px;
+    align-items: center;
+
+    .draglines {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+      height: 75%;
+      width: 15px;
+      flex-direction: row;
+
+      &.rotated {
+        transform: rotate(180deg);
+      }
+
+      div {
+        border: 1px solid #000;
+        border-radius: 15px;
+        width: 0;
+
+        &:nth-child(1) {
+          height: 75%;
+        }
+
+        &:nth-child(2) {
+          height: 85%;
+        }
+
+        &:nth-child(3) {
+          height: 95%;
+        }
+      }
+    }
+  }
+
+  .toolbar__container {
+    display: flex;
+    position: relative;
+    width: calc(100% - 80px);
+    justify-content: center;
+
+    .toolbar__body,
+    .side-view-body {
+      position: absolute;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: .3s;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .toolbar__body {
+      top: 0;
+      left: 0;
+    }
+
+    .side-view-body {
+      top: 70px;
+    }
+
+    .toolbar__items {
+      display: flex;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+      flex-direction: row;
+
+      li {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        margin: 0 5px;
+
+        button svg {
+          width: 24px;
+          height: 24px;
+          pointer-events: none;
+        }
+
+        &.active {
+          background-color: #fff;
+          border-radius: 5px;
+        }
+
+        &.cross-line {
+          background-color: #4c4c4c;
+          height: 24px;
+          width: 2px;
+          margin: 0 5px;
+        }
+      }
+
+      .toolbar__width-button {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #000;
+
+        & > div {
+          height: 18px;
+          background-color: #000;
+          transform: rotate(45deg);
+          border-radius: 5px;
+        }
+      }
+
+      .toolbar__color-picker {
+        position: relative;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: none;
+
+        &::before {
+          position: absolute;
+          content: "";
+          top: 50%;
+          left: 50%;
+          width: 20px;
+          height: 20px;
+          background: inherit;
+          border-radius: 50%;
+          border: 2px solid #fff;
+          transform: translate(-50%, -50%);
+        }
+      }
+    }
+  }
+}
+
+.toolbar.tool-slide .toolbar__body,
+.toolbar.color-slide .toolbar__body,
+.toolbar.width-slide .toolbar__body {
+  top: -70px;
+}
+
+.toolbar.tool-slide .tool-group,
+.toolbar.color-slide .color-group,
+.toolbar.width-slide .width-group {
+  top: 0;
+}

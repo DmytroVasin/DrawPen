@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import "./ToolBar.css";
+import "./ToolBar.scss";
 import { colorList, widthList } from "../constants.js";
 
 const STICKY_DISTANCE = 25;
@@ -20,7 +20,6 @@ const ToolBar = ({
   const toolbarRef = useRef()
   const [slide, setSlide] = useState("");
   const [lastActiveFigure, setLastActiveFigure] = useState("rectangle");
-  const [toolbarDirection, setToolbarDirection] = useState("vertical");
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -89,20 +88,6 @@ const ToolBar = ({
     switchView("")
   };
 
-  const handleRotateToolbar = (e) => {
-    setToolbarDirection(prev => prev === "horizontal" ? "vertical" : "horizontal");
-
-    const buttonWidth = e.target.getBoundingClientRect().width;
-
-    const toolbar = toolbarRef.current;
-    const width = toolbarDirection === "vertical" ? toolbar.offsetWidth - buttonWidth : toolbar.offsetHeight - buttonWidth;
-
-    setPosition(prev => ({
-      x: toolbarDirection === "vertical" ? prev.x + width : prev.x - width,
-      y: prev.y
-    }));
-  };
-
   const getIconByToolName = (toolName) => {
     switch (toolName) {
       case "rectangle":
@@ -125,13 +110,10 @@ const ToolBar = ({
   };
 
   return (
-    <aside ref={toolbarRef} className={`toolbar ${slide} ${toolbarDirection}`} style={{ left: position.x, top: position.y }}>
+    <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar}>
           <Icons.MdOutlineCancel size={15} />
-        </button>
-        <button onClick={handleRotateToolbar}>
-          <Icons.AiOutlineRotateRight size={15} />
         </button>
       </div>
       <div className="toolbar__draglines">
@@ -169,10 +151,10 @@ const ToolBar = ({
                 <Icons.GiLaserBurst />
               </button>
             </li>
-            <div className="cross-line" />
+            <li className="cross-line"></li>
             <li>
               <button
-                id="colorPicker"
+                className="toolbar__color-picker"
                 onClick={() => switchView("color-slide")}
                 style={{ backgroundColor: colorList[activeColorIndex].color }}
               />
@@ -189,7 +171,7 @@ const ToolBar = ({
             {colorList.map((color, index) => (
               <li key={index}>
                 <button
-                  id="colorPicker"
+                  className="toolbar__color-picker"
                   onClick={() => onChangeColor(index)}
                   style={{ backgroundColor: color.color }}
                 />

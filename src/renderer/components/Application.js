@@ -15,7 +15,7 @@ import {
   IsOnFourDots,
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
-import { AiOutlineLine, AiOutlineRotateRight } from "react-icons/ai";
+import { AiOutlineLine } from "react-icons/ai";
 import { IoFlashlight } from "react-icons/io5";
 import { GiLaserBurst } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -30,7 +30,6 @@ const Icons = {
   FaCircle,
   FaArrowRight,
   AiOutlineLine,
-  AiOutlineRotateRight,
   IoFlashlight,
   GiLaserBurst,
   MdOutlineCancel

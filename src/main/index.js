@@ -112,6 +112,8 @@ function createWindow () {
   console.log('height', height)
 
   mainWindow = new BrowserWindow({
+    x: 0,
+    y: 0,
     width: 800,
     height: 600,
     // width: width,
@@ -135,7 +137,6 @@ function createWindow () {
 
   // Load the index.html of the app window.
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
-  mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -171,6 +172,7 @@ app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
 
+// DOSE NOT WORK?
 app.dock.hide()
 
 // MOVE TO MODULEs!
