@@ -8,7 +8,7 @@ const ToolBar = ({
   activeTool,
   activeColorIndex,
   activeWidthIndex,
-  handleReset,
+  handleCloseToolBar,
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
@@ -127,7 +127,7 @@ const ToolBar = ({
   return (
     <aside ref={toolbarRef} className={`toolbar ${slide} ${toolbarDirection}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
-        <button>
+        <button onClick={handleCloseToolBar}>
           <Icons.MdOutlineCancel size={15} />
         </button>
         <button onClick={handleRotateToolbar}>

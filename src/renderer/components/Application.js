@@ -57,6 +57,14 @@ const Application = () => {
   const [cursorType, setCursorType] = useState('crosshair');
 
   useEffect(() => {
+    // TODO: Why it's been called twice?
+    window.electronAPI.onResetScreen(() => {
+      handleReset();
+      console.log('Handle Reset');
+    });
+  }, []);
+
+  useEffect(() => {
     if (!activeFigureInfo) { return }
 
     const activeFigure = findActiveFigure();
@@ -360,6 +368,12 @@ const Application = () => {
     }
   };
 
+  // TOOD: Create IPC module
+  // TOOD: Move to a IPC module
+  const handleCloseToolBar = () => {
+    window.electronAPI.invokeCloseToolBar();
+  }
+
   return (
     <Fragment>
       <DrawDesk
@@ -381,7 +395,7 @@ const Application = () => {
         activeTool={activeTool}
         activeColorIndex={activeColorIndex}
         activeWidthIndex={activeWidthIndex}
-        handleReset={handleReset}
+        handleCloseToolBar={handleCloseToolBar}
         handleChangeColor={handleChangeColor}
         handleChangeWidth={handleChangeWidth}
         handleChangeTool={handleChangeTool}

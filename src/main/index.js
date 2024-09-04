@@ -40,6 +40,13 @@ function updateContextMenu() {
     },
     { type: 'separator' },
     {
+      label: 'Clear desk',
+      click: () => {
+        resetScreen()
+      }
+    },
+    { type: 'separator' },
+    {
       label: 'About DrawPen',
       click: () => {
         if (aboutWindow) {
@@ -110,6 +117,7 @@ function createWindow () {
     // width: width,
     // height: height,
     transparent: true,
+    hasShadow: false,
     frame: false,
     webPreferences: {
       nodeIntegration: false,
@@ -165,6 +173,19 @@ app.on('will-quit', () => {
 
 app.dock.hide()
 
-ipcMain.handle('get-app-version', () => {
+// MOVE TO MODULEs!
+ipcMain.handle('get_app_version', () => {
   return app.getVersion();
 });
+
+// MOVE TO MODULEs!
+ipcMain.handle('close_toolbar', () => {
+  toggleWindow();
+  resetScreen();
+
+  return null;
+});
+
+function resetScreen() {
+  mainWindow.webContents.send('reset_screen');
+}
