@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://getkap.co/static/favicon/kap.svg" height="64">
+  <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.svg?raw=true" height="64">
   <h3 align="center">Draw Pen</h3>
   <p align="center">An open-source screen annotation tool<p>
 </p>

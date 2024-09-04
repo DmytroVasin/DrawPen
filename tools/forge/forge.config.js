@@ -1,4 +1,3 @@
-// Forge Configuration
 const path = require('path');
 const rootDir = process.cwd();
 
@@ -10,6 +9,15 @@ module.exports = {
     executableName: 'DrawPen',
     // Set application icon
     icon: path.resolve('assets/images/appIcon.ico'),
+    //
+    // osxSign: {},
+    // // ...
+    // osxNotarize: {
+    //   tool: 'notarytool',
+    //   appleId: process.env.APPLE_ID,
+    //   appleIdPassword: process.env.APPLE_PASSWORD,
+    //   teamId: process.env.APPLE_TEAM_ID
+    // }
   },
   makers: [
     {
@@ -45,13 +53,29 @@ module.exports = {
             {
               name: 'about_window',
               html: path.join(rootDir, 'src/renderer/about_page/about.html'),
-              js: path.join(rootDir, 'src/renderer/about_page/about.js')
+              js: path.join(rootDir, 'src/renderer/about_page/about.js'),
+              preload: {
+                js: path.join(rootDir, 'src/renderer/about_page/preload.js'),
+              },
             },
           ]
         },
         devServer: {
           liveReload: false,
         },
+      }
+    }
+  ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'DmytroVasin',
+          name: 'DrawPen'
+        },
+        prerelease: false,
+        draft: true
       }
     }
   ]

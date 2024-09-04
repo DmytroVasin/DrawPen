@@ -1,4 +1,5 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell } from 'electron';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+// import { updateElectronApp } from 'update-electron-app';
 import path from 'path';
 
 let tray
@@ -8,9 +9,6 @@ let aboutWindow
 let isActive = true
 let activeIcon = path.resolve('assets/icon_draw_white.png')
 let disabledIcon = path.resolve('assets/icon_ghost_white.png')
-
-let activeIcon1 = path.resolve('assets/icon.svg');
-
 
 function toggleWindow() {
   if (isActive) {
@@ -29,7 +27,7 @@ function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: isActive ? 'Hide DrawPen' : 'Show DrawPen',
-      accelerator: 'Space',
+      accelerator: 'CmdOrCtrl+Shift+D',
       click: () => {
         toggleWindow();
       }
@@ -55,7 +53,8 @@ function updateContextMenu() {
             minimizable: false,
             autoHideMenuBar: true,
             webPreferences: {
-              nodeIntegration: true
+              nodeIntegration: true,
+              preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
             }
           });
 
@@ -84,7 +83,8 @@ function updateContextMenu() {
     {
       label: 'Check for Updates',
       click: () => {
-        // TODO: ....
+        // "update-electron-app": "^3.0.0",
+        // updateElectronApp()
       }
     },
     {
@@ -147,7 +147,7 @@ app.whenReady().then(() => {
   updateContextMenu();
 
   // Register a global shortcut for the 'Space' key
-  globalShortcut.register('Space', () => {
+  globalShortcut.register('CmdOrCtrl+Shift+D', () => {
     toggleWindow()
   });
 })
@@ -164,3 +164,7 @@ app.on('will-quit', () => {
 });
 
 app.dock.hide()
+
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
