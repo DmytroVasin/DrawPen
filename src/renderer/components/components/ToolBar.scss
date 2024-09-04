@@ -1,13 +1,13 @@
 .toolbar {
-  width: 400px;
-  height: 70px;
+  width: 382px;
+  height: 55px;
   display: flex;
   position: absolute;
   top: 0;
   left: 0;
-  background-color: rgba(180, 180, 180, 0.95);
+  background-color: rgba(230, 230, 230, 0.95);
   border-radius: 10px;
-  border: 1px solid rgba(180, 180, 180, 0.95);
+  border: 1px solid rgba(50, 50, 50, 0.95);
   overflow: hidden;
 
   button {
@@ -28,8 +28,7 @@
   }
 
   .toolbar__buttons {
-    display: flex;
-    justify-content: space-between;
+    position: absolute;
 
     button {
       padding: 2px;
@@ -41,14 +40,14 @@
   .toolbar__draglines {
     display: flex;
     height: var(--toolbar-width);
-    padding: 0 5px;
+    padding: 0 15px;
     align-items: center;
+    cursor: move;
 
     .draglines {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: move;
       height: 75%;
       width: 15px;
       flex-direction: row;
@@ -63,15 +62,15 @@
         width: 0;
 
         &:nth-child(1) {
-          height: 75%;
+          height: 20%;
         }
 
         &:nth-child(2) {
-          height: 85%;
+          height: 50%;
         }
 
         &:nth-child(3) {
-          height: 95%;
+          height: 85%;
         }
       }
     }
@@ -80,7 +79,7 @@
   .toolbar__container {
     display: flex;
     position: relative;
-    width: calc(100% - 80px);
+    width: 100%;
     justify-content: center;
 
     .toolbar__body,
@@ -125,7 +124,7 @@
         }
 
         &.active {
-          background-color: #fff;
+          background-color: #FFF;
           border-radius: 5px;
         }
 
@@ -143,11 +142,20 @@
         border-radius: 50%;
         border: 2px solid #000;
 
-        & > div {
+        div {
           height: 18px;
           background-color: #000;
           transform: rotate(45deg);
-          border-radius: 5px;
+
+          &.light {
+            width: 3px;
+          }
+          &.medium {
+            width: 5px;
+          }
+          &.bold {
+            width: 8px;
+          }
         }
       }
 

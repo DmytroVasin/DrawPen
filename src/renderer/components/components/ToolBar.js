@@ -91,13 +91,13 @@ const ToolBar = ({
   const getIconByToolName = (toolName) => {
     switch (toolName) {
       case "rectangle":
-        return <Icons.FaSquare />;
+        return <Icons.FaRegSquare />;
       case "oval":
-        return <Icons.FaCircle />;
+        return <Icons.FaRegCircle />;
       case "line":
         return <Icons.AiOutlineLine />;
       default:
-        return <Icons.FaSquare />;
+        return <Icons.FaRegSquare />;
     }
   };
 
@@ -113,11 +113,11 @@ const ToolBar = ({
     <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar}>
-          <Icons.MdOutlineCancel size={15} />
+          <Icons.MdOutlineCancel size={16} />
         </button>
       </div>
-      <div className="toolbar__draglines">
-        <div className="draglines" onMouseDown={onMouseDown}>
+      <div className="toolbar__draglines" onMouseDown={onMouseDown}>
+        <div className="draglines">
           <div />
           <div />
           <div />
@@ -126,29 +126,29 @@ const ToolBar = ({
       <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
-            <li className={activeTool === "arrow" && "active"}>
+            <li className={activeTool === "arrow" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("arrow")}>
                 <Icons.FaArrowRight />
               </button>
             </li>
-            <li className={activeTool === "pen" && "active"}>
+            <li className={activeTool === "pen" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("pen")}>
                 <Icons.FaPaintBrush />
               </button>
             </li>
-            <li className={["rectangle", "oval", "line"].includes(activeTool) && "active"}>
+            <li className={["rectangle", "oval", "line"].includes(activeTool) ? "active" : undefined}>
               <button onClick={() => switchView("tool-slide")}>
                 {renderGroupIcon()}
               </button>
             </li>
-            <li className={activeTool === "flashlight" && "active"}>
+            <li className={activeTool === "flashlight" ? "active" : undefined}>
               <button  onClick={() => handleChangeTool("flashlight")}>
                 <Icons.IoFlashlight />
               </button>
             </li>
-            <li className={activeTool === "laser" && "active"}>
+            <li className={activeTool === "laser" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("laser")}>
-                <Icons.GiLaserBurst />
+                <Icons.GiLaserburn />
               </button>
             </li>
             <li className="cross-line"></li>
@@ -161,7 +161,7 @@ const ToolBar = ({
             </li>
             <li>
               <button className="toolbar__width-button" onClick={() => switchView("width-slide")}>
-                <div style={{ width: `${widthList[activeWidthIndex].width / 3}px` }} />
+                <div className={`${widthList[activeWidthIndex].name}`} />
               </button>
             </li>
           </ul>
@@ -181,17 +181,17 @@ const ToolBar = ({
         </div>
         <div className="side-view-body tool-group">
           <ul className="toolbar__items">
-            <li className={activeTool === "rectangle" && "active"}>
+            <li className={activeTool === "rectangle" ? "active" : undefined}>
               <button onClick={() => handleToolChange("rectangle")}>
-                <Icons.FaSquare />
+                <Icons.FaRegSquare />
               </button>
             </li>
-            <li className={activeTool === "oval" && "active"}>
+            <li className={activeTool === "oval" ? "active" : undefined}>
               <button onClick={() => handleToolChange("oval")}>
-                <Icons.FaCircle />
+                <Icons.FaRegCircle />
               </button>
             </li>
-            <li className={activeTool === "line" && "active"}>
+            <li className={activeTool === "line" ? "active" : undefined}>
               <button onClick={() => handleToolChange("line")}>
                 <Icons.AiOutlineLine />
               </button>
@@ -203,7 +203,7 @@ const ToolBar = ({
             {widthList.map((width, index) => (
               <li key={index}>
                 <button className="toolbar__width-button" onClick={() => onChangeWidth(index)}>
-                  <div style={{ width: `${width.width / 3}px` }} />
+                  <div className={`${width.name}`} />
                 </button>
               </li>
             ))}

@@ -1,11 +1,9 @@
-#myCanvas {
-  cursor: crosshair;
+#canvas {
   border: 2px solid black;
 }
 
-.cursor_icon {
+#cursor {
   position: absolute;
-  pointer-events: none;
-  left: 0;
   top: 0;
+  left: 0;
 }

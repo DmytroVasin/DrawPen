@@ -14,10 +14,10 @@ import {
   IsOnTwoDots,
   IsOnFourDots,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaSquare, FaCircle, FaArrowRight } from "react-icons/fa";
+import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { IoFlashlight } from "react-icons/io5";
-import { GiLaserBurst } from "react-icons/gi";
+import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 
 import {
@@ -26,12 +26,12 @@ import {
 
 const Icons = {
   FaPaintBrush,
-  FaSquare,
-  FaCircle,
+  FaRegSquare,
+  FaRegCircle,
   FaArrowRight,
   AiOutlineLine,
   IoFlashlight,
-  GiLaserBurst,
+  GiLaserburn,
   MdOutlineCancel
 };
 
