@@ -30,6 +30,11 @@ const DrawDesk = ({
   const cursorIconRef = useRef()
 
   useEffect(() => {
+    canvasRef.current.width = window.innerWidth;
+    canvasRef.current.height = window.innerHeight;
+  }, []);
+
+  useEffect(() => {
     draw(allFigures, allLaserFigures, flashlightFigure, activeFigureInfo)
   }, [allFigures, allLaserFigures, flashlightFigure, activeFigureInfo, waveCircles]);
 
@@ -486,8 +491,6 @@ const DrawDesk = ({
     <>
       <canvas
         id="canvas"
-        width="800"
-        height="600"
         ref={canvasRef}
         style={{ cursor: cursorType }}
         onMouseDown={onMouseDown}
@@ -496,6 +499,8 @@ const DrawDesk = ({
         onMouseLeave={handleMouseUp}
         onWheel={onScroll}
       />
+
+      {/* TODO: move to separate folder! */}
       <div ref={cursorIconRef} id='cursor'>
         {getIconByToolName(activeTool)}
       </div>
