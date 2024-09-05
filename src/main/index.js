@@ -6,36 +6,33 @@ let tray
 let mainWindow
 let aboutWindow
 
-let isActive = true
+let foregroundMode = true
+let showToolbar = true
+let showWhiteboard = false
 let activeIcon = path.resolve('assets/icon_draw_white.png')
-let disabledIcon = path.resolve('assets/icon_ghost_white.png')
-
-function toggleWindow() {
-  if (isActive) {
-    tray.setImage(disabledIcon)
-    mainWindow.hide()
-  } else {
-    tray.setImage(activeIcon)
-    mainWindow.show()
-  }
-
-  isActive = !isActive
-  updateContextMenu() // Need to rerender the context menu
-}
+let disabledIcon = path.resolve('assets/icon_background_white.png')
 
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: isActive ? 'Hide DrawPen' : 'Show DrawPen',
+      label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
       accelerator: 'CmdOrCtrl+Shift+D',
       click: () => {
         toggleWindow();
       }
     },
     {
-      label: 'Enter/Exit Ghost Mode',
+      label: showToolbar ? 'Hide Toolbar' : 'Show Toolbar',
+      accelerator: 'CmdOrCtrl+Shift+F',
       click: () => {
-        // TODO:...
+        toggleToolbar()
+      }
+    },
+    {
+      label: showWhiteboard ? 'Hide Witeboard' : 'Show Witeboard',
+      accelerator: 'CmdOrCtrl+Shift+G',
+      click: () => {
+        toggleWhiteboard()
       }
     },
     { type: 'separator' },
@@ -114,8 +111,8 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     x: 0,
     y: 0,
-    width: 400,
-    height: 400,
+    width: 500,
+    height: 500,
     // width: width,
     // height: height,
     transparent: true,
@@ -155,9 +152,14 @@ app.whenReady().then(() => {
   tray = new Tray(activeIcon);
   updateContextMenu();
 
-  // Register a global shortcut for the 'Space' key
   globalShortcut.register('CmdOrCtrl+Shift+D', () => {
     toggleWindow()
+  });
+  globalShortcut.register('CmdOrCtrl+Shift+F', () => {
+    toggleToolbar()
+  });
+  globalShortcut.register('CmdOrCtrl+Shift+G', () => {
+    toggleWhiteboard()
   });
 })
 
@@ -182,12 +184,58 @@ ipcMain.handle('get_app_version', () => {
 
 // MOVE TO MODULEs!
 ipcMain.handle('close_toolbar', () => {
-  toggleWindow();
-  resetScreen();
+  hideDrawWindow()
+  resetScreen()
 
-  return null;
+  return null
 });
 
 function resetScreen() {
   mainWindow.webContents.send('reset_screen');
+}
+
+function toggleToolbar() {
+  if (!foregroundMode) {
+    showDrawWindow()
+  }
+
+  showToolbar = !showToolbar
+
+  mainWindow.webContents.send('toggle_toolbar')
+  updateContextMenu() // Need to rerender the context menu
+}
+
+function toggleWindow() {
+  if (foregroundMode) {
+    hideDrawWindow()
+  } else {
+    showDrawWindow()
+  }
+}
+
+function showDrawWindow() {
+  mainWindow.show()
+
+  tray.setImage(activeIcon)
+  foregroundMode = true
+  updateContextMenu() // Need to rerender the context menu
+}
+
+function hideDrawWindow() {
+  mainWindow.hide()
+
+  tray.setImage(disabledIcon)
+  foregroundMode = false
+  updateContextMenu() // Need to rerender the context menu
+}
+
+function toggleWhiteboard() {
+  if (!foregroundMode) {
+    showDrawWindow()
+  }
+
+  showWhiteboard = !showWhiteboard
+
+  mainWindow.webContents.send('toggle_whiteboard')
+  updateContextMenu() // Need to rerender the context menu
 }

@@ -61,6 +61,14 @@ const Application = () => {
       handleReset();
       console.log('Handle Reset');
     });
+
+    window.electronAPI.onToggleToolbar(() => {
+      console.log('Toggle Toolbar');
+    });
+
+    window.electronAPI.onToggleWhiteboard(() => {
+      console.log('Toggle Whiteboard');
+    });
   }, []);
 
   useEffect(() => {

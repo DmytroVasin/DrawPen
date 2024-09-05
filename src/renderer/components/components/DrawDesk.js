@@ -489,6 +489,8 @@ const DrawDesk = ({
 
   return (
     <>
+      <div id="whiteboard"></div>
+
       <canvas
         id="canvas"
         ref={canvasRef}
