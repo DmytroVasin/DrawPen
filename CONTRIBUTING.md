@@ -32,4 +32,15 @@ https://github.com/weiameili/Pensela
 
 
 
-MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
+
+
+
+- Electron Autoupdater
+- Icons
+- Laser TODO
+- Mouse over Toolbar | MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
+- Random color
+- Arrow bug
+- Selection of a curve - не должно работать
+- Arrow move to Figures tab
+- Click on figures tab  activeate curret figure....
