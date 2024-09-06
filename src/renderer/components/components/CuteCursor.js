@@ -14,7 +14,7 @@ const CuteCursor = ({
   activeTool,
   Icons
 }) => {
-  const getIconByToolName = (toolName) => {
+  const renderIconByToolName = (toolName) => {
     const iconColor = colorList[activeColorIndex].color;
     const iconSize = widthList[activeWidthIndex].cute_icon_size;
     const strokeWidth = '20';
@@ -48,8 +48,8 @@ const CuteCursor = ({
   };
 
   return (
-    <div id='cursor' style={{ left: mouseCoordinates.x, top: mouseCoordinates.y }}>
-      {getIconByToolName(activeTool)}
+    <div id='cute_cursor' style={{ left: mouseCoordinates.x, top: mouseCoordinates.y }}>
+      {renderIconByToolName(activeTool)}
     </div>
   );
 };

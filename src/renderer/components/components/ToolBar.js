@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.scss";
 import { colorList, widthList } from "../constants.js";
 
-const STICKY_DISTANCE = 25;
+const STICKY_DISTANCE = 15;
+const ZONE_BORDER = 10; // Equals to "#zone_borders" border
 
 const ToolBar = ({
   activeTool,
@@ -14,7 +15,7 @@ const ToolBar = ({
   handleChangeTool,
   Icons
 }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: ZONE_BORDER, y: ZONE_BORDER });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const toolbarRef = useRef()
@@ -37,20 +38,29 @@ const ToolBar = ({
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const toolbar = toolbarRef.current
-    const toolbarWidth = toolbar.offsetWidth;
-    const toolbarHeight = toolbar.offsetHeight;
+    const toolbarWidth = toolbarRef.current.offsetWidth;
+    const toolbarHeight = toolbarRef.current.offsetHeight;
 
-    if (newX < STICKY_DISTANCE) {
-      newX = 0;
-    } else if (newX > windowWidth - toolbarWidth - STICKY_DISTANCE) {
-      newX = windowWidth - toolbarWidth;
+    const leftEdge = STICKY_DISTANCE + ZONE_BORDER;
+    const topEdge = STICKY_DISTANCE + ZONE_BORDER;
+    const rightEdge = windowWidth - ZONE_BORDER - STICKY_DISTANCE;
+    const bottomEdge = windowHeight - ZONE_BORDER - STICKY_DISTANCE;
+
+    const minX = ZONE_BORDER;
+    const minY = ZONE_BORDER;
+    const maxX = windowWidth - ZONE_BORDER - toolbarWidth;
+    const maxY = windowHeight - ZONE_BORDER - toolbarHeight;
+
+    if (newX < leftEdge) {
+      newX = minX;
+    } else if (newX + toolbarWidth > rightEdge) {
+      newX = maxX;
     }
 
-    if (newY < STICKY_DISTANCE) {
-      newY = 0;
-    } else if (newY > windowHeight - toolbarHeight - STICKY_DISTANCE) {
-      newY = windowHeight - toolbarHeight;
+    if (newY < topEdge) {
+      newY = minY;
+    } else if (newY + toolbarHeight > bottomEdge) {
+      newY = maxY;
     }
 
     setPosition({ x: newX, y: newY });
@@ -88,8 +98,8 @@ const ToolBar = ({
     switchView("")
   };
 
-  const getIconByToolName = (toolName) => {
-    switch (toolName) {
+  const renderGroupIcon = () => {
+    switch (lastActiveFigure) {
       case "rectangle":
         return <Icons.FaRegSquare />;
       case "oval":
@@ -97,12 +107,8 @@ const ToolBar = ({
       case "line":
         return <Icons.AiOutlineLine />;
       default:
-        return <Icons.FaRegSquare />;
+        null
     }
-  };
-
-  const renderGroupIcon = () => {
-    return getIconByToolName(lastActiveFigure);
   };
 
   const switchView = (name) => {
@@ -203,7 +209,7 @@ const ToolBar = ({
             {widthList.map((width, index) => (
               <li key={index}>
                 <button className="toolbar__width-button" onClick={() => onChangeWidth(index)}>
-                  <div className={`${width.name}`} />
+                  <div className={width.name} />
                 </button>
               </li>
             ))}

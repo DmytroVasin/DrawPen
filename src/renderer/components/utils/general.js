@@ -78,3 +78,10 @@ export const filterClosePoints = (points) => {
 
   return result
 }
+
+export const getMouseCoordinates = (event) => {
+  return {
+    x: event.nativeEvent.pageX,
+    y: event.nativeEvent.pageY,
+  };
+};

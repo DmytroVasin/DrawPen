@@ -1,11 +1,11 @@
-import './Application.css';
+import './Application.scss';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { throttle } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
-import { filterClosePoints } from './utils/general.js';
+import { filterClosePoints, getMouseCoordinates } from './utils/general.js';
 import {
   IsOnCurve,
   IsOnLine,
@@ -37,10 +37,10 @@ const Icons = {
 };
 
 const Application = () => {
-  console.log('App render');
+  // console.log('App render');
 
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
-  const [allFigures, setAllFigures] = useState([]);
+  const [allFigures, setAllFigures] = useState([{ id: 1, type: 'pen', colorIndex: 0, widthIndex: 1, points: [[140, 221], [283, 221]] }]);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [flashlightFigure, setFlashlightFigure] = useState({
     active: false,
@@ -376,12 +376,6 @@ const Application = () => {
     }
   };
 
-
-  // TODO: move to helper?
-  const getMouseCoordinates = (event) => {
-    return { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
-  };
-
   const handleMousePosition = (event) => {
     setMouseCoordinates(getMouseCoordinates(event));
   }
@@ -406,7 +400,9 @@ const Application = () => {
   };
 
   return (
-    <div onMouseMove={handleMousePosition}>
+    <div id="root_wrapper" onMouseMove={handleMousePosition}>
+      <div id="zone_borders"></div>
+
       {
         showWhiteboard &&
         <div id="whiteboard"></div>

@@ -1,7 +1,11 @@
-#cursor {
+#cute_cursor {
+  transform: translate(15px, -25px);
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
-  transform: translate(20px, -15px);
+  z-index: 1;
+
+  svg {
+    display: block;
+  }
 }

@@ -2,7 +2,7 @@ import './DrawDesk.css';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { getStroke } from 'perfect-freehand';
-import { getSvgPathFromStroke } from '../utils/general.js';
+import { getSvgPathFromStroke, getMouseCoordinates } from '../utils/general.js';
 
 import {
   colorList,
@@ -128,11 +128,6 @@ const DrawDesk = ({
       ctx.fill();
       ctx.closePath();
     });
-  };
-
-  // TODO: move to helper?
-  const getMouseCoordinates = (event) => {
-    return { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
   };
 
   const onMouseDown = (event) => {

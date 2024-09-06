@@ -1,0 +1,69 @@
+/* App.css */
+html, body {
+  height: 100%;
+  width:100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  display: block;
+
+  #root {
+    user-select: none;
+    height: 100%;
+    display: flex;
+
+    #root_wrapper {
+      width: 100%;
+      height: 100%;
+
+      #whiteboard {
+        position: absolute;
+        width: 70%;
+        height: 70%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+
+        /* https://www.magicpattern.design/tools/css-backgrounds */
+        background-color: #f5faff;
+        background-image: radial-gradient(#000000 1.3px, #f5faff 1.3px);
+        background-size: 26px 26px;
+      }
+
+      #zone_borders {
+        --border-size: 10px; // Equals to ZONE_BORDER
+        --border-color: #B2F2BB;
+
+        border-style: solid;
+        border-width: var(--border-size);
+        border-color: var(--border-color);
+        border-radius: 10px;
+        box-sizing: border-box;
+
+        position: absolute;
+        width: 100%;
+        height: 100%;
+
+        z-index: -1;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: calc(var(--border-size) * -1);
+          left: calc(var(--border-size) * -1);
+          height: 100%;
+          width: 100%;
+
+          border-style: solid;
+          border-width: var(--border-size);
+          border-color: var(--border-color);
+          border-radius: 20px;
+          outline: var(--border-size);
+        }
+      }
+    }
+  }
+}
