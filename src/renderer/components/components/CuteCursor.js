@@ -30,8 +30,6 @@ const CuteCursor = ({
     switch (toolName) {
       case "laser":
         return <Icons.GiLaserburn size={iconSize} style={{ stroke: strokeColor, strokeWidth: strokeWidthLaser }} />
-      case "flashlight":
-        return <Icons.IoFlashlight size={iconSize} style={{ stroke: strokeColor, strokeWidth: strokeWidth }} />
       case "pen":
         return <Icons.FaPaintBrush {...iconProps} />
       case "arrow":

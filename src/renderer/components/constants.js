@@ -1,4 +1,4 @@
-  // ['flashlight', 'pen', 'line', 'arrow', 'oval', 'rectangle', 'laser']
+  // ['pen', 'line', 'arrow', 'oval', 'rectangle', 'laser']
 
 export const laserTime = 1000;
 export const colorList = [

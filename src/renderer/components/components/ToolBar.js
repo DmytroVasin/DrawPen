@@ -147,11 +147,6 @@ const ToolBar = ({
                 {renderGroupIcon()}
               </button>
             </li>
-            <li className={activeTool === "flashlight" ? "active" : undefined}>
-              <button  onClick={() => handleChangeTool("flashlight")}>
-                <Icons.IoFlashlight />
-              </button>
-            </li>
             <li className={activeTool === "laser" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("laser")}>
                 <Icons.GiLaserburn />

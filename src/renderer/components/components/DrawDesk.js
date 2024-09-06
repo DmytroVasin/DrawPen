@@ -14,12 +14,10 @@ const DrawDesk = ({
   setAllFigures,
   allLaserFigures,
   activeFigureInfo,
-  flashlightFigure,
   cursorType,
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
-  handleScroll,
 }) => {
   // console.log('DrawDesk render');
   const canvasRef = useRef(null);
@@ -30,10 +28,10 @@ const DrawDesk = ({
   }, []);
 
   useEffect(() => {
-    draw(allFigures, allLaserFigures, flashlightFigure, activeFigureInfo)
-  }, [allFigures, allLaserFigures, flashlightFigure, activeFigureInfo]);
+    draw(allFigures, allLaserFigures, activeFigureInfo)
+  }, [allFigures, allLaserFigures, activeFigureInfo]);
 
-  const draw = (allFigures, allLaserFigures, flashlightFigure, activeFigureInfo) => {
+  const draw = (allFigures, allLaserFigures, activeFigureInfo) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
@@ -106,19 +104,6 @@ const DrawDesk = ({
       ctx.shadowBlur = 0;
       ctx.shadowColor = 'transparent'; // Reset shadows
     })
-
-    if (flashlightFigure.active && flashlightFigure.x && flashlightFigure.y) {
-      let { x, y, radius } = flashlightFigure;
-
-      let path = new Path2D();
-      path.rect(0, 0, canvasRef.width, canvasRef.height);
-      path.arc(x, y, radius, 0, 2 * Math.PI);
-
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(85, 85, 85, 0.5)';
-      ctx.fill(path, 'evenodd');
-      ctx.closePath();
-    }
   };
 
   const onMouseDown = (event) => {
@@ -127,10 +112,6 @@ const DrawDesk = ({
 
   const onMouseMove = (event) => {
     handleMouseMove(getMouseCoordinates(event));
-  }
-
-  const onScroll = (event) => {
-    handleScroll(event.deltaY);
   }
 
   // ========================== Canvas Drawing....
@@ -441,7 +422,6 @@ const DrawDesk = ({
       onMouseMove={onMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onWheel={onScroll}
     />
   );
 };

@@ -17,7 +17,6 @@ import {
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
-import { IoFlashlight } from "react-icons/io5";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 
@@ -31,7 +30,6 @@ const Icons = {
   FaRegCircle,
   FaArrowRight,
   AiOutlineLine,
-  IoFlashlight,
   GiLaserburn,
   MdOutlineCancel
 };
@@ -42,14 +40,6 @@ const Application = () => {
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([{ id: 1, type: 'pen', colorIndex: 0, widthIndex: 1, points: [[140, 221], [283, 221]] }]);
   const [allLaserFigures, setLaserFigure] = useState([]);
-  const [flashlightFigure, setFlashlightFigure] = useState({
-    active: false,
-    radius: 75,
-    maxRadius: 150,
-    minRadius: 50,
-    x: null,
-    y: null,
-  });
   const [activeTool, setActiveTool] = useState('pen');
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
   const [activeColorIndex, setActiveColorIndex] = useState(0);
@@ -145,12 +135,6 @@ const Application = () => {
 
   const handleChangeTool = (toolName) => {
     setActiveTool(toolName);
-
-    if (toolName === 'flashlight') {
-      setFlashlightFigure({ ...flashlightFigure, active: true });
-    } else {
-      setFlashlightFigure({ ...flashlightFigure, active: false });
-    }
   };
 
   const moveFigureToTop = (figureId) => {
@@ -235,8 +219,6 @@ const Application = () => {
   }
 
   const handleMouseDown = ({ x, y }) => {
-    if (activeTool === 'flashlight') { return }
-
     // Click on dots of the active figure
     if (activeFigureInfo) {
       const resizingDotName = getDotNameAtMousePosition(x, y);
@@ -294,11 +276,6 @@ const Application = () => {
   };
 
   const handleMouseMove = ({ x, y }) => {
-    if (activeTool === 'flashlight') {
-      setFlashlightFigure({ ...flashlightFigure, x, y });
-      return;
-    }
-
     if (isActiveFigureMoving()) {
       const activeFigure = findActiveFigure()
 
@@ -366,16 +343,6 @@ const Application = () => {
     setIsDrawing(false);
   };
 
-  const handleScroll = (deltaY) => {
-    if (activeTool === 'flashlight') {
-      let newRadius = flashlightFigure.radius + (deltaY > 0 ? -1 : 1);
-      newRadius = Math.min(newRadius, flashlightFigure.maxRadius);
-      newRadius = Math.max(newRadius, flashlightFigure.minRadius);
-
-      setFlashlightFigure({ ...flashlightFigure, radius: newRadius });
-    }
-  };
-
   const handleMousePosition = (event) => {
     setMouseCoordinates(getMouseCoordinates(event));
   }
@@ -422,11 +389,9 @@ const Application = () => {
         allLaserFigures={allLaserFigures}
         activeFigureInfo={activeFigureInfo}
         cursorType={cursorType}
-        flashlightFigure={flashlightFigure}
         handleMouseDown={handleMouseDown}
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
-        handleScroll={handleScroll}
       />
 
       {

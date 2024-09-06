@@ -29,3 +29,7 @@ https://www.svgviewer.dev/svg-to-png
 https://github.com/rampatra/presentify-localization
 
 https://github.com/weiameili/Pensela
+
+
+
+MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
