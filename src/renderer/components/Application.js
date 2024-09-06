@@ -1,9 +1,10 @@
 import './Application.css';
 
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { throttle } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
+import CuteCursor from './components/CuteCursor.js';
 import { filterClosePoints } from './utils/general.js';
 import {
   IsOnCurve,
@@ -38,6 +39,7 @@ const Icons = {
 const Application = () => {
   console.log('App render');
 
+  const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([]);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [flashlightFigure, setFlashlightFigure] = useState({
@@ -54,6 +56,8 @@ const Application = () => {
   const [activeWidthIndex, setActiveWidthIndex] = useState(2);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorType, setCursorType] = useState('crosshair');
+  const [showToolbar, setShowToolbar] = useState(true);
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
 
   useEffect(() => {
     // TODO: Why it's been called twice?
@@ -63,10 +67,12 @@ const Application = () => {
     });
 
     window.electronAPI.onToggleToolbar(() => {
+      handleToggleToolbar()
       console.log('Toggle Toolbar');
     });
 
     window.electronAPI.onToggleWhiteboard(() => {
+      handleToggleWhiteboard()
       console.log('Toggle Whiteboard');
     });
   }, []);
@@ -114,11 +120,6 @@ const Application = () => {
 
     return figures.filter(figure => figure.points.length > 0);
   }
-
-  const handleReset = () => {
-    setActiveFigureInfo(null);
-    setAllFigures([]);
-  };
 
   const handleChangeColor = (newColorIndex) => {
     if (activeFigureInfo) {
@@ -375,14 +376,50 @@ const Application = () => {
     }
   };
 
+
+  // TODO: move to helper?
+  const getMouseCoordinates = (event) => {
+    return { x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY };
+  };
+
+  const handleMousePosition = (event) => {
+    setMouseCoordinates(getMouseCoordinates(event));
+  }
+
   // TOOD: Create IPC module
   // TOOD: Move to a IPC module
   const handleCloseToolBar = () => {
     window.electronAPI.invokeCloseToolBar();
   }
 
+  const handleReset = () => {
+    setActiveFigureInfo(null);
+    setAllFigures([]);
+  };
+
+  const handleToggleToolbar = () => {
+    setShowToolbar((prevShowToolbar) => !prevShowToolbar);
+  };
+
+  const handleToggleWhiteboard = () => {
+    setShowWhiteboard((prevShowWhiteboard) => !prevShowWhiteboard);
+  };
+
   return (
-    <Fragment>
+    <div onMouseMove={handleMousePosition}>
+      {
+        showWhiteboard &&
+        <div id="whiteboard"></div>
+      }
+
+      <CuteCursor
+        mouseCoordinates={mouseCoordinates}
+        activeColorIndex={activeColorIndex}
+        activeWidthIndex={activeWidthIndex}
+        activeTool={activeTool}
+        Icons={Icons}
+      />
+
       <DrawDesk
         allFigures={allFigures}
         setAllFigures={setAllFigures}
@@ -394,21 +431,22 @@ const Application = () => {
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
         handleScroll={handleScroll}
-        activeColorIndex={activeColorIndex}
-        activeTool={activeTool}
-        Icons={Icons}
       />
-      <ToolBar
-        activeTool={activeTool}
-        activeColorIndex={activeColorIndex}
-        activeWidthIndex={activeWidthIndex}
-        handleCloseToolBar={handleCloseToolBar}
-        handleChangeColor={handleChangeColor}
-        handleChangeWidth={handleChangeWidth}
-        handleChangeTool={handleChangeTool}
-        Icons={Icons}
-      />
-    </Fragment>
+
+      {
+        showToolbar &&
+          <ToolBar
+            activeTool={activeTool}
+            activeColorIndex={activeColorIndex}
+            activeWidthIndex={activeWidthIndex}
+            handleCloseToolBar={handleCloseToolBar}
+            handleChangeColor={handleChangeColor}
+            handleChangeWidth={handleChangeWidth}
+            handleChangeTool={handleChangeTool}
+            Icons={Icons}
+          />
+      }
+    </div>
   );
 };
 

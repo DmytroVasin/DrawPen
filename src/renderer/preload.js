@@ -9,3 +9,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onToggleToolbar: (callback) => ipcRenderer.on('toggle_toolbar', callback),
   onToggleWhiteboard: (callback) => ipcRenderer.on('toggle_whiteboard', callback),
 });
+console.log('preload.js loaded');

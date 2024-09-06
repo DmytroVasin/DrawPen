@@ -9,7 +9,7 @@ export const colorList = [
   { color: '#1e1e1e' },
 ];
 export const widthList = [
-  { width: 6,  name: 'light' },
-  { width: 12, name: 'medium' },
-  { width: 18, name: 'bold' },
+  { width: 6,  name: 'light',  cute_icon_size: 15 },
+  { width: 12, name: 'medium', cute_icon_size: 17 },
+  { width: 18, name: 'bold',   cute_icon_size: 20 },
 ]

@@ -6,9 +6,5 @@ console.log('[DRAWPEN]: Main page loading...');
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <Application />
-  </React.StrictMode>
+  <Application />
 );
-
-console.log('.........');
