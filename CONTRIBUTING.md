@@ -41,6 +41,8 @@ https://github.com/weiameili/Pensela
 - Mouse over Toolbar | MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
 - Random color
 - Arrow bug
+- Arrown with min-length
 - Selection of a curve - не должно работать
 - Arrow move to Figures tab
 - Click on figures tab  activeate curret figure....
+- Rethink arrow - looks like a s....

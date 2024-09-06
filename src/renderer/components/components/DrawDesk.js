@@ -11,7 +11,6 @@ import {
 
 const DrawDesk = ({
   allFigures,
-  setAllFigures,
   allLaserFigures,
   activeFigureInfo,
   cursorType,
@@ -47,6 +46,14 @@ const DrawDesk = ({
         }
       }
 
+      if (figure.type === 'arrow') {
+        drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex)
+
+        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
+          drawArrowActive(ctx, figure.points[0], figure.points[1])
+        }
+      }
+
       if (figure.type === 'line') {
         drawLine(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
 
@@ -55,11 +62,11 @@ const DrawDesk = ({
         }
       }
 
-      if (figure.type === 'arrow') {
-        drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex, figure)
+      if (figure.type === 'rectangle') {
+        drawRectangle(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure.points[0], figure.points[1], figure.widthIndex, figureColor)
+          drawRectangleActive(ctx, figure.points[0], figure.points[1])
         }
       }
 
@@ -68,14 +75,6 @@ const DrawDesk = ({
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawOvalActive(ctx, figure.points[0], figure.points[1])
-        }
-      }
-
-      if (figure.type === 'rectangle') {
-        drawRectangle(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
-
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawRectangleActive(ctx, figure.points[0], figure.points[1])
         }
       }
     });
@@ -170,28 +169,7 @@ const DrawDesk = ({
     ctx.fill();
   }
 
-  const getResizableDotParams = (pointA, pointB) => {
-    const minDistance = 30;
-    const [startX, startY] = pointA;
-    const [endX, endY] = pointB;
-
-    let diffX = endX - startX;
-    let diffY = endY - startY;
-    let distance = Math.sqrt(diffX ** 2 + diffY ** 2);
-
-    if (distance < minDistance) {
-      const scaleFactor = minDistance / distance;
-
-      const newEndX = startX + diffX * scaleFactor;
-      const newEndY = startY + diffY * scaleFactor;
-
-      pointB = [newEndX, newEndY];
-    }
-
-    return pointB
-  }
-
-  const getArrowParams = (pointA, pointB, width, figure) => {
+  const getArrowParams = (pointA, pointB, width) => {
     const arrowWeights = [
       [[-18, 7], [-20, 24]],
       [[-38, 12], [-40, 36]],
@@ -201,29 +179,11 @@ const DrawDesk = ({
     const maxScaleFactors = [0.8, 0.9, 1];
 
     const [startX, startY] = pointA;
-    let [endX, endY] = pointB;
+    const [endX, endY] = pointB;
 
     let diffX = endX - startX;
     let diffY = endY - startY;
     let len = Math.sqrt(diffX ** 2 + diffY ** 2);
-
-    const minLength = 30
-
-    if (len > minLength && !figure.hasExceededLimit) {
-      setAllFigures((prevFigures) => prevFigures.map((fig) =>
-        fig.id === figure.id ? { ...fig, hasExceededLimit: true } : fig
-      ));
-    }
-
-    if (figure && figure.hasExceededLimit && len < minLength) {
-      const scaleFactor = minLength / len;
-      endX = startX + diffX * scaleFactor;
-      endY = startY + diffY * scaleFactor;
-
-      diffX = endX - startX;
-      diffY = endY - startY;
-      len = Math.sqrt(diffX ** 2 + diffY ** 2);
-    }
 
     let sin = diffX / len;
     let cos = diffY / len;
@@ -262,7 +222,7 @@ const DrawDesk = ({
     return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
   };
 
-  const drawArrow = (ctx, pointA, pointB, color, width, active = false) => {
+  const drawArrow = (ctx, pointA, pointB, color, width) => {
     const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
 
     ctx.fillStyle = color;
@@ -293,45 +253,49 @@ const DrawDesk = ({
     ctx.closePath();
     ctx.fill();
 
-    if (active) {
-      drawArrowOutline(ctx, transformedPoints, startX, startY, arrowWidth, angle)
-    }
+    // if (active) {
+    //   drawArrowOutline(ctx, transformedPoints, startX, startY, arrowWidth, angle)
+    // }
   };
 
-  const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
-    ctx.strokeStyle = '#6cc3e2';
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
+  // const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
+  //   ctx.strokeStyle = '#6cc3e2';
+  //   ctx.lineWidth = 2;
+  //   ctx.shadowBlur = 0;
+  //   ctx.shadowColor = 'transparent';
 
-    ctx.beginPath();
+  //   ctx.beginPath();
 
-    points.forEach((point, index) => {
-      let [x, y] = point;
+  //   points.forEach((point, index) => {
+  //     let [x, y] = point;
 
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    });
+  //     if (index === 0) {
+  //       ctx.moveTo(x, y);
+  //     } else {
+  //       ctx.lineTo(x, y);
+  //     }
+  //   });
 
-    ctx.closePath();
-    ctx.stroke();
+  //   ctx.closePath();
+  //   ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
-    ctx.closePath();
-    ctx.stroke();
-  };
+  //   ctx.beginPath();
+  //   ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
+  //   ctx.closePath();
+  //   ctx.stroke();
+  // };
 
-  const drawArrowActive = (ctx, pointA, pointB, width, color) => {
-    drawArrow(ctx, pointA, pointB, color, width, true)
+  const drawArrowActive = (ctx, pointA, pointB) => {
+    const color = '#FFF'
+    const width = 0 // Active color
 
-    drawArrow(ctx, pointA, pointB, color, width, figure)
+    drawArrow(ctx, pointA, pointB, color, width)
 
-    resiableDot(ctx, pointA)
-    resiableDot(ctx, newPointB)
+    const [startX, startY] = pointA;
+    const [endX, endY] = pointB;
+
+    resiableDot(ctx, [startX, startY])
+    resiableDot(ctx, [endX, endY])
   }
 
   const drawOval = (ctx, pointA, pointB, color, width) => {
