@@ -50,7 +50,6 @@ const Application = () => {
   const [showWhiteboard, setShowWhiteboard] = useState(false);
 
   useEffect(() => {
-    // TODO: Why it's been called twice?
     window.electronAPI.onResetScreen(() => {
       handleReset();
       console.log('Handle Reset');
@@ -331,6 +330,10 @@ const Application = () => {
         const currentFigure = allFigures[allFigures.length - 1];
 
         currentFigure.points = [...filterClosePoints(currentFigure.points)];
+
+        if (currentFigure.points.length < 3) { // Min number of points to draw a curve
+          currentFigure.points = [];
+        }
 
         setAllFigures([...allFigures]);
       }
