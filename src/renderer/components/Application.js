@@ -7,7 +7,6 @@ import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
 import { filterClosePoints, getMouseCoordinates } from './utils/general.js';
 import {
-  IsOnCurve,
   IsOnLine,
   IsOnArrow,
   IsOnOval,
@@ -149,8 +148,6 @@ const Application = () => {
 
   const isOnFigure = (x, y, figure) => {
     switch (figure.type) {
-      case 'pen':
-        return IsOnCurve(x, y, figure.points)
       case 'line':
         return IsOnLine(x, y, figure.points)
       case 'arrow':

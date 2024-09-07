@@ -32,6 +32,7 @@ export const IsOnLine = (x, y, figurePoints) => {
 }
 
 export const IsOnArrow = (x, y, figurePoints) => {
+  // TODO: Make it smarter!
   return IsOnCurve(x, y, figurePoints)
 }
 

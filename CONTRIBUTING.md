@@ -37,15 +37,9 @@ https://github.com/weiameili/Pensela
 
 - Electron Autoupdater
 - Icons
-- Laser TODO
+- Laser BUG: TODO
 - Mouse over Toolbar | MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
 - Random color
-- Arrow bug
-- Arrown with min-length
-- Selection of a curve - не должно работать
 - Arrow move to Figures tab
 - Click on figures tab  activeate curret figure....
-- Rethink arrow - looks like a s....
-- Min/Max arrows
-- ARROW improvments: quadraticCurve
-- Disable DRAW ACTIVE PEN!
+- Rethink arrow - looks like a s.... (Skitch?)
