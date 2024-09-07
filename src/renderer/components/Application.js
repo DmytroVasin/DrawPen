@@ -38,7 +38,11 @@ const Application = () => {
   // console.log('App render');
 
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
-  const [allFigures, setAllFigures] = useState([{ id: 1, type: 'pen', colorIndex: 0, widthIndex: 1, points: [[140, 221], [283, 221]] }]);
+  const [allFigures, setAllFigures] = useState([
+    { id: 1, type: 'arrow', colorIndex: 0, widthIndex: 0, points: [[100, 200], [400, 200]] },
+    { id: 2, type: 'arrow', colorIndex: 1, widthIndex: 1, points: [[100, 300], [400, 300]] },
+    { id: 3, type: 'arrow', colorIndex: 2, widthIndex: 2, points: [[100, 400], [400, 400]] },
+  ]);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [activeTool, setActiveTool] = useState('pen');
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);

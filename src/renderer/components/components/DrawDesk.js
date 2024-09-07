@@ -159,138 +159,103 @@ const DrawDesk = ({
     const [x, y] = point;
 
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI*2, true);
-    ctx.fillStyle = '#fff';
+    ctx.arc(x, y, 9, 0, Math.PI*2, true);
+    ctx.fillStyle = '#DDD';
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(x, y, 7, 0, Math.PI*2, true);
-    ctx.fillStyle = '#6cc3e2';
+    ctx.arc(x, y, 8, 0, Math.PI*2, true);
+    ctx.fillStyle = '#FFF';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI*2, true);
+    ctx.fillStyle = '#6CC3E2';
     ctx.fill();
   }
 
   const getArrowParams = (pointA, pointB, width) => {
-    const arrowWeights = [
-      [[-18, 7], [-20, 24]],
-      [[-38, 12], [-40, 36]],
-      [[-58, 17], [-60, 48]],
-    ];
+    const minArrowLength = 20;
+    const minTailSize = 1;
+    const arrowSetup = [
+      { max_scale_length: 100, d1_y: 2, d2_y: 7,  d3_y: 21, d2_x: 18, d3_x: 20 },
+      { max_scale_length: 200, d1_y: 3, d2_y: 12, d3_y: 36, d2_x: 38, d3_x: 40 },
+      { max_scale_length: 300, d1_y: 4, d2_y: 17, d3_y: 51, d2_x: 58, d3_x: 60 },
+    ]
 
-    const maxScaleFactors = [0.8, 0.9, 1];
+    const arrow = arrowSetup[width]
+
+    // ---
 
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
 
-    let diffX = endX - startX;
-    let diffY = endY - startY;
-    let len = Math.sqrt(diffX ** 2 + diffY ** 2);
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+    let length = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-    let sin = diffX / len;
-    let cos = diffY / len;
+    const cos = diffX / length;
+    const sin = diffY / length;
 
-    const baseScaleFactor = len / 300;
-    const maxScaleFactor = maxScaleFactors[width];
-    const scaleFactor = Math.min(baseScaleFactor, maxScaleFactor);
-    const pointWidth = [5, 7, 9]
+    length = Math.max(length, minArrowLength);
+    let scaleFactor = Math.min(length / arrow.max_scale_length, 1)
 
-    let arrowWidth = Math.max(0, scaleFactor * pointWidth[width]);
-    let arrowPoints = [[0, -arrowWidth / 2]];
+    // ---
 
-    const controlPoints = arrowWeights[width];
-    controlPoints.forEach((control) => {
-      let x = control[0] * scaleFactor;
-      let y = control[1] * scaleFactor;
-      arrowPoints.push([x < 0 ? len + x : x, -y]);
-    });
+    const d1 = [0,                                      Math.max(arrow.d1_y * scaleFactor, minTailSize)]
+    const d2 = [length - arrow.d2_x * scaleFactor,      arrow.d2_y * scaleFactor]
+    const d3 = [length - arrow.d3_x * scaleFactor,      arrow.d3_y * scaleFactor]
+    const d4 = [length,                                 0]
+    const d5 = [d3[0],                                  d3[1] * -1]
+    const d6 = [d2[0],                                  d2[1] * -1]
+    const d7 = [d1[0],                                  d1[1] * -1]
 
-    arrowPoints.push([len, 0]);
-    controlPoints.reverse().forEach((control) => {
-      let x = control[0] * scaleFactor;
-      let y = control[1] * scaleFactor;
-      arrowPoints.push([x < 0 ? len + x : x, y]);
-    });
+    const t1 = [ -2 * d1[1],                          d7[1]]
+    const t2 = [ -2 * d1[1],                          d1[1]]
 
-    arrowPoints.push([0, arrowWidth / 2]);
-
-    let transformedPoints = arrowPoints.map(([x, y]) => {
+    function transformPoint([x, y]) {
       return [
-        startX + x * sin - y * cos,
-        startY + x * cos + y * sin
+        startX + x * cos - y * sin,
+        startY + x * sin + y * cos
       ];
-    });
+    }
 
-    return { startX, startY, arrowWidth, angle: Math.atan2(diffY, diffX), transformedPoints };
+    const figurePoints = [d1, d2, d3, d4, d5, d6, d7].map(transformPoint)
+    const tailPoints = [t1, t2].map(transformPoint)
+
+    return { figurePoints, tailPoints }
   };
 
   const drawArrow = (ctx, pointA, pointB, color, width) => {
-    const { startX, startY, arrowWidth, angle, transformedPoints } = getArrowParams(pointA, pointB, width);
+    const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, width);
 
     ctx.fillStyle = color;
-    ctx.shadowColor = '#777';
-    ctx.shadowBlur = 3;
+    ctx.shadowColor = '#999';
+    ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 1;
-    ctx.shadowOffsetY = 1;
+    ctx.shadowOffsetY = 2;
 
     ctx.beginPath();
 
-    transformedPoints.forEach((point, index) => {
-      let [x, y] = point;
-
+    figurePoints.forEach((point, index) => {
       if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
+        ctx.moveTo(...point)
+        return
       }
+
+      ctx.lineTo(...point)
     });
 
+    ctx.bezierCurveTo(...tailPoints[0], ...tailPoints[1], ...figurePoints[0]);
+
     ctx.closePath();
     ctx.fill();
+
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent'; // Reset shadows
-
-    ctx.beginPath();
-    ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
-    ctx.closePath();
-    ctx.fill();
-
-    // if (active) {
-    //   drawArrowOutline(ctx, transformedPoints, startX, startY, arrowWidth, angle)
-    // }
   };
 
-  // const drawArrowOutline = (ctx, points, startX, startY, arrowWidth, angle) => {
-  //   ctx.strokeStyle = '#6cc3e2';
-  //   ctx.lineWidth = 2;
-  //   ctx.shadowBlur = 0;
-  //   ctx.shadowColor = 'transparent';
-
-  //   ctx.beginPath();
-
-  //   points.forEach((point, index) => {
-  //     let [x, y] = point;
-
-  //     if (index === 0) {
-  //       ctx.moveTo(x, y);
-  //     } else {
-  //       ctx.lineTo(x, y);
-  //     }
-  //   });
-
-  //   ctx.closePath();
-  //   ctx.stroke();
-
-  //   ctx.beginPath();
-  //   ctx.arc(startX, startY, arrowWidth / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
-  //   ctx.closePath();
-  //   ctx.stroke();
-  // };
-
-  const drawArrowActive = (ctx, pointA, pointB) => {
-    const color = '#FFF'
-    const width = 0 // Active color
-
-    drawArrow(ctx, pointA, pointB, color, width)
-
+  const drawArrowActive = (ctx, pointA, pointB, color, width) => {
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
 

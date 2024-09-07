@@ -46,3 +46,6 @@ https://github.com/weiameili/Pensela
 - Arrow move to Figures tab
 - Click on figures tab  activeate curret figure....
 - Rethink arrow - looks like a s....
+- Min/Max arrows
+- ARROW improvments: quadraticCurve
+- Disable DRAW ACTIVE PEN!
