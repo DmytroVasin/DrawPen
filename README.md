@@ -18,7 +18,7 @@
 
 <br/>
 
-![DrawPen](https://github.com/gitify-app/gitify/blob/main/assets/images/press.png)
+![DrawPen](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/main.png?raw=true)
 
 Demo can be found [here](https://youtu.be/OzpgCw24ut8)
 
