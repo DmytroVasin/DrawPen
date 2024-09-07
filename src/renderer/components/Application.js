@@ -67,6 +67,11 @@ const Application = () => {
       handleToggleWhiteboard()
       console.log('Toggle Whiteboard');
     });
+
+    window.electronAPI.onCallUndo(() => {
+      handleUndo()
+      console.log('Call Undo');
+    });
   }, []);
 
   useEffect(() => {
@@ -372,6 +377,14 @@ const Application = () => {
 
   const handleToggleWhiteboard = () => {
     setShowWhiteboard((prevShowWhiteboard) => !prevShowWhiteboard);
+  };
+
+  const handleUndo = () => {
+    setActiveFigureInfo(null);
+
+    setAllFigures((prevAllFigures) => {
+      return prevAllFigures.slice(0, -1);
+    })
   };
 
   return (

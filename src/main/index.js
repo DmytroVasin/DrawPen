@@ -1,4 +1,5 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+import { register } from 'module';
 // import { updateElectronApp } from 'update-electron-app';
 import path from 'path';
 
@@ -44,8 +45,9 @@ function updateContextMenu() {
     },
     {
       label: 'Undo',
+      accelerator: 'CmdOrCtrl+Z',
       click: () => {
-        // resetScreen()
+        callUndo()
       }
     },
     { type: 'separator' },
@@ -158,16 +160,20 @@ app.whenReady().then(() => {
   tray = new Tray(activeIcon);
   updateContextMenu();
 
-  globalShortcut.register('CmdOrCtrl+Shift+D', () => {
-    toggleWindow()
-  });
-  globalShortcut.register('CmdOrCtrl+Shift+F', () => {
-    toggleToolbar()
-  });
-  globalShortcut.register('CmdOrCtrl+Shift+G', () => {
-    toggleWhiteboard()
-  });
+  registerShortcats()
 })
+
+app.on('browser-window-focus', () => {
+  registerShortcats()
+})
+
+app.on('browser-window-blur', () => {
+  globalShortcut.unregisterAll()
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -175,13 +181,26 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('will-quit', () => {
-  // Unregister all shortcuts when quitting the app
-  globalShortcut.unregisterAll();
-});
-
-// DOSE NOT WORK?
+// TODO: DOSE NOT WORK?
 app.dock.hide()
+
+function registerShortcats() {
+  globalShortcut.register('CmdOrCtrl+Shift+D', () => {
+    toggleWindow()
+  })
+
+  globalShortcut.register('CmdOrCtrl+Shift+F', () => {
+    toggleToolbar()
+  })
+
+  globalShortcut.register('CmdOrCtrl+Shift+G', () => {
+    toggleWhiteboard()
+  })
+
+  globalShortcut.register('CmdOrCtrl+Z', () => {
+    callUndo()
+  })
+}
 
 // MOVE TO MODULEs!
 ipcMain.handle('get_app_version', () => {
@@ -198,6 +217,10 @@ ipcMain.handle('hide_app', () => {
 
 function resetScreen() {
   mainWindow.webContents.send('reset_screen');
+}
+
+function callUndo() {
+  mainWindow.webContents.send('call_undo');
 }
 
 function toggleToolbar() {
