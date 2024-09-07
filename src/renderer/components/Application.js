@@ -46,7 +46,7 @@ const Application = () => {
   const [activeTool, setActiveTool] = useState('pen');
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
   const [activeColorIndex, setActiveColorIndex] = useState(0);
-  const [activeWidthIndex, setActiveWidthIndex] = useState(2);
+  const [activeWidthIndex, setActiveWidthIndex] = useState(1);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(true);
@@ -347,10 +347,18 @@ const Application = () => {
     setMouseCoordinates(getMouseCoordinates(event));
   }
 
+  const handleContextMenu = (_event) => {
+    invokeHideApp();
+  }
+
+  const handleCloseToolBar = () => {
+    invokeHideApp();
+  }
+
   // TOOD: Create IPC module
   // TOOD: Move to a IPC module
-  const handleCloseToolBar = () => {
-    window.electronAPI.invokeCloseToolBar();
+  const invokeHideApp = () => {
+    window.electronAPI.invokeHideApp();
   }
 
   const handleReset = () => {
@@ -367,7 +375,7 @@ const Application = () => {
   };
 
   return (
-    <div id="root_wrapper" onMouseMove={handleMousePosition}>
+    <div id="root_wrapper" onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
       <div id="zone_borders"></div>
 
       {

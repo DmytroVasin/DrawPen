@@ -4,6 +4,7 @@ import { colorList, widthList } from "../constants.js";
 
 const STICKY_DISTANCE = 15;
 const ZONE_BORDER = 10; // Equals to "#zone_borders" border
+const TOOLBAR_WIDTH = 191; // Equals to 50% of "#toolbar" width
 
 const ToolBar = ({
   activeTool,
@@ -15,7 +16,10 @@ const ToolBar = ({
   handleChangeTool,
   Icons
 }) => {
-  const [position, setPosition] = useState({ x: ZONE_BORDER, y: ZONE_BORDER });
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const [position, setPosition] = useState({ x: windowWidth / 2 - TOOLBAR_WIDTH, y: ZONE_BORDER });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const toolbarRef = useRef()
@@ -36,8 +40,6 @@ const ToolBar = ({
     let newX = e.clientX - offset.x;
     let newY = e.clientY - offset.y;
 
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
     const toolbarWidth = toolbarRef.current.offsetWidth;
     const toolbarHeight = toolbarRef.current.offsetHeight;
 

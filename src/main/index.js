@@ -42,6 +42,12 @@ function updateContextMenu() {
         resetScreen()
       }
     },
+    {
+      label: 'Undo',
+      click: () => {
+        // resetScreen()
+      }
+    },
     { type: 'separator' },
     {
       label: 'About DrawPen',
@@ -183,7 +189,7 @@ ipcMain.handle('get_app_version', () => {
 });
 
 // MOVE TO MODULEs!
-ipcMain.handle('close_toolbar', () => {
+ipcMain.handle('hide_app', () => {
   hideDrawWindow()
   resetScreen()
 

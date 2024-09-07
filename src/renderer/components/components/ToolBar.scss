@@ -1,10 +1,10 @@
 .toolbar {
-  width: 382px;
+  width: 382px; // Equal to TOOLBAR_WIDTH
   height: 55px;
   display: flex;
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: calc(50% - 191px); // Equal to 50% of TOOLBAR_WIDTH
   background-color: rgba(230, 230, 230, 0.95);
   border-radius: 10px;
   border: 1px solid rgba(50, 50, 50, 0.95);

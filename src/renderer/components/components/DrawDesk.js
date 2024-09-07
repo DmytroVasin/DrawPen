@@ -92,6 +92,8 @@ const DrawDesk = ({
   };
 
   const onMouseDown = (event) => {
+    if(event.button === 2) return;
+
     handleMouseDown(getMouseCoordinates(event));
   }
 
