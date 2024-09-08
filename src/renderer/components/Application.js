@@ -115,7 +115,7 @@ const Application = () => {
       figure.points.shift();
     }
 
-    return figures.filter(figure => figure.points.length > 0);
+    return figures
   }
 
   const handleChangeColor = (newColorIndex) => {

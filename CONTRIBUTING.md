@@ -37,7 +37,6 @@ https://github.com/weiameili/Pensela
 
 - Electron Autoupdater
 - Icons
-- Laser BUG: TODO
 - Mouse over Toolbar | MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
 - Random color
 - Зажатая клавиша FN - включает приложеение
