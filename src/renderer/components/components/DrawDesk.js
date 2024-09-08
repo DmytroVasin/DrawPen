@@ -46,15 +46,12 @@ const DrawDesk = ({
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
     allFigures.forEach((figure) => {
-      const figureColor = colorList[figure.colorIndex].color
-      const figureWidth = widthList[figure.widthIndex].width
-
       if (figure.type === 'pen') {
-        drawPen(ctx, figure.points, figureColor, figureWidth)
+        drawPen(ctx, figure.points, figure.colorIndex, figure.widthIndex)
       }
 
       if (figure.type === 'arrow') {
-        drawArrow(ctx, figure.points[0], figure.points[1], figureColor, figure.widthIndex)
+        drawArrow(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawArrowActive(ctx, figure.points[0], figure.points[1])
@@ -62,7 +59,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'line') {
-        drawLine(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
+        drawLine(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawLineActive(ctx, figure.points[0], figure.points[1])
@@ -70,7 +67,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'rectangle') {
-        drawRectangle(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
+        drawRectangle(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawRectangleActive(ctx, figure.points[0], figure.points[1])
@@ -78,7 +75,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'oval') {
-        drawOval(ctx, figure.points[0], figure.points[1], figureColor, figureWidth)
+        drawOval(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawOvalActive(ctx, figure.points[0], figure.points[1])

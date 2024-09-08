@@ -1,12 +1,11 @@
-  // ['pen', 'line', 'arrow', 'oval', 'rectangle', 'laser']
-
 export const laserTime = 1000;
 export const colorList = [
-  { color: '#1971c2' },
-  { color: '#e03131' },
-  { color: '#2f9e44' },
-  { color: '#f08c00' },
-  { color: '#1e1e1e' },
+  { color: '#0ACCA0', name: 'color_rainbow' },
+  { color: '#1971c2', name: 'color_blue' },
+  { color: '#e03131', name: 'color_red' },
+  { color: '#2f9e44', name: 'color_green' },
+  { color: '#f08c00', name: 'color_orange' },
+  { color: '#1e1e1e', name: 'color_black' },
 ];
 export const widthList = [
   { width: 6,  name: 'light',  cute_icon_size: 15 },

@@ -1,5 +1,6 @@
 import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke } from '../../utils/general.js';
+import { colorList, widthList } from '../../constants.js'
 
 const drawDot = (ctx, point) => {
   const [x, y] = point;
@@ -20,41 +21,68 @@ const drawDot = (ctx, point) => {
   ctx.fill();
 }
 
-export const drawPen = (ctx, points, color, width) => {
-  const myStroke = getStroke(points, { size: width });
+const createGradient = (ctx, pointA, pointB) => {
+  const gradient = ctx.createLinearGradient(...pointA, ...pointB);
+  gradient.addColorStop(0, 'red');
+  gradient.addColorStop(1 / 6, 'orange');
+  gradient.addColorStop(2 / 6, 'yellow');
+  gradient.addColorStop(3 / 6, 'green');
+  gradient.addColorStop(4 / 6, 'blue');
+  gradient.addColorStop(5 / 6, 'indigo');
+  gradient.addColorStop(1, 'violet');
+
+  return gradient
+}
+
+const activeFigureColorAndWidth = () => {
+  return ['#FFF', 2]
+}
+
+const detectColorAndWidthBy = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+  let color = colorList[colorIndex].color
+  const width = widthList[widthIndex].width
+
+  if (colorList[colorIndex].name === 'color_rainbow') {
+    color = createGradient(ctx, pointA, pointB)
+  }
+
+  return [color, width]
+}
+
+export const drawPen = (ctx, points, colorIndex, widthIndex) => {
+  const figureColor = colorList[colorIndex].color
+  const figureWidth = widthList[widthIndex].width
+
+  if (colorList[colorIndex].name === 'color_rainbow') {
+    // https://riptutorial.com/html5-canvas/example/13472/fillstyle--a-path-styling-attribute-
+    // ctx.colorMode(HSL, 360)
+    // ctx.fillStyle = 'hsl('+ 360*Math.random() +',100%,50%)';
+
+    // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0
+
+    // const curX = points[points.length - 1].x
+    // const curY = points[points.length - 1].y
+    // const lastX = points[points.length - 2].x
+    // const lastY = points[points.length - 2].y
+
+    // const line = new fabric.Line([lastX, lastY, curX, curY], {
+    //   stroke: `hsl(${colorDeg}, 90%, 50%)`,
+    //   strokeWidth: strokeWidth,
+    //   originX: 'center',
+    //   originY: 'center'
+    // })
+
+    return;
+  }
+
+  const myStroke = getStroke(points, { size: figureWidth });
   const pathData = getSvgPathFromStroke(myStroke);
 
-  ctx.fillStyle = color;
+  ctx.fillStyle = figureColor;
   ctx.fill(new Path2D(pathData));
 }
 
-export const drawLine = (ctx, pointA, pointB, color, width) => {
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-  ctx.closePath();
-}
-
-export const drawLineActive = (ctx, pointA, pointB) => {
-  const color = '#FFF'
-  const width = 2
-
-  drawLine(ctx, pointA, pointB, color, width)
-
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
-}
-
-const getArrowParams = (pointA, pointB, width) => {
+const getArrowParams = (pointA, pointB, widthIndex) => {
   const minArrowLength = 20;
   const minTailSize = 1;
   const arrowSetup = [
@@ -63,7 +91,7 @@ const getArrowParams = (pointA, pointB, width) => {
     { max_scale_length: 300, d1_y: 4, d2_y: 17, d3_y: 51, d2_x: 58, d3_x: 60 },
   ]
 
-  const arrow = arrowSetup[width]
+  const arrow = arrowSetup[widthIndex]
 
   // ---
 
@@ -106,14 +134,30 @@ const getArrowParams = (pointA, pointB, width) => {
   return { figurePoints, tailPoints }
 };
 
-export const drawArrow = (ctx, pointA, pointB, color, width) => {
-  const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, width);
+export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+  const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
 
-  ctx.fillStyle = color;
-  ctx.shadowColor = '#777';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 1;
-  ctx.shadowOffsetY = 2;
+  let fillStyle = colorList[colorIndex].color
+  let shadowColor = '#777';
+  let shadowBlur = 4;
+  let shadowOffsetX = 1;
+  let shadowOffsetY = 2;
+
+  if (colorList[colorIndex].name === 'color_rainbow') {
+    const color = createGradient(ctx, pointA, pointB)
+
+    fillStyle = color;
+    shadowColor = '#CCC';
+    shadowBlur = 1;
+    shadowOffsetX = 0;
+    shadowOffsetY = 1;
+  }
+
+  ctx.fillStyle = fillStyle;
+  ctx.shadowColor = shadowColor;
+  ctx.shadowBlur = shadowBlur;
+  ctx.shadowOffsetX = shadowOffsetX;
+  ctx.shadowOffsetY = shadowOffsetY;
 
   ctx.beginPath();
 
@@ -143,7 +187,58 @@ export const drawArrowActive = (ctx, pointA, pointB) => {
   drawDot(ctx, [endX, endY])
 }
 
-export const drawOval = (ctx, pointA, pointB, color, width) => {
+export const drawLine = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
+
+  drawLineSkeleton(ctx, pointA, pointB, color, width)
+}
+
+export const drawLineActive = (ctx, pointA, pointB) => {
+  const [color, width] = activeFigureColorAndWidth()
+
+  drawLineSkeleton(ctx, pointA, pointB, color, width)
+
+  drawDot(ctx, pointA)
+  drawDot(ctx, pointB)
+}
+
+const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.stroke();
+  ctx.closePath();
+};
+
+export const drawOval = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
+
+  drawOvalSkeleton(ctx, pointA, pointB, color, width)
+}
+
+export const drawOvalActive = (ctx, pointA, pointB) => {
+  const [color, width] = activeFigureColorAndWidth()
+
+  drawOvalSkeleton(ctx, pointA, pointB, color, width)
+
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  drawDot(ctx, [startX, startY])
+  drawDot(ctx, [endX, endY])
+  drawDot(ctx, [startX, endY])
+  drawDot(ctx, [endX, startY])
+}
+
+const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
   const [startX, startY] = pointA;
   const [endX, endY] = pointB;
 
@@ -161,11 +256,16 @@ export const drawOval = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 }
 
-export const drawOvalActive = (ctx, pointA, pointB) => {
-  const color = '#FFF'
-  const width = 2
+export const drawRectangle = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
 
-  drawOval(ctx, pointA, pointB, color, width)
+  drawRectangleSkeleton(ctx, pointA, pointB, color, width)
+}
+
+export const drawRectangleActive = (ctx, pointA, pointB) => {
+  const [color, width] = activeFigureColorAndWidth()
+
+  drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 
   const [startX, startY] = pointA;
   const [endX, endY] = pointB;
@@ -176,7 +276,7 @@ export const drawOvalActive = (ctx, pointA, pointB) => {
   drawDot(ctx, [endX, startY])
 }
 
-export const drawRectangle = (ctx, pointA, pointB, color, width) => {
+const drawRectangleSkeleton = (ctx, pointA, pointB, color, width) => {
   const [startX, startY] = pointA;
   const [endX, endY] = pointB;
 
@@ -205,21 +305,6 @@ export const drawRectangle = (ctx, pointA, pointB, color, width) => {
   ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
   ctx.closePath();
   ctx.stroke();
-}
-
-export const drawRectangleActive = (ctx, pointA, pointB) => {
-  const color = '#FFF'
-  const width = 2
-
-  drawRectangle(ctx, pointA, pointB, color, width)
-
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  drawDot(ctx, [startX, startY])
-  drawDot(ctx, [endX, endY])
-  drawDot(ctx, [startX, endY])
-  drawDot(ctx, [endX, startY])
 }
 
 export const drawLaser = (ctx, points) => {

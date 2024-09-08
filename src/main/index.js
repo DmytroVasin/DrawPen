@@ -127,13 +127,11 @@ function createMainWindow () {
   registerGlobalShortcats()
 
   mainWindow.on('focus', () => {
-    console.log('focus')
     registerShortcats()
   })
 
   // NOTE: hide?
   mainWindow.on('blur', () => {
-    console.log('blur')
     unregisterShortcats()
   })
 }

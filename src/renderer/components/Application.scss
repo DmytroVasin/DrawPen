@@ -1,4 +1,17 @@
-/* App.css */
+:root {
+  --toolbar-width: 382px; // Equal to TOOLBAR_WIDTH
+  --toolbar-height: 55px;
+
+  --border-size: 10px; // Equals to ZONE_BORDER
+  --border-color: #B2F2BB;
+
+  --color-picker-blue:   #1971C2; // Equals to colorList
+  --color-picker-red:    #E03131;
+  --color-picker-green:  #2F9E44;
+  --color-picker-orange: #F08C00;
+  --color-picker-black:  #1E1E1E;
+}
+
 html, body {
   height: 100%;
   width:100%;
@@ -34,9 +47,6 @@ body {
       }
 
       #zone_borders {
-        --border-size: 10px; // Equals to ZONE_BORDER
-        --border-color: #B2F2BB;
-
         border-style: solid;
         border-width: var(--border-size);
         border-color: var(--border-color);

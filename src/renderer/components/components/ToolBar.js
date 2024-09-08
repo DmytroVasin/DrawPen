@@ -157,9 +157,8 @@ const ToolBar = ({
             <li className="cross-line"></li>
             <li>
               <button
-                className="toolbar__color-picker"
+                className={`toolbar__color-picker ${colorList[activeColorIndex].name}`}
                 onClick={() => switchView("color-slide")}
-                style={{ backgroundColor: colorList[activeColorIndex].color }}
               />
             </li>
             <li>
@@ -174,9 +173,8 @@ const ToolBar = ({
             {colorList.map((color, index) => (
               <li key={index}>
                 <button
-                  className="toolbar__color-picker"
+                  className={`toolbar__color-picker ${color.name}`}
                   onClick={() => onChangeColor(index)}
-                  style={{ backgroundColor: color.color }}
                 />
               </li>
             ))}

@@ -34,13 +34,14 @@ const Icons = {
 };
 
 const Application = () => {
-  // console.log('App render');
+  console.log('App render');
 
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
-    { id: 1, type: 'arrow', colorIndex: 0, widthIndex: 0, points: [[100, 200], [400, 200]] },
-    { id: 2, type: 'arrow', colorIndex: 1, widthIndex: 1, points: [[100, 300], [400, 300]] },
-    { id: 3, type: 'arrow', colorIndex: 2, widthIndex: 2, points: [[100, 400], [400, 400]] },
+    { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]] },
+    { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]] },
+    { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]] },
+    { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]] },
   ]);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [activeTool, setActiveTool] = useState('pen');
@@ -51,6 +52,10 @@ const Application = () => {
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(true);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
+
+  // useEffect(() => {
+  //   console.log(allFigures)
+  // }, [allFigures]);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
