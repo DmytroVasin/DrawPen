@@ -109,7 +109,6 @@ const DrawDesk = ({
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
     />
   );
 };

@@ -37,7 +37,8 @@ https://github.com/weiameili/Pensela
 
 - Electron Autoupdater
 - Icons
-- Mouse over Toolbar | MOUSEUP срабативает прі наведеніі на TOOLBAR!?????
 - Random color
-- Зажатая клавиша FN - включает приложеение
+
+TODO:
+- Зажата клавіша FN - вмикає пріложеніе
 - Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php

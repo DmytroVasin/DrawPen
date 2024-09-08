@@ -1,5 +1,4 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
-import { register } from 'module';
 // import { updateElectronApp } from 'update-electron-app';
 import path from 'path';
 
@@ -13,25 +12,36 @@ let showWhiteboard = false
 let activeIcon = path.resolve('assets/icon_draw_white.png')
 let disabledIcon = path.resolve('assets/icon_background_white.png')
 
+const KEY_ACTIVATE = 'Shift+S' // TODO: Better to replace with Fn?
+const KEY_SHOW_HIDE_APP = 'Shift+A'
+const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+Shift+F'
+const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+Shift+G'
+const KEY_UNDO = 'CmdOrCtrl+Z'
+
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
+      label: 'Hold to Activate...',
+      accelerator: KEY_ACTIVATE,
+    },
+    { type: 'separator' },
+    {
       label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
-      accelerator: 'CmdOrCtrl+Shift+D',
+      accelerator: KEY_SHOW_HIDE_APP,
       click: () => {
         toggleWindow();
       }
     },
     {
       label: showToolbar ? 'Hide Toolbar' : 'Show Toolbar',
-      accelerator: 'CmdOrCtrl+Shift+F',
+      accelerator: KEY_SHOW_HIDE_TOOLBAR,
       click: () => {
         toggleToolbar()
       }
     },
     {
-      label: showWhiteboard ? 'Hide Witeboard' : 'Show Witeboard',
-      accelerator: 'CmdOrCtrl+Shift+G',
+      label: showWhiteboard ? 'Hide Whiteboard' : 'Show Whiteboard',
+      accelerator: KEY_SHOW_HIDE_WHITEBOARD,
       click: () => {
         toggleWhiteboard()
       }
@@ -45,7 +55,7 @@ function updateContextMenu() {
     },
     {
       label: 'Undo',
-      accelerator: 'CmdOrCtrl+Z',
+      accelerator: KEY_UNDO,
       click: () => {
         callUndo()
       }
@@ -57,38 +67,7 @@ function updateContextMenu() {
         if (aboutWindow) {
           aboutWindow.focus();
         } else {
-          // Create the window if it doesn't exist
-          aboutWindow = new BrowserWindow({
-            width: 250,
-            height: 250,
-            resizable: false,
-            minimizable: false,
-            autoHideMenuBar: true,
-            webPreferences: {
-              nodeIntegration: true,
-              preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
-            }
-          });
-
-          // aboutWindow.loadFile('./src/about.html')
-          aboutWindow.loadURL(ABOUT_WINDOW_WEBPACK_ENTRY);
-
-          // Prevent the window from being minimized to the dock
-          aboutWindow.on('minimize', (event) => {
-            event.preventDefault();
-          });
-
-          // Clear the reference when the window is closed
-          aboutWindow.on('closed', () => {
-            aboutWindow = null;
-          });
-
-          // Open URL in user's browser.
-          aboutWindow.webContents.setWindowOpenHandler((details) => {
-            shell.openExternal(details.url);
-
-            return { action: "deny" }; // Prevent the app from opening the URL.
-          })
+          createAboutWindow()
         }
       }
     },
@@ -110,7 +89,7 @@ function updateContextMenu() {
   tray.setContextMenu(contextMenu);
 }
 
-function createWindow () {
+function createMainWindow () {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   console.log('width', width)
@@ -136,43 +115,73 @@ function createWindow () {
     }
   })
 
-  // Keep the window on top
-  mainWindow.setAlwaysOnTop(true) // , "screen-saver"
-  mainWindow.setVisibleOnAllWorkspaces(true)
-
-  // Load the index.html of the app window.
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
+
+  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   mainWindow.on('closed', function () {
     mainWindow = null;
-  });
+  })
+
+  registerGlobalShortcats()
+
+  mainWindow.on('focus', () => {
+    console.log('focus')
+    registerShortcats()
+  })
+
+  // NOTE: hide?
+  mainWindow.on('blur', () => {
+    console.log('blur')
+    unregisterShortcats()
+  })
 }
 
-app.whenReady().then(() => {
-  createWindow()
+function createAboutWindow() {
+  aboutWindow = new BrowserWindow({
+    width: 250,
+    height: 250,
+    resizable: false,
+    minimizable: false,
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
+    }
+  })
 
-  // app.on('activate', () => {
-  //   if (BrowserWindow.getAllWindows().length === 0) {
-  //     createWindow()
-  //   }
-  // })
+  aboutWindow.loadURL(ABOUT_WINDOW_WEBPACK_ENTRY)
 
-  tray = new Tray(activeIcon);
-  updateContextMenu();
+  // Prevent the window from being minimized to the dock
+  aboutWindow.on('minimize', (event) => {
+    event.preventDefault()
+  })
 
-  registerShortcats()
-})
+  // Clear the reference when the window is closed
+  aboutWindow.on('closed', () => {
+    aboutWindow = null
+  })
 
-app.on('browser-window-focus', () => {
-  registerShortcats()
-})
+  // Open URL in user's browser.
+  aboutWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
 
-app.on('browser-window-blur', () => {
-  globalShortcut.unregisterAll()
+    return { action: "deny" }; // Prevent the app from opening the URL.
+  })
+}
+
+app.on('ready', () => {
+  app.dock.hide()
+
+  createMainWindow()
+
+  tray = new Tray(activeIcon)
+  updateContextMenu()
 })
 
 app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
+  unregisterShortcats();
 });
 
 app.on('window-all-closed', () => {
@@ -181,25 +190,40 @@ app.on('window-all-closed', () => {
   }
 })
 
-// TODO: DOSE NOT WORK?
-app.dock.hide()
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createMainWindow()
+  }
+})
+
+function registerGlobalShortcats() {
+  globalShortcut.register(KEY_ACTIVATE, () => {
+    showDrawWindow()
+  })
+}
 
 function registerShortcats() {
-  globalShortcut.register('CmdOrCtrl+Shift+D', () => {
+  globalShortcut.register(KEY_SHOW_HIDE_APP, () => {
     toggleWindow()
   })
 
-  globalShortcut.register('CmdOrCtrl+Shift+F', () => {
+  globalShortcut.register(KEY_SHOW_HIDE_TOOLBAR, () => {
     toggleToolbar()
   })
 
-  globalShortcut.register('CmdOrCtrl+Shift+G', () => {
+  globalShortcut.register(KEY_SHOW_HIDE_WHITEBOARD, () => {
     toggleWhiteboard()
   })
 
-  globalShortcut.register('CmdOrCtrl+Z', () => {
+  globalShortcut.register(KEY_UNDO, () => {
     callUndo()
   })
+}
+function unregisterShortcats() {
+  globalShortcut.unregister(KEY_SHOW_HIDE_APP)
+  globalShortcut.unregister(KEY_SHOW_HIDE_TOOLBAR)
+  globalShortcut.unregister(KEY_SHOW_HIDE_WHITEBOARD)
+  globalShortcut.unregister(KEY_UNDO)
 }
 
 // MOVE TO MODULEs!

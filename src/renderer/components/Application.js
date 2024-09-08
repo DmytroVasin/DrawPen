@@ -53,25 +53,10 @@ const Application = () => {
   const [showWhiteboard, setShowWhiteboard] = useState(false);
 
   useEffect(() => {
-    window.electronAPI.onResetScreen(() => {
-      handleReset();
-      console.log('Handle Reset');
-    });
-
-    window.electronAPI.onToggleToolbar(() => {
-      handleToggleToolbar()
-      console.log('Toggle Toolbar');
-    });
-
-    window.electronAPI.onToggleWhiteboard(() => {
-      handleToggleWhiteboard()
-      console.log('Toggle Whiteboard');
-    });
-
-    window.electronAPI.onCallUndo(() => {
-      handleUndo()
-      console.log('Call Undo');
-    });
+    window.electronAPI.onResetScreen(handleReset);
+    window.electronAPI.onToggleToolbar(handleToggleToolbar);
+    window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
+    window.electronAPI.onCallUndo(handleUndo);
   }, []);
 
   useEffect(() => {
@@ -363,23 +348,33 @@ const Application = () => {
   // TOOD: Create IPC module
   // TOOD: Move to a IPC module
   const invokeHideApp = () => {
+    console.log('Renderer -> Main: Invoke Hide App');
+
     window.electronAPI.invokeHideApp();
   }
 
   const handleReset = () => {
+    console.log('Main -> Renderer: Handle Reset');
+
     setActiveFigureInfo(null);
     setAllFigures([]);
   };
 
   const handleToggleToolbar = () => {
+    console.log('Main -> Renderer: Toggle Toolbar');
+
     setShowToolbar((prevShowToolbar) => !prevShowToolbar);
   };
 
   const handleToggleWhiteboard = () => {
+    console.log('Main -> Renderer: Toggle Whiteboard');
+
     setShowWhiteboard((prevShowWhiteboard) => !prevShowWhiteboard);
   };
 
   const handleUndo = () => {
+    console.log('Main -> Renderer: Call Undo');
+
     setActiveFigureInfo(null);
 
     setAllFigures((prevAllFigures) => {
