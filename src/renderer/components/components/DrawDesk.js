@@ -15,11 +15,6 @@ import {
   drawLaser,
 } from './drawer/figures.js';
 
-import {
-  colorList,
-  widthList,
-} from '../constants.js'
-
 const DrawDesk = ({
   allFigures,
   allLaserFigures,
@@ -91,11 +86,15 @@ const DrawDesk = ({
   const onMouseDown = (event) => {
     if(event.button === 2) return;
 
-    handleMouseDown(getMouseCoordinates(event));
+    const coordinates = getMouseCoordinates(event)
+
+    handleMouseDown(coordinates);
   }
 
   const onMouseMove = (event) => {
-    handleMouseMove(getMouseCoordinates(event));
+    let coordinates = getMouseCoordinates(event)
+
+    handleMouseMove(coordinates);
   }
 
   return (

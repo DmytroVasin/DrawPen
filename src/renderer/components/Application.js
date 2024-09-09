@@ -1,6 +1,7 @@
 import './Application.scss';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { LazyBrush } from 'lazy-brush';
 import { throttle } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
@@ -21,6 +22,7 @@ import { MdOutlineCancel } from "react-icons/md";
 
 import {
   laserTime,
+  widthList,
 } from './constants.js'
 
 const Icons = {
@@ -34,7 +36,8 @@ const Icons = {
 };
 
 const Application = () => {
-  console.log('App render');
+  // console.log('App render');
+  const lazyBrushRef = useRef(null);
 
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
@@ -47,15 +50,11 @@ const Application = () => {
   const [activeTool, setActiveTool] = useState('pen');
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
   const [activeColorIndex, setActiveColorIndex] = useState(0);
-  const [activeWidthIndex, setActiveWidthIndex] = useState(1);
+  const [activeWidthIndex, setActiveWidthIndex] = useState(2);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(true);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
-
-  // useEffect(() => {
-  //   console.log(allFigures)
-  // }, [allFigures]);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -87,10 +86,6 @@ const Application = () => {
   }
 
   const scheduleClearLaserTail = (id) => {
-    // We first create a new reference with the useRef hook and then use useEffect to listen to changes of the message variable.
-    // Use a ref to access the current allLaserFigures value in an async callback
-    // Синхронізуємо реф зі станом при кожному рендерінгу
-
     // https://felixgerschau.com/react-hooks-settimeout/
     setTimeout(() => {
       const updatedLaserFigures = clearLaserTail(id, allLasersFiguresByRef.current);
@@ -262,11 +257,18 @@ const Application = () => {
       newFigure.points.push([x, y]);
     }
 
+    if (activeTool === 'pen') {
+      initLazyBrush(x, y);
+    }
+
+
     setAllFigures([...allFigures, newFigure]);
     setIsDrawing(true);
   };
 
   const handleMouseMove = ({ x, y }) => {
+    setMouseCursorThrottle(x, y);
+
     if (isActiveFigureMoving()) {
       const activeFigure = findActiveFigure()
 
@@ -284,6 +286,21 @@ const Application = () => {
     }
 
     if (isDrawing) {
+      if (['pen', 'laser'].includes(activeTool)) {
+        if (lazyBrushRef.current) {
+          lazyBrushRef.current.update({ x: x, y: y });
+
+          if (lazyBrushRef.current.brushHasMoved()) {
+            const brush = lazyBrushRef.current.getBrushCoordinates();
+
+            x = brush.x
+            y = brush.y
+          } else {
+            return;
+          }
+        }
+      }
+
       if (activeTool === 'laser') {
         const currentLaser = allLaserFigures[allLaserFigures.length - 1];
 
@@ -312,8 +329,6 @@ const Application = () => {
         return
       }
     }
-
-    setMouseCursorThrottle(x, y);
   };
 
   const handleMouseUp = () => {
@@ -321,7 +336,9 @@ const Application = () => {
       if (activeTool === 'pen') {
         const currentFigure = allFigures[allFigures.length - 1];
 
-        currentFigure.points = [...filterClosePoints(currentFigure.points)];
+        if (currentFigure.colorIndex !== 0) { // Not Rainbow
+          currentFigure.points = [...filterClosePoints(currentFigure.points)];
+        }
 
         if (currentFigure.points.length < 3) { // Min number of points to draw a curve
           currentFigure.points = [];
@@ -386,6 +403,16 @@ const Application = () => {
       return prevAllFigures.slice(0, -1);
     })
   };
+
+  const initLazyBrush = (x, y) => {
+    // https://github.com/dulnan/lazy-brush
+    lazyBrushRef.current = new LazyBrush({
+      enabled: true,
+      radius: 6,
+      // friction: 0.1,
+      initialPoint: { x: x, y: y }
+    });
+  }
 
   return (
     <div id="root_wrapper" onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>

@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
+    "lazy-brush": "^2.0.1",
     "lodash.throttle": "^4.1.1",
     "perfect-freehand": "^1.2.2",
     "react": "^18.3.1",

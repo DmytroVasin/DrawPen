@@ -54,23 +54,23 @@ export const drawPen = (ctx, points, colorIndex, widthIndex) => {
   const figureWidth = widthList[widthIndex].width
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    // https://riptutorial.com/html5-canvas/example/13472/fillstyle--a-path-styling-attribute-
-    // ctx.colorMode(HSL, 360)
-    // ctx.fillStyle = 'hsl('+ 360*Math.random() +',100%,50%)';
+    points.forEach((point, index) => {
+      if (index === 0) return;
 
-    // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0
+      ctx.beginPath()
+      ctx.lineWidth = figureWidth
+      ctx.lineJoin = 'round'
+      ctx.lineCap = 'round'
 
-    // const curX = points[points.length - 1].x
-    // const curY = points[points.length - 1].y
-    // const lastX = points[points.length - 2].x
-    // const lastY = points[points.length - 2].y
+      ctx.moveTo(points[index-1][0], points[index-1][1])
+      ctx.lineTo(point[0], point[1]);
 
-    // const line = new fabric.Line([lastX, lastY, curX, curY], {
-    //   stroke: `hsl(${colorDeg}, 90%, 50%)`,
-    //   strokeWidth: strokeWidth,
-    //   originX: 'center',
-    //   originY: 'center'
-    // })
+      // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
+      // https://stackoverflow.com/questions/29007257/creating-a-rainbow-effect-in-rectangle-canvas
+
+      ctx.strokeStyle = `hsl(${index / 5}, 90%, 50%)`
+      ctx.stroke()
+    })
 
     return;
   }
