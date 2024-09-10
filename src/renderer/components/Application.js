@@ -37,6 +37,7 @@ const Icons = {
 const Application = () => {
   // console.log('App render');
 
+  const [rainbowColorDeg, updateRainbowColorDeg] = useState(Math.floor(Math.random() * 360));
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
     { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]] },
@@ -249,6 +250,7 @@ const Application = () => {
       colorIndex: activeColorIndex,
       widthIndex: activeWidthIndex,
       points: [[x, y]],
+      rainbowColorDeg: rainbowColorDeg,
     };
 
     if (['line', 'arrow', 'oval', 'rectangle'].includes(newFigure.type)) {
@@ -279,6 +281,8 @@ const Application = () => {
     }
 
     if (isDrawing) {
+      // console.log('DRAWING....')
+
       if (activeTool === 'laser') {
         const currentLaser = allLaserFigures[allLaserFigures.length - 1];
 
@@ -407,6 +411,7 @@ const Application = () => {
         handleMouseDown={handleMouseDown}
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
+        updateRainbowColorDeg={updateRainbowColorDeg}
       />
 
       {

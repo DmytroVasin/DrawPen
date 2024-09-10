@@ -117,7 +117,7 @@ function createMainWindow () {
 
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  mainWindow.setAlwaysOnTop(true);
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   mainWindow.on('closed', function () {

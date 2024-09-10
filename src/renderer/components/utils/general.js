@@ -29,7 +29,7 @@ export const getLazyPoints = (points, options = {}) => {
     enabled: true,
     radius: radius,
     initialPoint: { x: startPoint[0], y: startPoint[1] },
-    friction: 0.1,
+    friction: 0.2,
   });
 
   points.forEach((point, index) => {

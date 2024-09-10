@@ -42,5 +42,14 @@ https://github.com/weiameili/Pensela
 TODO:
 - Зажата клавіша FN - вмикає пріложеніе
 - Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php
-- RAINBOW>!?
-// colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
+- Mouse Icon: Gradient! https://www.joshwcomeau.com/gradient-generator/
+- RAINBOW> for FIGURES!
+- Alpha opacity .... With time figures dissapear???
+- TODO: Decrease amount of params in DrawDesc: `figure.points, figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg`
+
+
+
+
+
+https://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage
+createGradient

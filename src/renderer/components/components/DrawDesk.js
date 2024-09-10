@@ -23,6 +23,7 @@ const DrawDesk = ({
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
+  updateRainbowColorDeg,
 }) => {
   // console.log('DrawDesk render');
   const canvasRef = useRef(null);
@@ -42,7 +43,7 @@ const DrawDesk = ({
 
     allFigures.forEach((figure) => {
       if (figure.type === 'pen') {
-        drawPen(ctx, figure.points, figure.colorIndex, figure.widthIndex)
+        drawPen(ctx, figure.points, figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
       }
 
       if (figure.type === 'arrow') {

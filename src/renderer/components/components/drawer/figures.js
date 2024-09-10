@@ -49,20 +49,22 @@ const detectColorAndWidthBy = (ctx, pointA, pointB, colorIndex, widthIndex) => {
   return [color, width]
 }
 
-export const drawPen = (ctx, points, colorIndex, widthIndex) => {
+export const drawPen = (ctx, points, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
   const figureColor = colorList[colorIndex].color
   const figureWidth = widthList[widthIndex].width
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    drawLazyPen(ctx, points, figureWidth)
+    drawLazyPen(ctx, points, figureWidth, rainbowColorDeg, updateRainbowColorDeg)
     return;
   }
 
   drawPerfectPen(ctx, points, figureColor, figureWidth)
 }
 
-const drawLazyPen = (ctx, points, width) => {
+const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg) => {
   points = getLazyPoints(points, { size: width })
+
+  let colorDeg = rainbowColorDeg % 360
 
   points.forEach((point, index) => {
     if (index === 0) return;
@@ -75,12 +77,15 @@ const drawLazyPen = (ctx, points, width) => {
     ctx.moveTo(fromPoint[0], fromPoint[1])
     ctx.lineTo(toPoint[0], toPoint[1]);
 
-    // TODO: ....
-    // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
-    ctx.strokeStyle = `hsl(${index / 5}, 90%, 50%)`
+    const speedOfColorChange = 0.5
+    colorDeg = (rainbowColorDeg + (speedOfColorChange * index)) % 360
+
+    ctx.strokeStyle = `hsl(${colorDeg}, 80%, 50%)`
     ctx.lineWidth = width
     ctx.stroke()
   })
+
+  updateRainbowColorDeg(colorDeg)
 }
 
 const drawPerfectPen = (ctx, points, color, width) => {
@@ -217,14 +222,12 @@ const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
 
   ctx.strokeStyle = color;
   ctx.lineWidth = width;
-  ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.lineTo(endX, endY);
   ctx.stroke();
-  ctx.closePath();
 };
 
 export const drawOval = (ctx, pointA, pointB, colorIndex, widthIndex) => {
