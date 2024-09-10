@@ -1,5 +1,5 @@
 import { getStroke } from 'perfect-freehand';
-import { getSvgPathFromStroke } from '../../utils/general.js';
+import { getSvgPathFromStroke, getLazyPoints } from '../../utils/general.js';
 import { colorList, widthList } from '../../constants.js'
 
 const drawDot = (ctx, point) => {
@@ -54,31 +54,40 @@ export const drawPen = (ctx, points, colorIndex, widthIndex) => {
   const figureWidth = widthList[widthIndex].width
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    points.forEach((point, index) => {
-      if (index === 0) return;
-
-      ctx.beginPath()
-      ctx.lineWidth = figureWidth
-      ctx.lineJoin = 'round'
-      ctx.lineCap = 'round'
-
-      ctx.moveTo(points[index-1][0], points[index-1][1])
-      ctx.lineTo(point[0], point[1]);
-
-      // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
-      // https://stackoverflow.com/questions/29007257/creating-a-rainbow-effect-in-rectangle-canvas
-
-      ctx.strokeStyle = `hsl(${index / 5}, 90%, 50%)`
-      ctx.stroke()
-    })
-
+    drawLazyPen(ctx, points, figureWidth)
     return;
   }
 
-  const myStroke = getStroke(points, { size: figureWidth });
+  drawPerfectPen(ctx, points, figureColor, figureWidth)
+}
+
+const drawLazyPen = (ctx, points, width) => {
+  points = getLazyPoints(points, { size: width })
+
+  points.forEach((point, index) => {
+    if (index === 0) return;
+
+    const fromPoint = points[index-1]
+    const toPoint   = point
+
+    ctx.beginPath()
+
+    ctx.moveTo(fromPoint[0], fromPoint[1])
+    ctx.lineTo(toPoint[0], toPoint[1]);
+
+    // TODO: ....
+    // colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
+    ctx.strokeStyle = `hsl(${index / 5}, 90%, 50%)`
+    ctx.lineWidth = width
+    ctx.stroke()
+  })
+}
+
+const drawPerfectPen = (ctx, points, color, width) => {
+  const myStroke = getStroke(points, { size: width });
   const pathData = getSvgPathFromStroke(myStroke);
 
-  ctx.fillStyle = figureColor;
+  ctx.fillStyle = color;
   ctx.fill(new Path2D(pathData));
 }
 
@@ -132,7 +141,7 @@ const getArrowParams = (pointA, pointB, widthIndex) => {
   const tailPoints = [t1, t2].map(transformPoint)
 
   return { figurePoints, tailPoints }
-};
+}
 
 export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
   const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
@@ -177,7 +186,7 @@ export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
 
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent'; // Reset shadows
-};
+}
 
 export const drawArrowActive = (ctx, pointA, pointB) => {
   const [startX, startY] = pointA;

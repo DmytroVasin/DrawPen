@@ -1,3 +1,5 @@
+import { LazyBrush } from "lazy-brush";
+
 // https://github.com/steveruizok/perfect-freehand/tree/main
 export const getSvgPathFromStroke = (stroke) => {
   if (!stroke.length) return ''
@@ -13,6 +15,36 @@ export const getSvgPathFromStroke = (stroke) => {
 
   d.push('Z')
   return d.join(' ')
+}
+
+export const getLazyPoints = (points, options = {}) => {
+  const radius = Math.min(options.size / 2, 6)
+
+  const startPoint = points[0]
+  let lazyPoints = [startPoint]
+
+  if (startPoint === undefined) return points
+
+  const lazy = new LazyBrush({
+    enabled: true,
+    radius: radius,
+    initialPoint: { x: startPoint[0], y: startPoint[1] },
+    friction: 0.1,
+  });
+
+  points.forEach((point, index) => {
+    if (index === 0) return;
+
+    lazy.update({ x: point[0], y: point[1] })
+
+    if (lazy.brushHasMoved()) {
+      const brush = lazy.getBrushCoordinates()
+
+      lazyPoints.push([brush.x, brush.y])
+    }
+  })
+
+  return lazyPoints
 }
 
 // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line

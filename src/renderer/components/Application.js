@@ -1,7 +1,6 @@
 import './Application.scss';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LazyBrush } from 'lazy-brush';
 import { throttle } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
@@ -37,7 +36,6 @@ const Icons = {
 
 const Application = () => {
   // console.log('App render');
-  const lazyBrushRef = useRef(null);
 
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
@@ -257,11 +255,6 @@ const Application = () => {
       newFigure.points.push([x, y]);
     }
 
-    if (activeTool === 'pen') {
-      initLazyBrush(x, y);
-    }
-
-
     setAllFigures([...allFigures, newFigure]);
     setIsDrawing(true);
   };
@@ -286,21 +279,6 @@ const Application = () => {
     }
 
     if (isDrawing) {
-      if (['pen', 'laser'].includes(activeTool)) {
-        if (lazyBrushRef.current) {
-          lazyBrushRef.current.update({ x: x, y: y });
-
-          if (lazyBrushRef.current.brushHasMoved()) {
-            const brush = lazyBrushRef.current.getBrushCoordinates();
-
-            x = brush.x
-            y = brush.y
-          } else {
-            return;
-          }
-        }
-      }
-
       if (activeTool === 'laser') {
         const currentLaser = allLaserFigures[allLaserFigures.length - 1];
 
@@ -403,16 +381,6 @@ const Application = () => {
       return prevAllFigures.slice(0, -1);
     })
   };
-
-  const initLazyBrush = (x, y) => {
-    // https://github.com/dulnan/lazy-brush
-    lazyBrushRef.current = new LazyBrush({
-      enabled: true,
-      radius: 6,
-      // friction: 0.1,
-      initialPoint: { x: x, y: y }
-    });
-  }
 
   return (
     <div id="root_wrapper" onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>

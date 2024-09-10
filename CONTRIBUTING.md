@@ -43,3 +43,4 @@ TODO:
 - Зажата клавіша FN - вмикає пріложеніе
 - Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php
 - RAINBOW>!?
+// colorDeg = colorDeg < 360 ? colorDeg + 1 : 0;
