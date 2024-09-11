@@ -116,4 +116,11 @@ export const getMouseCoordinates = (event) => {
     x: event.nativeEvent.pageX,
     y: event.nativeEvent.pageY,
   };
-};
+}
+
+export const distanceBetweenPoints = (pointA, pointB) => {
+  const [startX, startY] = pointA
+  const [endX, endY] = pointB
+
+  return Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
+}

@@ -1,6 +1,10 @@
 import { getStroke } from 'perfect-freehand';
-import { getSvgPathFromStroke, getLazyPoints } from '../../utils/general.js';
-import { colorList, widthList } from '../../constants.js'
+import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../../utils/general.js';
+import { colorList, widthList, rainbowScaleFactor } from '../../constants.js'
+
+const hslColor = (degree) => {
+  return `hsl(${degree % 360}, 80%, 50%)`
+}
 
 const drawDot = (ctx, point) => {
   const [x, y] = point;
@@ -21,29 +25,39 @@ const drawDot = (ctx, point) => {
   ctx.fill();
 }
 
-const createGradient = (ctx, pointA, pointB) => {
-  const gradient = ctx.createLinearGradient(...pointA, ...pointB);
-  gradient.addColorStop(0, 'red');
-  gradient.addColorStop(1 / 6, 'orange');
-  gradient.addColorStop(2 / 6, 'yellow');
-  gradient.addColorStop(3 / 6, 'green');
-  gradient.addColorStop(4 / 6, 'blue');
-  gradient.addColorStop(5 / 6, 'indigo');
-  gradient.addColorStop(1, 'violet');
+const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg) => {
+  let colorDeg = rainbowColorDeg
 
+  const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
+
+  const amountOfColorChanges = Math.round(distance)
+
+  if (amountOfColorChanges === 0) {
+    return hslColor(colorDeg)
+  }
+
+  const gradient = ctx.createLinearGradient(...pointA, ...pointB);
+
+  for (let i = 0; i <= amountOfColorChanges; i++) {
+    let color = hslColor(colorDeg + i)
+
+    gradient.addColorStop(i / amountOfColorChanges, color)
+  }
+
+  updateRainbowColorDeg(rainbowColorDeg + distance)
   return gradient
 }
 
-const activeFigureColorAndWidth = () => {
+const activeColorAndWidth = () => {
   return ['#FFF', 2]
 }
 
-const detectColorAndWidthBy = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
   let color = colorList[colorIndex].color
   const width = widthList[widthIndex].width
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    color = createGradient(ctx, pointA, pointB)
+    color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
   }
 
   return [color, width]
@@ -64,7 +78,7 @@ export const drawPen = (ctx, points, colorIndex, widthIndex, rainbowColorDeg, up
 const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg) => {
   points = getLazyPoints(points, { size: width })
 
-  let colorDeg = rainbowColorDeg % 360
+  let colorDeg = rainbowColorDeg
 
   points.forEach((point, index) => {
     if (index === 0) return;
@@ -73,16 +87,17 @@ const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg)
     const toPoint   = point
 
     ctx.beginPath()
+    ctx.lineWidth = width
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
     ctx.moveTo(fromPoint[0], fromPoint[1])
     ctx.lineTo(toPoint[0], toPoint[1]);
 
-    const speedOfColorChange = 0.5
-    colorDeg = (rainbowColorDeg + (speedOfColorChange * index)) % 360
-
-    ctx.strokeStyle = `hsl(${colorDeg}, 80%, 50%)`
-    ctx.lineWidth = width
+    ctx.strokeStyle = hslColor(colorDeg)
     ctx.stroke()
+
+    colorDeg += distanceBetweenPoints(fromPoint, toPoint) * rainbowScaleFactor
   })
 
   updateRainbowColorDeg(colorDeg)
@@ -132,8 +147,8 @@ const getArrowParams = (pointA, pointB, widthIndex) => {
   const d6 = [d2[0],                                  d2[1] * -1]
   const d7 = [d1[0],                                  d1[1] * -1]
 
-  const t1 = [ -2 * d1[1],                          d7[1]]
-  const t2 = [ -2 * d1[1],                          d1[1]]
+  const t1 = [ -2 * d1[1],                            d7[1]]
+  const t2 = [ -2 * d1[1],                            d1[1]]
 
   function transformPoint([x, y]) {
     return [
@@ -201,14 +216,14 @@ export const drawArrowActive = (ctx, pointA, pointB) => {
   drawDot(ctx, [endX, endY])
 }
 
-export const drawLine = (ctx, pointA, pointB, colorIndex, widthIndex) => {
-  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
+export const drawLine = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 }
 
 export const drawLineActive = (ctx, pointA, pointB) => {
-  const [color, width] = activeFigureColorAndWidth()
+  const [color, width] = activeColorAndWidth()
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 
@@ -230,14 +245,14 @@ const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 };
 
-export const drawOval = (ctx, pointA, pointB, colorIndex, widthIndex) => {
-  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
+export const drawOval = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 }
 
 export const drawOvalActive = (ctx, pointA, pointB) => {
-  const [color, width] = activeFigureColorAndWidth()
+  const [color, width] = activeColorAndWidth()
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 
@@ -268,14 +283,14 @@ const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 }
 
-export const drawRectangle = (ctx, pointA, pointB, colorIndex, widthIndex) => {
-  const [color, width] = detectColorAndWidthBy(ctx, pointA, pointB, colorIndex, widthIndex)
+export const drawRectangle = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 }
 
 export const drawRectangleActive = (ctx, pointA, pointB) => {
-  const [color, width] = activeFigureColorAndWidth()
+  const [color, width] = activeColorAndWidth()
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 

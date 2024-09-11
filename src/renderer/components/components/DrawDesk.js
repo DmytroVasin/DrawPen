@@ -55,7 +55,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'line') {
-        drawLine(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
+        drawLine(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawLineActive(ctx, figure.points[0], figure.points[1])
@@ -63,7 +63,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'rectangle') {
-        drawRectangle(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
+        drawRectangle(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawRectangleActive(ctx, figure.points[0], figure.points[1])
@@ -71,7 +71,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'oval') {
-        drawOval(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
+        drawOval(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawOvalActive(ctx, figure.points[0], figure.points[1])

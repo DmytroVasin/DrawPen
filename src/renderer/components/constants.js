@@ -1,4 +1,5 @@
 export const laserTime = 1000;
+export const rainbowScaleFactor = 0.05;
 export const colorList = [
   { color: '#0ACCA0', name: 'color_rainbow' },
   { color: '#1971c2', name: 'color_blue' },
