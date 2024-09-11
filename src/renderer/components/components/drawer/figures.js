@@ -63,7 +63,9 @@ const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbo
   return [color, width]
 }
 
-export const drawPen = (ctx, points, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
+  const { points, colorIndex, widthIndex, rainbowColorDeg } = figure;
+
   const figureColor = colorList[colorIndex].color
   const figureWidth = widthList[widthIndex].width
 
@@ -83,21 +85,37 @@ const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg)
   points.forEach((point, index) => {
     if (index === 0) return;
 
-    const fromPoint = points[index-1]
-    const toPoint   = point
+    const pointA = points[index-1]
+    const pointB = point
+
+    const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
+
+    const amountOfColorChanges = Math.round(distance)
+
+    let color
+    if (amountOfColorChanges === 0) {
+      color = hslColor(colorDeg)
+    } else {
+      const gradient = ctx.createLinearGradient(...pointA, ...pointB);
+
+      gradient.addColorStop(0, hslColor(colorDeg))
+      gradient.addColorStop(1, hslColor(colorDeg + distance))
+
+      color = gradient
+    }
 
     ctx.beginPath()
     ctx.lineWidth = width
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    ctx.moveTo(fromPoint[0], fromPoint[1])
-    ctx.lineTo(toPoint[0], toPoint[1]);
+    ctx.moveTo(pointA[0], pointA[1])
+    ctx.lineTo(pointB[0], pointB[1]);
 
-    ctx.strokeStyle = hslColor(colorDeg)
+    ctx.strokeStyle = color
     ctx.stroke()
 
-    colorDeg += distanceBetweenPoints(fromPoint, toPoint) * rainbowScaleFactor
+    colorDeg += distance
   })
 
   updateRainbowColorDeg(colorDeg)
@@ -163,7 +181,8 @@ const getArrowParams = (pointA, pointB, widthIndex) => {
   return { figurePoints, tailPoints }
 }
 
-export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
+export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure;
   const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
 
   let fillStyle = colorList[colorIndex].color
@@ -173,7 +192,7 @@ export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
   let shadowOffsetY = 2;
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    const color = createGradient(ctx, pointA, pointB)
+    const color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
 
     fillStyle = color;
     shadowColor = '#CCC';
@@ -208,21 +227,25 @@ export const drawArrow = (ctx, pointA, pointB, colorIndex, widthIndex) => {
   ctx.shadowColor = 'transparent'; // Reset shadows
 }
 
-export const drawArrowActive = (ctx, pointA, pointB) => {
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
+export const drawArrowActive = (ctx, figure) => {
+  const [pointA, pointB] = figure.points
+
+  const [startX, startY] = pointA
+  const [endX, endY] = pointB
 
   drawDot(ctx, [startX, startY])
   drawDot(ctx, [endX, endY])
 }
 
-export const drawLine = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
   const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawLineActive = (ctx, pointA, pointB) => {
+export const drawLineActive = (ctx, figure) => {
+  const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth()
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
@@ -245,7 +268,8 @@ const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 };
 
-export const drawOval = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+export const drawOval = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
   const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
@@ -283,13 +307,15 @@ const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 }
 
-export const drawRectangle = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+export const drawRectangle = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
   const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawRectangleActive = (ctx, pointA, pointB) => {
+export const drawRectangleActive = (ctx, figure) => {
+  const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth()
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
@@ -334,11 +360,12 @@ const drawRectangleSkeleton = (ctx, pointA, pointB, color, width) => {
   ctx.stroke();
 }
 
-export const drawLaser = (ctx, points) => {
+export const drawLaser = (ctx, figure) => {
+  const { points } = figure
+
   ctx.shadowBlur = 10;
   ctx.shadowColor = '#FF2D21';
   ctx.fillStyle = '#EA3323CC';
-
   const myStroke1 = getStroke(points, {
     size: 18,
     simulatePressure: false,

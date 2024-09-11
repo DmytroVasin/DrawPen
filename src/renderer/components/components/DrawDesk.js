@@ -43,44 +43,44 @@ const DrawDesk = ({
 
     allFigures.forEach((figure) => {
       if (figure.type === 'pen') {
-        drawPen(ctx, figure.points, figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
+        drawPen(ctx, figure, updateRainbowColorDeg)
       }
 
       if (figure.type === 'arrow') {
-        drawArrow(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex)
+        drawArrow(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure.points[0], figure.points[1])
+          drawArrowActive(ctx, figure)
         }
       }
 
       if (figure.type === 'line') {
-        drawLine(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
+        drawLine(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawLineActive(ctx, figure.points[0], figure.points[1])
+          drawLineActive(ctx, figure)
         }
       }
 
       if (figure.type === 'rectangle') {
-        drawRectangle(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
+        drawRectangle(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawRectangleActive(ctx, figure.points[0], figure.points[1])
+          drawRectangleActive(ctx, figure)
         }
       }
 
       if (figure.type === 'oval') {
-        drawOval(ctx, figure.points[0], figure.points[1], figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg, updateRainbowColorDeg)
+        drawOval(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawOvalActive(ctx, figure.points[0], figure.points[1])
+          drawOvalActive(ctx, figure)
         }
       }
-    });
+    })
 
     allLaserFigures.forEach((figure) => {
-      drawLaser(ctx, figure.points)
+      drawLaser(ctx, figure)
     })
   };
 

@@ -41,8 +41,5 @@ https://github.com/weiameili/Pensela
 
 TODO:
 - Зажата клавіша FN - вмикає пріложеніе
-- Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php
-- Mouse Icon: Gradient! https://www.joshwcomeau.com/gradient-generator/
-- RAINBOW> for FIGURES!
 - Alpha opacity .... With time figures dissapear???
-- TODO: Decrease amount of params in DrawDesc: `figure.points, figure.colorIndex, figure.widthIndex, figure.rainbowColorDeg`
+- Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php
