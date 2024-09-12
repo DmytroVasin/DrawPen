@@ -49,7 +49,7 @@ const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColor
 }
 
 const activeColorAndWidth = () => {
-  return ['#FFF', 2]
+  return ['#FFF', 1]
 }
 
 const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
@@ -230,11 +230,8 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 export const drawArrowActive = (ctx, figure) => {
   const [pointA, pointB] = figure.points
 
-  const [startX, startY] = pointA
-  const [endX, endY] = pointB
-
-  drawDot(ctx, [startX, startY])
-  drawDot(ctx, [endX, endY])
+  drawDot(ctx, pointA)
+  drawDot(ctx, pointB)
 }
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
@@ -275,7 +272,8 @@ export const drawOval = (ctx, figure, updateRainbowColorDeg) => {
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawOvalActive = (ctx, pointA, pointB) => {
+export const drawOvalActive = (ctx, figure) => {
+  const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth()
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
@@ -283,8 +281,8 @@ export const drawOvalActive = (ctx, pointA, pointB) => {
   const [startX, startY] = pointA;
   const [endX, endY] = pointB;
 
-  drawDot(ctx, [startX, startY])
-  drawDot(ctx, [endX, endY])
+  drawDot(ctx, pointA)
+  drawDot(ctx, pointB)
   drawDot(ctx, [startX, endY])
   drawDot(ctx, [endX, startY])
 }
@@ -323,8 +321,8 @@ export const drawRectangleActive = (ctx, figure) => {
   const [startX, startY] = pointA;
   const [endX, endY] = pointB;
 
-  drawDot(ctx, [startX, startY])
-  drawDot(ctx, [endX, endY])
+  drawDot(ctx, pointA)
+  drawDot(ctx, pointB)
   drawDot(ctx, [startX, endY])
   drawDot(ctx, [endX, startY])
 }

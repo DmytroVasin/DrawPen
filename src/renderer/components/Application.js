@@ -40,14 +40,14 @@ const Application = () => {
   const [rainbowColorDeg, updateRainbowColorDeg] = useState(Math.random() * 360);
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
-    // { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-    // { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: (Math.random() * 360) },
-    // { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
-    // { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
+    { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+    { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+    { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
+    { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
   ]);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [activeTool, setActiveTool] = useState('pen');
-  const [activeFigureInfo, setActiveFigureInfo] = useState(null);
+  const [activeFigureInfo, setActiveFigureInfo] = useState({id: 1});
   const [activeColorIndex, setActiveColorIndex] = useState(0);
   const [activeWidthIndex, setActiveWidthIndex] = useState(2);
   const [isDrawing, setIsDrawing] = useState(false);

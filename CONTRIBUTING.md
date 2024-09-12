@@ -41,5 +41,7 @@ https://github.com/weiameili/Pensela
 
 TODO:
 - Зажата клавіша FN - вмикає пріложеніе
-- Alpha opacity .... With time figures dissapear???
-- Dots: Create Gradient: https://www.w3resource.com/html5-canvas/html5-canvas-gradients-patterns.php
+- иконка для стирания/очищения
+--- Alpha opacity .... With time figures dissapear???
+- Стрелочку перенести к фигурам
+--- Активация происходит на первий клик - при второс клике меняетьсч слайдер
