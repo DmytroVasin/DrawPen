@@ -137,14 +137,14 @@ const Application = () => {
 
   const isOnFigure = (x, y, figure) => {
     switch (figure.type) {
-      case 'line':
-        return IsOnLine(x, y, figure.points)
       case 'arrow':
         return IsOnArrow(x, y, figure.points)
-      case 'oval':
-        return IsOnOval(x, y, figure.points)
       case 'rectangle':
         return IsOnRectangle(x, y, figure.points)
+      case 'oval':
+        return IsOnOval(x, y, figure.points)
+      case 'line':
+        return IsOnLine(x, y, figure.points)
       default:
         return false
     }

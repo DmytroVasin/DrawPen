@@ -82,9 +82,9 @@ const ToolBar = ({
     };
   }, [onMouseMove, onMouseUp]);
 
-  const handleToolChange = (tool) => {
+  const pickTool = (tool) => {
     handleChangeTool(tool);
-    if (["rectangle", "oval", "line"].includes(tool)) {
+    if (["arrow", "rectangle", "oval", "line"].includes(tool)) {
       setLastActiveFigure(tool);
     }
     switchView("");
@@ -102,12 +102,14 @@ const ToolBar = ({
 
   const renderGroupIcon = () => {
     switch (lastActiveFigure) {
+      case "arrow":
+        return <Icons.FaArrowRight />
       case "rectangle":
-        return <Icons.FaRegSquare />;
+        return <Icons.FaRegSquare />
       case "oval":
-        return <Icons.FaRegCircle />;
+        return <Icons.FaRegCircle />
       case "line":
-        return <Icons.AiOutlineLine />;
+        return <Icons.AiOutlineLine />
       default:
         null
     }
@@ -134,17 +136,12 @@ const ToolBar = ({
       <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
-            <li className={activeTool === "arrow" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("arrow")}>
-                <Icons.FaArrowRight />
-              </button>
-            </li>
             <li className={activeTool === "pen" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("pen")}>
                 <Icons.FaPaintBrush />
               </button>
             </li>
-            <li className={["rectangle", "oval", "line"].includes(activeTool) ? "active" : undefined}>
+            <li className={["arrow", "rectangle", "oval", "line"].includes(activeTool) ? "active" : undefined}>
               <button onClick={() => switchView("tool-slide")}>
                 {renderGroupIcon()}
               </button>
@@ -182,18 +179,23 @@ const ToolBar = ({
         </div>
         <div className="side-view-body tool-group">
           <ul className="toolbar__items">
+            <li className={activeTool === "arrow" ? "active" : undefined}>
+              <button onClick={() => pickTool("arrow")}>
+                <Icons.FaArrowRight />
+              </button>
+            </li>
             <li className={activeTool === "rectangle" ? "active" : undefined}>
-              <button onClick={() => handleToolChange("rectangle")}>
+              <button onClick={() => pickTool("rectangle")}>
                 <Icons.FaRegSquare />
               </button>
             </li>
             <li className={activeTool === "oval" ? "active" : undefined}>
-              <button onClick={() => handleToolChange("oval")}>
+              <button onClick={() => pickTool("oval")}>
                 <Icons.FaRegCircle />
               </button>
             </li>
             <li className={activeTool === "line" ? "active" : undefined}>
-              <button onClick={() => handleToolChange("line")}>
+              <button onClick={() => pickTool("line")}>
                 <Icons.AiOutlineLine />
               </button>
             </li>
