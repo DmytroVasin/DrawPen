@@ -42,6 +42,4 @@ https://github.com/weiameili/Pensela
 TODO:
 - Зажата клавіша FN - вмикає пріложеніе
 - иконка для стирания/очищения
---- Alpha opacity .... With time figures dissapear???
-- Стрелочку перенести к фигурам
---- Активация происходит на первий клик - при второс клике меняетьсч слайдер
+--- Alpha opacity .... With time figures dissapear?

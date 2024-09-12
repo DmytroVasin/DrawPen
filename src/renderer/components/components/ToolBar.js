@@ -115,6 +115,14 @@ const ToolBar = ({
     }
   };
 
+  const pickFigureOrSwitchView = () => {
+    if (["arrow", "rectangle", "oval", "line"].includes(activeTool)) {
+      switchView("tool-slide");
+    } else {
+      pickTool(lastActiveFigure);
+    }
+  };
+
   const switchView = (name) => {
     setSlide(name);
   };
@@ -141,8 +149,8 @@ const ToolBar = ({
                 <Icons.FaPaintBrush />
               </button>
             </li>
-            <li className={["arrow", "rectangle", "oval", "line"].includes(activeTool) ? "active" : undefined}>
-              <button onClick={() => switchView("tool-slide")}>
+            <li className={["arrow", "rectangle", "oval", "line"].includes(activeTool) ? "active more_figures" : undefined}>
+              <button onClick={() => pickFigureOrSwitchView()}>
                 {renderGroupIcon()}
               </button>
             </li>
