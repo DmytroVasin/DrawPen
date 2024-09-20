@@ -16,7 +16,7 @@ const CuteCursor = ({
 }) => {
   const renderIconByToolName = (toolName) => {
     const iconColor = colorList[activeColorIndex].color;
-    const iconSize = widthList[activeWidthIndex].cute_icon_size;
+    const iconSize = widthList[activeWidthIndex].icon_size;
 
     let iconProps = {
       size: iconSize,

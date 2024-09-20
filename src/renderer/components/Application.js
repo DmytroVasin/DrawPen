@@ -21,7 +21,6 @@ import { MdOutlineCancel } from "react-icons/md";
 
 import {
   laserTime,
-  widthList,
 } from './constants.js'
 
 const Icons = {

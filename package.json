@@ -1,7 +1,8 @@
 {
   "name": "drawpen",
+  "productName": "DrawPen",
   "version": "0.0.3",
-  "description": "DrawPen is a simple screen annotation",
+  "description": "DrawPen is a screen annotation tool built with web technology",
   "private": true,
   "license": "MIT",
   "main": ".webpack/main",

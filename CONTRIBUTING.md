@@ -1,45 +1,17 @@
-# DrawPen Contributing Guide
+# Contributing
 
-Hi!
+# Contributing
 
-### Installation
+https://github.com/DmytroVasin/DrawPen
 
-To get started, you'll need to clone the repository and install the dependencies.
+1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device
+2. Install the dependencies: `npm install`
+3. Build the code, start the app, and watch for changes: `npm start`
 
-```shell
-TODO: ...
+To make sure that your code works in the finished app, you can generate the binary:
+
+```
+$ npm run package
 ```
 
-
----
-
-nvm ls
-nvm use 20.12.1
-
-Electron:
-npm start
-
-
-
-ICON
-https://www.svgrepo.com/svg/79739/draw-a-picture
-https://www.svgviewer.dev/svg-to-png
-
-
-https://github.com/rampatra/presentify-localization
-
-https://github.com/weiameili/Pensela
-
-
-
-
-
-
-- Electron Autoupdater
-- Icons
-- Random color
-
-TODO:
-- Зажата клавіша FN - вмикає пріложеніе
-- иконка для стирания/очищения
---- Alpha opacity .... With time figures dissapear?
+After that, you'll see the binary in the `out` folder 😀

@@ -1,5 +1,5 @@
 export const laserTime = 1000;
-export const rainbowScaleFactor = 0.05;
+export const rainbowScaleFactor = 0.03;
 export const colorList = [
   { color: '#0ACCA0', name: 'color_rainbow' },
   { color: '#1971c2', name: 'color_blue' },
@@ -9,7 +9,7 @@ export const colorList = [
   { color: '#1e1e1e', name: 'color_black' },
 ];
 export const widthList = [
-  { width: 6,  name: 'light',  cute_icon_size: 15 },
-  { width: 12, name: 'medium', cute_icon_size: 17 },
-  { width: 18, name: 'bold',   cute_icon_size: 20 },
+  { pen_width: 8,  rainbow_pen_width: 4,  figure_size: 6,  icon_size: 15, name: 'light' },
+  { pen_width: 12, rainbow_pen_width: 8,  figure_size: 8,  icon_size: 17, name: 'medium' },
+  { pen_width: 16, rainbow_pen_width: 12, figure_size: 10, icon_size: 20, name: 'bold' },
 ]

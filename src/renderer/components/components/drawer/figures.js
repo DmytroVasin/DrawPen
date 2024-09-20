@@ -3,7 +3,7 @@ import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../.
 import { colorList, widthList, rainbowScaleFactor } from '../../constants.js'
 
 const hslColor = (degree) => {
-  return `hsl(${degree % 360}, 80%, 50%)`
+  return `hsl(${degree % 360}, 70%, 60%)`
 }
 
 const drawDot = (ctx, point) => {
@@ -54,7 +54,7 @@ const activeColorAndWidth = () => {
 
 const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
   let color = colorList[colorIndex].color
-  const width = widthList[widthIndex].width
+  const width = widthList[widthIndex].figure_size
 
   if (colorList[colorIndex].name === 'color_rainbow') {
     color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
@@ -66,15 +66,15 @@ const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbo
 export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
   const { points, colorIndex, widthIndex, rainbowColorDeg } = figure;
 
-  const figureColor = colorList[colorIndex].color
-  const figureWidth = widthList[widthIndex].width
+  const colorInfo = colorList[colorIndex]
+  const widthInfo = widthList[widthIndex]
 
-  if (colorList[colorIndex].name === 'color_rainbow') {
-    drawLazyPen(ctx, points, figureWidth, rainbowColorDeg, updateRainbowColorDeg)
+  if (colorInfo.name === 'color_rainbow') {
+    drawLazyPen(ctx, points, widthInfo.rainbow_pen_width, rainbowColorDeg, updateRainbowColorDeg)
     return;
   }
 
-  drawPerfectPen(ctx, points, figureColor, figureWidth)
+  drawPerfectPen(ctx, points, colorInfo.color, widthInfo.pen_width)
 }
 
 const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg) => {

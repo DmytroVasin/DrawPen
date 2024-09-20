@@ -9,3 +9,4 @@ node_modules
 .webpack/
 # Electron-Forge
 out/
+.private/
