@@ -9,8 +9,9 @@ let aboutWindow
 let foregroundMode = true
 let showToolbar = true
 let showWhiteboard = false
-let activeIcon = path.resolve('assets/menubarDefaultTemplate.png')
-let disabledIcon = path.resolve('assets/icon_background_white.png')
+
+let activeIcon = path.resolve('assets/activeIcon.png')
+let disabledIcon = path.resolve('assets/disabledIcon.png')
 
 const KEY_ACTIVATE = 'Shift+S' // TODO: Better to replace with Fn?
 const KEY_SHOW_HIDE_APP = 'Shift+A'
