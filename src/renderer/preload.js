@@ -5,6 +5,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer -> Main
   invokeHideApp: () => ipcRenderer.invoke('hide_app'),
+  invokeGetSettings: () => ipcRenderer.invoke('get_settings'),
+  invokeSetSettings: (settings) => ipcRenderer.invoke('set_settings', settings),
 
   // Main -> Renderer
   onResetScreen: (callback) => ipcRenderer.on('reset_screen', callback),

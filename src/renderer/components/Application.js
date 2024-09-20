@@ -1,7 +1,7 @@
 import './Application.scss';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { throttle } from 'lodash';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
@@ -33,10 +33,21 @@ const Icons = {
   MdOutlineCancel
 };
 
-const Application = () => {
+const Application = (settings) => {
   // console.log('App render');
 
-  const [rainbowColorDeg, updateRainbowColorDeg] = useState(Math.random() * 360);
+  const initialColorDeg = Math.random() * 360
+  const initialActiveTool = settings.tool_bar_active_tool
+  const initialActiveColor = settings.tool_bar_active_color_index
+  const initialActiveWidth = settings.tool_bar_active_weight_index
+  const initialShowToolbar = settings.show_tool_bar
+  const initialShowWhiteboard = settings.show_whiteboard
+  const initialToolbarDefaultFigure = settings.tool_bar_default_figure
+  const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
+
+  // ================================================================================================
+
+  const [rainbowColorDeg, updateRainbowColorDeg] = useState(initialColorDeg);
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState([
     { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
@@ -45,14 +56,16 @@ const Application = () => {
     { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
   ]);
   const [allLaserFigures, setLaserFigure] = useState([]);
-  const [activeTool, setActiveTool] = useState('pen');
-  const [activeFigureInfo, setActiveFigureInfo] = useState({id: 1});
-  const [activeColorIndex, setActiveColorIndex] = useState(0);
-  const [activeWidthIndex, setActiveWidthIndex] = useState(2);
+  const [activeTool, setActiveTool] = useState(initialActiveTool);
+  const [activeFigureInfo, setActiveFigureInfo] = useState(null);
+  const [activeColorIndex, setActiveColorIndex] = useState(initialActiveColor);
+  const [activeWidthIndex, setActiveWidthIndex] = useState(initialActiveWidth);
   const [isDrawing, setIsDrawing] = useState(false);
   const [cursorType, setCursorType] = useState('crosshair');
-  const [showToolbar, setShowToolbar] = useState(true);
-  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
+  const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
+  const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
+  const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -60,6 +73,27 @@ const Application = () => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onCallUndo(handleUndo);
   }, []);
+
+  useEffect(() => {
+    const debouncedUpdateSettings = debounce(() => {
+      invokeSetSettings({
+        show_whiteboard: showWhiteboard,
+        show_tool_bar: showToolbar,
+        tool_bar_active_tool: activeTool,
+        tool_bar_active_color_index: activeColorIndex,
+        tool_bar_active_weight_index: activeWidthIndex,
+        tool_bar_default_figure: toolbarLastActiveFigure,
+        tool_bar_x: toolbarPosition.x,
+        tool_bar_y: toolbarPosition.y,
+      });
+    }, 300);
+
+    debouncedUpdateSettings();
+
+    return () => {
+      debouncedUpdateSettings.cancel();
+    };
+  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, toolbarPosition]);
 
   useEffect(() => {
     if (!activeFigureInfo) { return }
@@ -348,8 +382,6 @@ const Application = () => {
     invokeHideApp();
   }
 
-  // TOOD: Create IPC module
-  // TOOD: Move to a IPC module
   const invokeHideApp = () => {
     console.log('Renderer -> Main: Invoke Hide App');
 
@@ -373,6 +405,12 @@ const Application = () => {
     console.log('Main -> Renderer: Toggle Whiteboard');
 
     setShowWhiteboard((prevShowWhiteboard) => !prevShowWhiteboard);
+  };
+
+  const invokeSetSettings = (settings) => {
+    console.log('Renderer -> Main: Invoke Set Settings');
+
+    window.electronAPI.invokeSetSettings(settings);
   };
 
   const handleUndo = () => {
@@ -416,6 +454,10 @@ const Application = () => {
       {
         showToolbar &&
           <ToolBar
+            position={toolbarPosition}
+            setPosition={setToolbarPosition}
+            lastActiveFigure={toolbarLastActiveFigure}
+            setLastActiveFigure={setToolbarLastActiveFigure}
             activeTool={activeTool}
             activeColorIndex={activeColorIndex}
             activeWidthIndex={activeWidthIndex}

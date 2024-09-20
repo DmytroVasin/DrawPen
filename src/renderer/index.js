@@ -5,6 +5,11 @@ import Application from './components/Application';
 console.log('[DRAWPEN]: Main page loading...');
 
 const root = createRoot(document.getElementById('root'));
-root.render(
-  <Application />
-);
+
+window.electronAPI.invokeGetSettings().then((settings) => {
+  console.log('[DRAWPEN]: Main page settings: ', settings);
+
+  root.render(
+    <Application {...settings} />
+  );
+})

@@ -1,22 +1,65 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+import Store from 'electron-store';
 // import { updateElectronApp } from 'update-electron-app';
 import path from 'path';
+
+const schema = {
+  show_whiteboard: {
+    type: 'boolean',
+    default: false
+  },
+  show_tool_bar: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_x: {
+    type: 'number',
+    default: 10
+  },
+  tool_bar_y: {
+    type: 'number',
+    default: 10
+  },
+  tool_bar_active_tool: {
+    type: 'string',
+    default: 'pen'
+  },
+  tool_bar_active_color_index: {
+    type: 'number',
+    default: 1
+  },
+  tool_bar_active_weight_index: {
+    type: 'number',
+    default: 1
+  },
+  tool_bar_default_figure: {
+    type: 'string',
+    default: 'arrow'
+  },
+};
+
+// app.getPath('userData') + '/config.json'
+const store = new Store({
+  schema
+});
+
+console.log('My current store: ', store.store)
 
 let tray
 let mainWindow
 let aboutWindow
 
 let foregroundMode = true
-let showToolbar = true
-let showWhiteboard = false
+let showWhiteboard = store.get('show_whiteboard')
+let showToolbar = store.get('show_tool_bar')
 
 let activeIcon = path.resolve('assets/activeIcon.png')
 let disabledIcon = path.resolve('assets/disabledIcon.png')
 
 const KEY_ACTIVATE = 'Shift+S' // TODO: Better to replace with Fn?
 const KEY_SHOW_HIDE_APP = 'Shift+A'
-const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+Shift+F'
-const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+Shift+G'
+const KEY_SHOW_HIDE_TOOLBAR = 'Shift+T'
+const KEY_SHOW_HIDE_WHITEBOARD = 'Shift+W'
 const KEY_UNDO = 'CmdOrCtrl+Z'
 
 function updateContextMenu() {
@@ -225,12 +268,30 @@ function unregisterShortcats() {
   globalShortcut.unregister(KEY_UNDO)
 }
 
-// MOVE TO MODULEs!
 ipcMain.handle('get_app_version', () => {
   return app.getVersion();
 });
 
-// MOVE TO MODULEs!
+ipcMain.handle('get_settings', () => {
+  return {
+    show_whiteboard: store.get('show_whiteboard'),
+    show_tool_bar: store.get('show_tool_bar'),
+    tool_bar_x: store.get('tool_bar_x'),
+    tool_bar_y: store.get('tool_bar_y'),
+    tool_bar_active_tool: store.get('tool_bar_active_tool'),
+    tool_bar_active_color_index: store.get('tool_bar_active_color_index'),
+    tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
+    tool_bar_default_figure: store.get('tool_bar_default_figure'),
+  };
+});
+
+ipcMain.handle('set_settings', (event, newSettings) => {
+  console.log('New store: ', newSettings)
+  store.set(newSettings)
+
+  return null
+});
+
 ipcMain.handle('hide_app', () => {
   hideDrawWindow()
   resetScreen()
@@ -244,17 +305,6 @@ function resetScreen() {
 
 function callUndo() {
   mainWindow.webContents.send('call_undo');
-}
-
-function toggleToolbar() {
-  if (!foregroundMode) {
-    showDrawWindow()
-  }
-
-  showToolbar = !showToolbar
-
-  mainWindow.webContents.send('toggle_toolbar')
-  updateContextMenu() // Need to rerender the context menu
 }
 
 function toggleWindow() {
@@ -278,6 +328,17 @@ function hideDrawWindow() {
 
   tray.setImage(disabledIcon)
   foregroundMode = false
+  updateContextMenu() // Need to rerender the context menu
+}
+
+function toggleToolbar() {
+  if (!foregroundMode) {
+    showDrawWindow()
+  }
+
+  showToolbar = !showToolbar
+
+  mainWindow.webContents.send('toggle_toolbar')
   updateContextMenu() // Need to rerender the context menu
 }
 
