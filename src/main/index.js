@@ -14,11 +14,11 @@ const schema = {
   },
   tool_bar_x: {
     type: 'number',
-    default: 10
+    default: 5
   },
   tool_bar_y: {
     type: 'number',
-    default: 10
+    default: 5
   },
   tool_bar_active_tool: {
     type: 'string',
@@ -56,7 +56,6 @@ let showToolbar = store.get('show_tool_bar')
 let activeIcon = path.resolve('assets/activeIcon.png')
 let disabledIcon = path.resolve('assets/disabledIcon.png')
 
-const KEY_ACTIVATE = 'Shift+S' // TODO: Better to replace with Fn?
 const KEY_SHOW_HIDE_APP = 'Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'Shift+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'Shift+W'
@@ -66,11 +65,6 @@ const KEY_W = 'CmdOrCtrl+W'
 
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Hold to Activate...',
-      accelerator: KEY_ACTIVATE,
-    },
-    { type: 'separator' },
     {
       label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
       accelerator: KEY_SHOW_HIDE_APP,
@@ -154,11 +148,7 @@ function createMainWindow () {
     frame: false,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true,
-      nodeIntegrationInWorker: false,
-      nodeIntegrationInSubFrames: false,
       preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      sandbox: false,
     }
   })
 
@@ -172,13 +162,11 @@ function createMainWindow () {
     mainWindow = null;
   })
 
-  registerGlobalShortcats()
-
   mainWindow.on('focus', () => {
     registerShortcats()
   })
 
-  // NOTE: hide?
+  // NOTE: the same as hide
   mainWindow.on('blur', () => {
     unregisterShortcats()
   })
@@ -192,7 +180,7 @@ function createAboutWindow() {
     minimizable: false,
     autoHideMenuBar: true,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
       preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
     }
   })
@@ -224,6 +212,8 @@ app.on('ready', () => {
 
   tray = new Tray(activeIcon)
   updateContextMenu()
+
+  registerGlobalShortcats()
 })
 
 app.on('will-quit', () => {
@@ -243,16 +233,12 @@ app.on('activate', () => {
 })
 
 function registerGlobalShortcats() {
-  globalShortcut.register(KEY_ACTIVATE, () => {
-    showDrawWindow()
+  globalShortcut.register(KEY_SHOW_HIDE_APP, () => {
+    toggleWindow()
   })
 }
 
 function registerShortcats() {
-  globalShortcut.register(KEY_SHOW_HIDE_APP, () => {
-    toggleWindow()
-  })
-
   globalShortcut.register(KEY_SHOW_HIDE_TOOLBAR, () => {
     toggleToolbar()
   })
@@ -275,7 +261,6 @@ function registerShortcats() {
 }
 
 function unregisterShortcats() {
-  globalShortcut.unregister(KEY_SHOW_HIDE_APP)
   globalShortcut.unregister(KEY_SHOW_HIDE_TOOLBAR)
   globalShortcut.unregister(KEY_SHOW_HIDE_WHITEBOARD)
   globalShortcut.unregister(KEY_UNDO)

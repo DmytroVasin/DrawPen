@@ -3,7 +3,7 @@ import "./ToolBar.scss";
 import { colorList, widthList } from "../constants.js";
 
 const STICKY_DISTANCE = 15;
-const ZONE_BORDER = 10; // Equals to "#zone_borders" border
+const ZONE_BORDER = 5; // Equals to "--border-size"
 
 const ToolBar = ({
   position,
