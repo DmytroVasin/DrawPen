@@ -61,6 +61,8 @@ const KEY_SHOW_HIDE_APP = 'Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'Shift+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'Shift+W'
 const KEY_UNDO = 'CmdOrCtrl+Z'
+const KEY_Q = 'CmdOrCtrl+Q'
+const KEY_W = 'CmdOrCtrl+W'
 
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
@@ -124,6 +126,7 @@ function updateContextMenu() {
     },
     {
       label: 'Quit',
+      accelerator: KEY_Q,
       click: () => {
         app.quit()
       }
@@ -163,6 +166,7 @@ function createMainWindow () {
 
   mainWindow.setAlwaysOnTop(true);
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  // mainWindow.setIgnoreMouseEvents(true);
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -260,12 +264,23 @@ function registerShortcats() {
   globalShortcut.register(KEY_UNDO, () => {
     callUndo()
   })
+
+  globalShortcut.register(KEY_Q, () => {
+    app.quit()
+  })
+
+  globalShortcut.register(KEY_W, () => {
+    // Do nothing
+  })
 }
+
 function unregisterShortcats() {
   globalShortcut.unregister(KEY_SHOW_HIDE_APP)
   globalShortcut.unregister(KEY_SHOW_HIDE_TOOLBAR)
   globalShortcut.unregister(KEY_SHOW_HIDE_WHITEBOARD)
   globalShortcut.unregister(KEY_UNDO)
+  globalShortcut.unregister(KEY_Q)
+  globalShortcut.unregister(KEY_W)
 }
 
 ipcMain.handle('get_app_version', () => {
