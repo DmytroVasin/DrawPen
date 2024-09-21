@@ -268,6 +268,7 @@ const Application = (settings) => {
       let laserFigure = {
         id: Date.now(),
         type: activeTool,
+        widthIndex: activeWidthIndex,
         points: [[x, y]],
       };
 

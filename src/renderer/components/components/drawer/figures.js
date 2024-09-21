@@ -359,13 +359,14 @@ const drawRectangleSkeleton = (ctx, pointA, pointB, color, width) => {
 }
 
 export const drawLaser = (ctx, figure) => {
-  const { points } = figure
+  const { points, widthIndex } = figure
+  const [innerWidth, otherWidth] = widthList[widthIndex].laser_width;
 
   ctx.shadowBlur = 10;
   ctx.shadowColor = '#FF2D21';
   ctx.fillStyle = '#EA3323CC';
   const myStroke1 = getStroke(points, {
-    size: 18,
+    size: otherWidth,
     simulatePressure: false,
     start: { taper: true, cap: true },
   });
@@ -374,7 +375,7 @@ export const drawLaser = (ctx, figure) => {
 
   ctx.fillStyle = '#FFF';
   const myStroke2 = getStroke(points, {
-    size: 8,
+    size: innerWidth,
     simulatePressure: false,
     start: { taper: true, cap: true },
   });
