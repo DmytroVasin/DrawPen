@@ -59,6 +59,7 @@ let disabledIcon = path.resolve('assets/disabledIcon.png')
 const KEY_SHOW_HIDE_APP = 'Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'Shift+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'Shift+W'
+const KEY_CLEAR_DESK = 'Shift+C'
 const KEY_UNDO = 'CmdOrCtrl+Z'
 const KEY_Q = 'CmdOrCtrl+Q'
 const KEY_W = 'CmdOrCtrl+W'
@@ -89,6 +90,7 @@ function updateContextMenu() {
     { type: 'separator' },
     {
       label: 'Clear desk',
+      accelerator: KEY_CLEAR_DESK,
       click: () => {
         resetScreen()
       }
@@ -247,6 +249,10 @@ function registerShortcats() {
     toggleWhiteboard()
   })
 
+  globalShortcut.register(KEY_CLEAR_DESK, () => {
+    resetScreen()
+  })
+
   globalShortcut.register(KEY_UNDO, () => {
     callUndo()
   })
@@ -263,6 +269,7 @@ function registerShortcats() {
 function unregisterShortcats() {
   globalShortcut.unregister(KEY_SHOW_HIDE_TOOLBAR)
   globalShortcut.unregister(KEY_SHOW_HIDE_WHITEBOARD)
+  globalShortcut.unregister(KEY_CLEAR_DESK)
   globalShortcut.unregister(KEY_UNDO)
   globalShortcut.unregister(KEY_Q)
   globalShortcut.unregister(KEY_W)
@@ -294,7 +301,6 @@ ipcMain.handle('set_settings', (event, newSettings) => {
 
 ipcMain.handle('hide_app', () => {
   hideDrawWindow()
-  resetScreen()
 
   return null
 });
@@ -325,6 +331,8 @@ function showDrawWindow() {
 
 function hideDrawWindow() {
   mainWindow.hide()
+
+  resetScreen()
 
   tray.setImage(disabledIcon)
   foregroundMode = false
