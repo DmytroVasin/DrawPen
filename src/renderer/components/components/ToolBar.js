@@ -17,6 +17,7 @@ const ToolBar = ({
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
+  handleReset,
   Icons,
 }) => {
   const windowWidth = window.innerWidth;
@@ -170,6 +171,12 @@ const ToolBar = ({
             <li>
               <button className="toolbar__width-button" onClick={() => switchView("width-slide")}>
                 <div className={`${widthList[activeWidthIndex].name}`} />
+              </button>
+            </li>
+            <li className="cross-line"></li>
+            <li>
+              <button onClick={handleReset}>
+                <Icons.FaEraser />
               </button>
             </li>
           </ul>

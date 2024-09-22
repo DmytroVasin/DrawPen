@@ -14,7 +14,7 @@ import {
   IsOnTwoDots,
   IsOnFourDots,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight } from "react-icons/fa";
+import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -30,7 +30,8 @@ const Icons = {
   FaArrowRight,
   AiOutlineLine,
   GiLaserburn,
-  MdOutlineCancel
+  MdOutlineCancel,
+  FaEraser,
 };
 
 const Application = (settings) => {
@@ -466,6 +467,7 @@ const Application = (settings) => {
             handleChangeColor={handleChangeColor}
             handleChangeWidth={handleChangeWidth}
             handleChangeTool={handleChangeTool}
+            handleReset={handleReset}
             Icons={Icons}
           />
       }
