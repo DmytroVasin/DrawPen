@@ -1,29 +1,30 @@
 <p align="center">
-  <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.svg?raw=true" height="64">
+  <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.png?raw=true" height="128">
   <h3 align="center">Draw Pen</h3>
   <p align="center">An open-source screen annotation tool<p>
 </p>
 
----
-
-<br/>
-
 <p align="center">
-    <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???-setup-win.exe'><img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/></a>
-    <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???.dmg'><img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/></a>
-    <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???.AppImage'><img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/></a>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???-setup-win.exe'>
+    <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
+  </a>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???.dmg'>
+    <img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/>
+  </a>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/download/v0.00.00/???.AppImage'>
+    <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
+  </a>
 </p>
 
-<p align="center">DrawPen is <b>free</b> to download and use.</p>
-
-<br/>
+---
 
 ![DrawPen](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/main.png?raw=true)
 
-Demo can be found [here](https://youtu.be/OzpgCw24ut8)
+Demo can be found [here](https://youtu.be/__todo__)
 
+### Installation
 
-You can download DrawPen for **free** from [release notes][release notes] or install it via [Homebrew Cask][brew].
+You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases) or install it via Homebrew Cask.
 
 ```shell
 brew install --cask drawpen
