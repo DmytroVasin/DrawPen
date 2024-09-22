@@ -1,31 +1,52 @@
 const path = require('path');
+const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
 
 module.exports = {
   packagerConfig: {
-    // Create asar archive for main, renderer process files
     asar: true,
-    // Set executable name
     executableName: 'DrawPen',
-    // Set application icon
-    icon: path.resolve('assets/images/appIcon.ico'),
-    //
-    // osxSign: {},
-    // // ...
+    icon: path.join(rootDir, 'assets/icon'),
+    // osxSign: {
+    //   identity: 'Developer ID Application: Your Name (TeamID)', // Ваша цифровая подпись Apple Developer
+    //   hardenedRuntime: true, // Включает защищённую среду исполнения (требуется для некоторых API)
+    //   entitlements: 'path/to/entitlements.plist', // Путь к файлу с разрешениями (опционально)
+    //   'entitlements-inherit': 'path/to/entitlements.plist', // Права наследования для дочерних процессов (опционально)
+    //   'gatekeeper-assess': false, // Проверка с помощью Gatekeeper (по умолчанию false)
+    // },
     // osxNotarize: {
-    //   tool: 'notarytool',
-    //   appleId: process.env.APPLE_ID,
-    //   appleIdPassword: process.env.APPLE_PASSWORD,
-    //   teamId: process.env.APPLE_TEAM_ID
+    //   appBundleId: 'com.example.app', // Bundle ID вашего приложения
+    //   appleId: 'your-apple-id@example.com', // Apple ID разработчика
+    //   appleIdPassword: 'your-app-specific-password', // Пароль для входа (используйте App-Specific Password)
     // }
   },
   makers: [
     {
-      // The Zip target builds basic .zip files containing your packaged application.
-      // There are no platform specific dependencies for using this maker and it will run on any platform.
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
-    }
+      name: '@electron-forge/maker-dmg',  // Maker для Mac
+      config: {
+        background: path.join(rootDir, 'assets/background-dmg.png'),
+        icon: path.join(rootDir, 'assets/icon.icns'),
+        additionalDMGOptions: {
+          window: { size: { width: 660, height: 500 } }
+        },
+      }
+    },
+    // {
+    //   name: "@electron-forge/maker-squirrel",  // Maker для Windows (squirrel)
+    //   config: {}
+    // },
+    // {
+    //   name: "@electron-forge/maker-zip",  // Maker для создания zip-архива (включая macOS)
+    //   platforms: ["darwin", "linux"]
+    // },
+    // {
+    //   name: "@electron-forge/maker-deb",  // Maker для Linux (deb)
+    //   config: {}
+    // },
+    // {
+    //   name: "@electron-forge/maker-rpm",  // Maker для Linux (rpm)
+    //   config: {}
+    // }
   ],
   plugins: [
     {
@@ -34,10 +55,8 @@ module.exports = {
         // Fix content-security-policy error when image or video src isn't same origin
         // Remove 'unsafe-eval' to get rid of console warning in development mode.
         devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' data:`,
-        // Ports
-        port: 3000, // Webpack Dev Server port
-        loggerPort: 9000, // Logger port
-        // Main process webpack configuration
+        port: 3000,
+        loggerPort: 9000,
         mainConfig: path.join(rootDir, 'tools/webpack/webpack.main.js'),
         renderer: {
           config: path.join(rootDir, 'tools/webpack/webpack.renderer.js'),
@@ -71,8 +90,8 @@ module.exports = {
       name: '@electron-forge/publisher-github',
       config: {
         repository: {
-          owner: 'DmytroVasin',
-          name: 'DrawPen'
+          owner: packageJson.author.name,
+          name: packageJson.productName,
         },
         prerelease: false,
         draft: true

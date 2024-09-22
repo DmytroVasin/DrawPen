@@ -314,8 +314,6 @@ const Application = (settings) => {
     }
 
     if (isDrawing) {
-      // console.log('DRAWING....')
-
       if (activeTool === 'laser') {
         const currentLaser = allLaserFigures[allLaserFigures.length - 1];
 

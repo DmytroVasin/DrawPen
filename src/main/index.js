@@ -1,9 +1,13 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
 import Store from 'electron-store';
-// import { updateElectronApp } from 'update-electron-app';
+import { autoUpdater } from 'electron-updater';
 import path from 'path';
 
 const schema = {
+  new_version_released: {
+    type: 'boolean',
+    default: false
+  },
   show_whiteboard: {
     type: 'boolean',
     default: false
@@ -43,7 +47,7 @@ const store = new Store({
   schema
 });
 
-console.log('My current store: ', store.store)
+console.log('Current store: ', store.store)
 
 let tray
 let mainWindow
@@ -56,15 +60,29 @@ let showToolbar = store.get('show_tool_bar')
 let activeIcon = path.resolve('assets/activeIcon.png')
 let disabledIcon = path.resolve('assets/disabledIcon.png')
 
-const KEY_SHOW_HIDE_APP = 'Shift+A'
-const KEY_SHOW_HIDE_TOOLBAR = 'Shift+T'
-const KEY_SHOW_HIDE_WHITEBOARD = 'Shift+W'
-const KEY_CLEAR_DESK = 'Shift+C'
+const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
+const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
+const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+W'
+const KEY_CLEAR_DESK = 'CmdOrCtrl+C'
 const KEY_UNDO = 'CmdOrCtrl+Z'
 const KEY_Q = 'CmdOrCtrl+Q'
 const KEY_W = 'CmdOrCtrl+W'
 
 function updateContextMenu() {
+  let updatesLabel = []
+
+  if (store.get('new_version_released')) {
+    updatesLabel = [
+      {
+        label: 'Update and Restart',
+        click: () => {
+          store.set('new_version_released', false)
+          autoUpdater.quitAndInstall()
+        }
+      }
+    ]
+  }
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
@@ -113,13 +131,7 @@ function updateContextMenu() {
         }
       }
     },
-    {
-      label: 'Check for Updates',
-      click: () => {
-        // "update-electron-app": "^3.0.0",
-        // updateElectronApp()
-      }
-    },
+    ...updatesLabel,
     {
       label: 'Quit',
       accelerator: KEY_Q,
@@ -135,16 +147,11 @@ function updateContextMenu() {
 function createMainWindow () {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
-  console.log('width', width)
-  console.log('height', height)
-
   mainWindow = new BrowserWindow({
     x: 0,
     y: 0,
-    width: 500,
-    height: 500,
-    // width: width,
-    // height: height,
+    width: width, // 500
+    height: height, // 500
     transparent: true,
     hasShadow: false,
     frame: false,
@@ -216,7 +223,25 @@ app.on('ready', () => {
   updateContextMenu()
 
   registerGlobalShortcats()
+
+  checkNewVersion();
 })
+
+function checkNewVersion() {
+  if (!store.get('new_version_released')) {
+    autoUpdater.checkForUpdates()
+  }
+
+  autoUpdater.on('update-downloaded', () => {
+    store.set('new_version_released', true)
+    updateContextMenu()
+  })
+
+  autoUpdater.on('error', (_error) => {
+    store.set('new_version_released', false)
+    updateContextMenu()
+  })
+}
 
 app.on('will-quit', () => {
   unregisterShortcats();
@@ -292,7 +317,7 @@ ipcMain.handle('get_settings', () => {
   };
 });
 
-ipcMain.handle('set_settings', (event, newSettings) => {
+ipcMain.handle('set_settings', (_event, newSettings) => {
   console.log('New store: ', newSettings)
   store.set(newSettings)
 
