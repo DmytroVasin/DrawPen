@@ -95,16 +95,17 @@ export const filterClosePoints = (points) => {
   if (points.length <= 1) { return points }
 
   const result = [points[0]]
+  let lastPoint = result[0]
 
-  for (let i = 1; i < points.length - 1; i++) {
-    const lastPoint = result[result.length - 1];
-    const currentPoint = points[i];
+  for (let i = 1; i < points.length; i++) {
+    const currentPoint = points[i]
 
-    const lastSum = lastPoint[0] + lastPoint[1];
-    const currentSum = currentPoint[0] + currentPoint[1];
+    const lastSum = lastPoint[0] + lastPoint[1]
+    const currentSum = currentPoint[0] + currentPoint[1]
 
     if (Math.abs(currentSum - lastSum) > 1) {
-      result.push(currentPoint);
+      lastPoint = currentPoint
+      result.push(currentPoint)
     }
   }
 
