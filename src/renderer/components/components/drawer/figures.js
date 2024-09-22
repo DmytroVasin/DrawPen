@@ -186,19 +186,13 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
   const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
 
   let fillStyle = colorList[colorIndex].color
-  let shadowColor = '#777';
+  let shadowColor = '#222';
   let shadowBlur = 4;
   let shadowOffsetX = 1;
   let shadowOffsetY = 2;
 
   if (colorList[colorIndex].name === 'color_rainbow') {
-    const color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
-
-    fillStyle = color;
-    shadowColor = '#CCC';
-    shadowBlur = 1;
-    shadowOffsetX = 0;
-    shadowOffsetY = 1;
+    fillStyle = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
   }
 
   ctx.fillStyle = fillStyle;
