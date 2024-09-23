@@ -20,7 +20,7 @@
 
 ![DrawPen](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/main.png?raw=true)
 
-Demo can be found [here](https://youtu.be/__todo__)
+![DrawPen - Usage](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/main.gif?raw=true)
 
 ### Installation
 
