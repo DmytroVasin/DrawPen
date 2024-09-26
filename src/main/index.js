@@ -57,8 +57,12 @@ let foregroundMode = true
 let showWhiteboard = store.get('show_whiteboard')
 let showToolbar = store.get('show_tool_bar')
 
-let activeIcon = path.resolve('assets/activeIcon.png')
-let disabledIcon = path.resolve('assets/disabledIcon.png')
+const iconSrc = {
+  DEFAULT: path.resolve('assets/web/trayIcon.png'),
+  darwin: path.resolve('assets/web/trayIconTemplate@2x.png'),
+}
+
+const trayIcon = iconSrc[process.platform] || iconSrc.DEFAULT
 
 const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
@@ -219,7 +223,7 @@ app.on('ready', () => {
 
   createMainWindow()
 
-  tray = new Tray(activeIcon)
+  tray = new Tray(trayIcon)
   updateContextMenu()
 
   registerGlobalShortcats()
@@ -349,7 +353,6 @@ function toggleWindow() {
 function showDrawWindow() {
   mainWindow.show()
 
-  tray.setImage(activeIcon)
   foregroundMode = true
   updateContextMenu() // Need to rerender the context menu
 }
@@ -359,7 +362,6 @@ function hideDrawWindow() {
 
   resetScreen()
 
-  tray.setImage(disabledIcon)
   foregroundMode = false
   updateContextMenu() // Need to rerender the context menu
 }

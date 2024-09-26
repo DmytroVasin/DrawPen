@@ -6,7 +6,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
     executableName: 'DrawPen',
-    icon: path.join(rootDir, 'assets/icon'),
+    icon: path.join(rootDir, 'assets/build/icon'),
     // osxSign: {
     //   identity: 'Developer ID Application: Your Name (TeamID)', // Ваша цифровая подпись Apple Developer
     //   hardenedRuntime: true, // Включает защищённую среду исполнения (требуется для некоторых API)
@@ -19,13 +19,20 @@ module.exports = {
     //   appleId: 'your-apple-id@example.com', // Apple ID разработчика
     //   appleIdPassword: 'your-app-specific-password', // Пароль для входа (используйте App-Specific Password)
     // }
+    // osxSign: {},
+    // osxNotarize: {
+    //   tool: 'notarytool',
+    //   appleId: process.env.APPLE_ID,
+    //   appleIdPassword: process.env.APPLE_PASSWORD,
+    //   teamId: process.env.APPLE_TEAM_ID,
+    // },
   },
   makers: [
     {
       name: '@electron-forge/maker-dmg',  // Maker для Mac
       config: {
-        background: path.join(rootDir, 'assets/background-dmg.png'),
-        icon: path.join(rootDir, 'assets/icon.icns'),
+        background: path.join(rootDir, 'assets/build/background-dmg.png'),
+        icon: path.join(rootDir, 'assets/build/icon.icns'),
         additionalDMGOptions: {
           window: { size: { width: 660, height: 500 } }
         },

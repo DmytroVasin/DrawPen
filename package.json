@@ -38,6 +38,8 @@
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "electron": "^32.0.1",
+    "electron-notarize": "^1.2.2",
+    "electron-osx-sign": "^0.6.0",
     "node-loader": "^2.0.0",
     "sass": "^1.77.8",
     "sass-loader": "^14.2.1",
