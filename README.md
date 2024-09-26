@@ -24,11 +24,7 @@
 
 ### Installation
 
-You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases) or install it via Homebrew Cask.
-
-```shell
-brew install --cask drawpen
-```
+You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases) or install it from [AppStore](https://todo...)
 
 ### Contributing
 

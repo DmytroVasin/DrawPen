@@ -157,6 +157,8 @@ function createMainWindow () {
     width: width, // 500
     height: height, // 500
     transparent: true,
+    resizable: false,
+    skipTaskbar: true,
     hasShadow: false,
     frame: false,
     webPreferences: {
