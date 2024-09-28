@@ -5,7 +5,7 @@ const rootDir = process.cwd();
 module.exports = {
   packagerConfig: {
     asar: true,
-    executableName: 'DrawPen',
+    executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     // osxSign: {
     //   identity: 'Developer ID Application: Your Name (TeamID)', // Ваша цифровая подпись Apple Developer
@@ -29,7 +29,7 @@ module.exports = {
   },
   makers: [
     {
-      name: '@electron-forge/maker-dmg',  // Maker для Mac
+      name: '@electron-forge/maker-dmg',  // Maker for Mac
       config: {
         background: path.join(rootDir, 'assets/build/background-dmg.png'),
         icon: path.join(rootDir, 'assets/build/icon.icns'),
@@ -38,21 +38,25 @@ module.exports = {
         },
       }
     },
+    {
+      name: "@electron-forge/maker-squirrel",  // Maker for Windows (squirrel)
+      config: {
+        // iconUrl: 'https://github.com/chaiNNer-org/chaiNNer/blob/main/src/public/icons/win/icon.ico',
+        // setupIcon: './src/public/icons/win/icon.ico',
+        // loadingGif: './src/public/icons/win/installing_loop.gif',
+      }
+    },
+    {
+      name: "@electron-forge/maker-deb",  // Maker for Linux (deb)
+      config: {}
+    },
+    {
+      name: "@electron-forge/maker-rpm",  // Maker for Linux (rpm)
+      config: {}
+    },
     // {
-    //   name: "@electron-forge/maker-squirrel",  // Maker для Windows (squirrel)
-    //   config: {}
-    // },
-    // {
-    //   name: "@electron-forge/maker-zip",  // Maker для создания zip-архива (включая macOS)
-    //   platforms: ["darwin", "linux"]
-    // },
-    // {
-    //   name: "@electron-forge/maker-deb",  // Maker для Linux (deb)
-    //   config: {}
-    // },
-    // {
-    //   name: "@electron-forge/maker-rpm",  // Maker для Linux (rpm)
-    //   config: {}
+    //   name: "@electron-forge/maker-zip",
+    //   platforms: ["darwin", "linux", "windows"]
     // }
   ],
   plugins: [

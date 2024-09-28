@@ -1,0 +1,57 @@
+# name: Release Installers
+
+# on:
+#   push:
+#     tags:
+#       - "v*"
+
+# jobs:
+#   macos:
+#     name: Release for macOS
+
+#     strategy:
+#       matrix:
+#         os: [macos-latest] # ubuntu-latest, windows-latest
+
+#     runs-on: ${{ matrix.os }}
+
+#     steps:
+#       - name: Install Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: 3.12
+
+#       # https://github.com/electron/forge/issues/2807
+#       # - run: python3 -m pip install setuptools --break-system-packages
+#       - name: Set up Python for appdmg to be installed
+#         run: python3 -m pip install setuptools
+
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: macOS certificate
+#         env:
+#           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+#           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+#         run: |
+#           KEY_CHAIN=build.keychain
+#           CERTIFICATE_P12=certificate.p12
+#           echo $APPLE_CERTIFICATE | base64 --decode > $CERTIFICATE_P12
+#           security create-keychain -p actions $KEY_CHAIN
+#           security default-keychain -s $KEY_CHAIN
+#           security unlock-keychain -p actions $KEY_CHAIN
+#           security import $CERTIFICATE_P12 -k $KEY_CHAIN -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign;
+#           security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
+#           rm -fr *.p12
+
+#       - name: publish
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           APPLE_ID: ${{ secrets.APPLE_ID }}
+#           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+#           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+#           APPLE_SIGNING_ID: ${{ secrets.APPLE_SIGNING_ID }}
+#         shell: bash
+#         run: npm run publish -- --dry-run --arch=universal
