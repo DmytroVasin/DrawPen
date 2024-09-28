@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.png?raw=true" height="128">
+  <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.png?raw=true" height="200">
   <h3 align="center">Draw Pen</h3>
   <p align="center">An open-source screen annotation tool<p>
 </p>
