@@ -229,8 +229,8 @@ const ToolBar = ({
           </ul>
         </div>
       </div>
-      <div className="toolbar__draglines">
-        <div className="draglines rotated" onMouseDown={onMouseDown}>
+      <div className="toolbar__draglines" onMouseDown={onMouseDown}>
+        <div className="draglines rotated">
           <div />
           <div />
           <div />

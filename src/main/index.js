@@ -80,7 +80,7 @@ function updateContextMenu() {
       {
         label: 'Update and Restart',
         click: () => {
-          store.set('new_version_released', false)
+          store.clear()
           autoUpdater.quitAndInstall()
         }
       }
@@ -360,9 +360,8 @@ function showDrawWindow() {
 }
 
 function hideDrawWindow() {
-  mainWindow.hide()
-
   resetScreen()
+  mainWindow.hide()
 
   foregroundMode = false
   updateContextMenu() // Need to rerender the context menu

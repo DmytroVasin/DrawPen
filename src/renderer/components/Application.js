@@ -393,6 +393,7 @@ const Application = (settings) => {
 
     setActiveFigureInfo(null);
     setAllFigures([]);
+    setLaserFigure([]);
   };
 
   const handleToggleToolbar = () => {

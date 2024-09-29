@@ -49,7 +49,7 @@ const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColor
 }
 
 const activeColorAndWidth = () => {
-  return ['#FFF', 1]
+  return ['#FFF', 2]
 }
 
 const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
