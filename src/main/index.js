@@ -154,10 +154,10 @@ function createMainWindow () {
   mainWindow = new BrowserWindow({
     x: 0,
     y: 0,
-    width: width, // 500
-    height: height, // 500
+    width: width,
+    height: height,
     transparent: true,
-    resizable: false,
+    resizable: true,
     skipTaskbar: true,
     hasShadow: false,
     frame: false,

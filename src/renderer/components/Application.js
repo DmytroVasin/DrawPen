@@ -5,6 +5,7 @@ import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
+import DisableZoom from './components/DisableZoom.js';
 import { filterClosePoints, getMouseCoordinates } from './utils/general.js';
 import {
   IsOnLine,
@@ -470,6 +471,8 @@ const Application = (settings) => {
             Icons={Icons}
           />
       }
+
+      <DisableZoom />
     </div>
   );
 };

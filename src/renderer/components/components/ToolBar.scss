@@ -28,8 +28,6 @@
   }
 
   .toolbar__buttons {
-    position: absolute;
-
     button {
       padding: 2px;
       width: 20px;
@@ -39,38 +37,21 @@
 
   .toolbar__draglines {
     display: flex;
-    padding: 0 15px;
+    padding: 0 10px;
     align-items: center;
     cursor: move;
 
     .draglines {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 75%;
-      width: 15px;
-      flex-direction: row;
-
-      &.rotated {
-        transform: rotate(180deg);
-      }
+      display: grid;
+      grid-template-columns: repeat(2, min-content);
+      row-gap: 2px;
+      column-gap: 4px;
 
       div {
-        border: 1px solid #000;
-        border-radius: 15px;
-        width: 0;
-
-        &:nth-child(1) {
-          height: 20%;
-        }
-
-        &:nth-child(2) {
-          height: 50%;
-        }
-
-        &:nth-child(3) {
-          height: 85%;
-        }
+        border-radius: 50%;
+        width: 3px;
+        height: 3px;
+        background-image: radial-gradient(circle at 50% 0, #C6C6C6, #666666);
       }
     }
   }
@@ -112,17 +93,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 30px;
-        height: 30px;
-        margin: 0 5px;
+        width: 26px;
+        height: 26px;
+        margin: 0 4px;
         border: 1px solid transparent;
 
         button {
           padding: 0;
 
           svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             pointer-events: none;
           }
         }
@@ -152,39 +133,39 @@
         &.cross-line {
           border: none;
           background-color: #4c4c4c;
-          height: 24px;
+          height: 20px;
           width: 2px;
-          margin: 0 5px;
+          margin: 0 4px;
         }
       }
 
       .toolbar__width-button {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         border: 2px solid #000;
 
         div {
-          height: 18px;
+          height: 15px;
           background-color: #000;
           transform: rotate(45deg);
 
           &.light {
-            width: 3px;
+            width: 2px;
           }
           &.medium {
-            width: 5px;
+            width: 4px;
           }
           &.bold {
-            width: 8px;
+            width: 6px;
           }
         }
       }
 
       .toolbar__color-picker {
         position: relative;
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         border: none;
 
@@ -193,8 +174,8 @@
           content: "";
           top: 50%;
           left: 50%;
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
           background: inherit;
           border-radius: 50%;
           border: 2px solid #fff;

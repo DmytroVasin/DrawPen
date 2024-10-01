@@ -136,13 +136,6 @@ const ToolBar = ({
           <Icons.MdOutlineCancel size={16} />
         </button>
       </div>
-      <div className="toolbar__draglines" onMouseDown={onMouseDown}>
-        <div className="draglines">
-          <div />
-          <div />
-          <div />
-        </div>
-      </div>
       <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
@@ -230,7 +223,12 @@ const ToolBar = ({
         </div>
       </div>
       <div className="toolbar__draglines" onMouseDown={onMouseDown}>
-        <div className="draglines rotated">
+        <div className="draglines">
+          <div />
+          <div />
+          <div />
+          <div />
+          <div />
           <div />
           <div />
           <div />

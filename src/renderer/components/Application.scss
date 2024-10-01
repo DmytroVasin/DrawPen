@@ -1,6 +1,6 @@
 :root {
-  --toolbar-width: 382px; // Equal to TOOLBAR_WIDTH
-  --toolbar-height: 55px;
+  --toolbar-width: calc(236px + 20px + 30px);
+  --toolbar-height: 44px;
 
   --border-size: 5px; // Equals to ZONE_BORDER
   --border-color: #B2F2BB;
