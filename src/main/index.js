@@ -161,6 +161,7 @@ function createMainWindow () {
     skipTaskbar: true,
     hasShadow: false,
     frame: false,
+    alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: false,
       preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -169,7 +170,6 @@ function createMainWindow () {
 
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.setAlwaysOnTop(true);
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   // mainWindow.setIgnoreMouseEvents(true);
 
