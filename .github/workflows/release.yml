@@ -1,14 +1,17 @@
-name: Build Installers
+name: Release Installers
 
-on: pull_request
+on:
+  push:
+    tags:
+      - "v*"
 
 jobs:
-  macos:
-    name: Build for macOS
+  release-macos:
+    name: Release for macOS
 
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-13, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -47,13 +50,14 @@ jobs:
       #     security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
       #     rm -fr *.p12
 
-      - run: npm run make # -- --arch=universal
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_${{ matrix.os }}
-          path: out/make
-          if-no-files-found: error
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # APPLE_SIGNING_ID: ${{ secrets.APPLE_SIGNING_ID }}
+        run: npm run publish #  -- --arch=universal
 
   linux:
     name: Build for Linux
@@ -79,13 +83,10 @@ jobs:
       # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
       - run: npm install
 
-      - run: npm run make
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_${{ matrix.os }}
-          path: out/make
-          if-no-files-found: error
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
 
   windows:
     name: Build for Windows
@@ -112,10 +113,7 @@ jobs:
 
       - run: npm install
 
-      - run: npm run make
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_${{ matrix.os }}
-          path: out/make
-          if-no-files-found: error
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish

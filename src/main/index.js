@@ -152,6 +152,7 @@ function createMainWindow () {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   mainWindow = new BrowserWindow({
+    show: false,
     x: 0,
     y: 0,
     width: width,
@@ -185,10 +186,15 @@ function createMainWindow () {
   mainWindow.on('blur', () => {
     unregisterShortcats()
   })
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.show()
+  })
 }
 
 function createAboutWindow() {
   aboutWindow = new BrowserWindow({
+    show: false,
     width: 250,
     height: 250,
     resizable: false,
@@ -210,6 +216,10 @@ function createAboutWindow() {
   // Clear the reference when the window is closed
   aboutWindow.on('closed', () => {
     aboutWindow = null
+  })
+
+  aboutWindow.webContents.on('did-finish-load', () => {
+    aboutWindow.show()
   })
 
   // Open URL in user's browser.
@@ -234,19 +244,45 @@ app.on('ready', () => {
 })
 
 function checkNewVersion() {
-  if (!store.get('new_version_released')) {
-    autoUpdater.checkForUpdates()
-  }
 
-  autoUpdater.on('update-downloaded', () => {
-    store.set('new_version_released', true)
-    updateContextMenu()
-  })
 
-  autoUpdater.on('error', (_error) => {
-    store.set('new_version_released', false)
-    updateContextMenu()
-  })
+  autoUpdater.updateConfigPath = path.resolve('assets/dev-app-update.yml');
+
+  console.log('updateConfigPath', path.resolve('assets/dev-app-update.yml'))
+
+  autoUpdater.allowPrerelease = true
+  autoUpdater.forceDevUpdateConfig = true
+
+  autoUpdater.checkForUpdates()
+
+  // if (!store.get('new_version_released')) {
+  //   // autoUpdater.checkForUpdates()
+  // }
+
+  // autoUpdater.on('update-downloaded', () => {
+  //   // store.set('new_version_released', true)
+  //   // updateContextMenu()
+  // })
+
+  // autoUpdater.on('error', (_error) => {
+  //   // store.set('new_version_released', false)
+  //   // updateContextMenu()
+  // })
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for update...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available.', info);
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Update not available.', info);
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Error in auto-updater.', err);
+  });
 }
 
 app.on('will-quit', () => {

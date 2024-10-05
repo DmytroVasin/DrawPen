@@ -29,8 +29,10 @@ module.exports = {
   },
   makers: [
     {
-      name: '@electron-forge/maker-dmg',  // Maker for Mac
+      name: '@electron-forge/maker-dmg',
       config: {
+        name: packageJson.productName,
+        overwrite: true, // Необов'язковий параметр
         background: path.join(rootDir, 'assets/build/background-dmg.png'),
         icon: path.join(rootDir, 'assets/build/icon.icns'),
         additionalDMGOptions: {
@@ -41,23 +43,23 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",  // Maker for Windows (squirrel)
       config: {
-        // iconUrl: 'https://github.com/chaiNNer-org/chaiNNer/blob/main/src/public/icons/win/icon.ico',
-        // setupIcon: './src/public/icons/win/icon.ico',
+        setupIcon: path.join(rootDir, 'assets/build/icon.ico'),
+        iconUrl: 'https://raw.githubusercontent.com/DmytroVasin/DrawPen/main/assets/build/icon.ico'
         // loadingGif: './src/public/icons/win/installing_loop.gif',
       }
     },
     {
-      name: "@electron-forge/maker-deb",  // Maker for Linux (deb)
+      name: "@electron-forge/maker-deb",
       config: {}
     },
     {
-      name: "@electron-forge/maker-rpm",  // Maker for Linux (rpm)
+      name: "@electron-forge/maker-rpm",
       config: {}
     },
-    // {
-    //   name: "@electron-forge/maker-zip",
-    //   platforms: ["darwin", "linux", "windows"]
-    // }
+    {
+      name: "@electron-forge/maker-zip",
+      platforms: ["darwin", "linux", "windows"]
+    }
   ],
   plugins: [
     {
@@ -104,7 +106,6 @@ module.exports = {
           owner: packageJson.author.name,
           name: packageJson.productName,
         },
-        prerelease: false,
         draft: true
       }
     }

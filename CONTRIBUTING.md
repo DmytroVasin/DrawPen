@@ -1,7 +1,5 @@
 # Contributing
 
-# Contributing
-
 https://github.com/DmytroVasin/DrawPen
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device
@@ -15,3 +13,11 @@ $ npm run package
 ```
 
 After that, you'll see the binary in the `out` folder 😀
+
+---
+
+NOTE: The app creates a setting file to keep data between restarts, the path can be found here
+```
+# app.getPath('userData')
+rm /Users/your_user_name/Library/Application\ Support/drawpen/config.json
+```
