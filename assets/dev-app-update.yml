@@ -1,5 +1,0 @@
-provider: github
-owner: DmytroVasin
-repo: DrawPen
-private: false
-allowPrerelease: true

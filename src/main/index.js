@@ -1,13 +1,9 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
-// import { autoUpdater } from 'electron-updater';
 import path from 'path';
 
 const schema = {
-  new_version_released: {
-    type: 'boolean',
-    default: false
-  },
   show_whiteboard: {
     type: 'boolean',
     default: false
@@ -73,20 +69,6 @@ const KEY_Q = 'CmdOrCtrl+Q'
 const KEY_W = 'CmdOrCtrl+W'
 
 function updateContextMenu() {
-  let updatesLabel = []
-
-  if (store.get('new_version_released')) {
-    updatesLabel = [
-      {
-        label: 'Update and Restart',
-        click: () => {
-          store.clear()
-          // autoUpdater.quitAndInstall()
-        }
-      }
-    ]
-  }
-
   const contextMenu = Menu.buildFromTemplate([
     {
       label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
@@ -135,7 +117,6 @@ function updateContextMenu() {
         }
       }
     },
-    ...updatesLabel,
     {
       label: 'Quit',
       accelerator: KEY_Q,
@@ -180,7 +161,6 @@ function createMainWindow () {
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  // mainWindow.setIgnoreMouseEvents(true);
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -247,48 +227,8 @@ app.on('ready', () => {
 
   registerGlobalShortcats()
 
-  checkNewVersion();
+  updateElectronApp()
 })
-
-function checkNewVersion() {
-  // autoUpdater.updateConfigPath = path.resolve('assets/dev-app-update.yml');
-
-  // console.log('updateConfigPath', path.resolve('assets/dev-app-update.yml'))
-
-  // autoUpdater.allowPrerelease = true
-  // autoUpdater.forceDevUpdateConfig = true
-
-  // autoUpdater.checkForUpdates()
-
-  // // if (!store.get('new_version_released')) {
-  // //   // autoUpdater.checkForUpdates()
-  // // }
-
-  // // autoUpdater.on('update-downloaded', () => {
-  // //   // store.set('new_version_released', true)
-  // //   // updateContextMenu()
-  // // })
-
-  // // autoUpdater.on('error', (_error) => {
-  // //   // store.set('new_version_released', false)
-  // //   // updateContextMenu()
-  // // })
-  // autoUpdater.on('checking-for-update', () => {
-  //   console.log('Checking for update...');
-  // });
-
-  // autoUpdater.on('update-available', (info) => {
-  //   console.log('Update available.', info);
-  // });
-
-  // autoUpdater.on('update-not-available', (info) => {
-  //   console.log('Update not available.', info);
-  // });
-
-  // autoUpdater.on('error', (err) => {
-  //   console.error('Error in auto-updater.', err);
-  // });
-}
 
 app.on('will-quit', () => {
   unregisterShortcats();

@@ -50,8 +50,8 @@
     "webpack": "^5.94.0"
   },
   "dependencies": {
+    "update-electron-app": "^3.0.0",
     "electron-store": "^10.0.0",
-    "electron-updater": "^6.3.4",
     "lazy-brush": "^2.0.1",
     "lodash.throttle": "^4.1.1",
     "perfect-freehand": "^1.2.2",
