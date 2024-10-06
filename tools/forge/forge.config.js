@@ -32,7 +32,7 @@ module.exports = {
       name: '@electron-forge/maker-dmg',
       config: {
         name: packageJson.productName,
-        overwrite: true, // Необов'язковий параметр
+        overwrite: true,
         background: path.join(rootDir, 'assets/build/background-dmg.png'),
         icon: path.join(rootDir, 'assets/build/icon.icns'),
         additionalDMGOptions: {
@@ -41,11 +41,11 @@ module.exports = {
       }
     },
     {
-      name: "@electron-forge/maker-squirrel",  // Maker for Windows (squirrel)
+      name: "@electron-forge/maker-squirrel",
       config: {
         setupIcon: path.join(rootDir, 'assets/build/icon.ico'),
-        iconUrl: 'https://raw.githubusercontent.com/DmytroVasin/DrawPen/main/assets/build/icon.ico'
-        // loadingGif: './src/public/icons/win/installing_loop.gif',
+        iconUrl: 'https://raw.githubusercontent.com/DmytroVasin/DrawPen/main/assets/build/icon.ico',
+        loadingGif: path.join(rootDir, 'assets/build/loading.gif')
       }
     },
     {

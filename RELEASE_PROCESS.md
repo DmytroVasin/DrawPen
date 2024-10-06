@@ -34,7 +34,7 @@
 - Mark Release as "Published"
 
 
-### 3. Debug/Rollback:
+### 4. Debug/Rollback:
 
 - Check all tags:
 

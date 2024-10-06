@@ -46,17 +46,22 @@ const Application = (settings) => {
   const initialShowWhiteboard = settings.show_whiteboard
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
+  let initialFigures = []
+
+  if (process.env.NODE_ENV === 'development') {
+    initialFigures = [
+      { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
+    ]
+  }
 
   // ================================================================================================
 
   const [rainbowColorDeg, updateRainbowColorDeg] = useState(initialColorDeg);
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
-  const [allFigures, setAllFigures] = useState([
-    { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-    { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-    { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
-    { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
-  ]);
+  const [allFigures, setAllFigures] = useState(initialFigures);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [activeTool, setActiveTool] = useState(initialActiveTool);
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
