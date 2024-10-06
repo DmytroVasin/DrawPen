@@ -132,7 +132,7 @@ const ToolBar = ({
   return (
     <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
-        <button onClick={handleCloseToolBar}>
+        <button onClick={handleCloseToolBar} title="Close">
           <Icons.MdOutlineCancel size={16} />
         </button>
       </div>
@@ -140,35 +140,37 @@ const ToolBar = ({
         <div className="toolbar__body">
           <ul className="toolbar__items">
             <li className={activeTool === "pen" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("pen")}>
+              <button onClick={() => handleChangeTool("pen")} title="Pen">
                 <Icons.FaPaintBrush />
               </button>
             </li>
             <li className={["arrow", "rectangle", "oval", "line"].includes(activeTool) ? "active more_figures" : undefined}>
-              <button onClick={() => pickFigureOrSwitchView()}>
+              <button onClick={() => pickFigureOrSwitchView()} title="Shapes">
                 {renderGroupIcon()}
               </button>
             </li>
             <li className={activeTool === "laser" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("laser")}>
+              <button onClick={() => handleChangeTool("laser")} title="Laser">
                 <Icons.GiLaserburn />
               </button>
             </li>
             <li className="cross-line"></li>
             <li>
               <button
-                className={`toolbar__color-picker ${colorList[activeColorIndex].name}`}
+                className={`toolbar__color-picker ${colorList[activeColorIndex].name} ${activeTool === "laser" ? "color_laser" : undefined}`}
                 onClick={() => switchView("color-slide")}
+                title="Change Color"
+                disabled={activeTool === "laser"}
               />
             </li>
             <li>
-              <button className="toolbar__width-button" onClick={() => switchView("width-slide")}>
+              <button className="toolbar__width-button" onClick={() => switchView("width-slide")} title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
               </button>
             </li>
             <li className="cross-line"></li>
             <li>
-              <button onClick={handleReset}>
+              <button onClick={handleReset} title="Clear All">
                 <Icons.FaEraser />
               </button>
             </li>
