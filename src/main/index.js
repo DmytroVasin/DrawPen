@@ -149,7 +149,14 @@ function updateContextMenu() {
 }
 
 function createMainWindow () {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  let { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  let isResizable = false
+
+  if (process.env.NODE_ENV === 'development') {
+    width = 500
+    height = 500
+    isResizable = true
+  }
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -158,7 +165,7 @@ function createMainWindow () {
     width: width,
     height: height,
     transparent: true,
-    resizable: true,
+    resizable: isResizable,
     skipTaskbar: true,
     hasShadow: false,
     frame: false,
