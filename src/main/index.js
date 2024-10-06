@@ -163,6 +163,7 @@ function createMainWindow () {
     hasShadow: false,
     frame: false,
     alwaysOnTop: true,
+    skipTaskbar: true,
     webPreferences: {
       nodeIntegration: false,
       preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -231,8 +232,7 @@ function createAboutWindow() {
 }
 
 app.on('ready', () => {
-  app.dock.hide()
-
+  hideDock()
   createMainWindow()
 
   tray = new Tray(trayIcon)
@@ -298,6 +298,12 @@ app.on('activate', () => {
     createMainWindow()
   }
 })
+
+function hideDock() {
+  if (process.platform === 'darwin') {
+    app.dock.hide();
+  }
+}
 
 function registerGlobalShortcats() {
   globalShortcut.register(KEY_SHOW_HIDE_APP, () => {
