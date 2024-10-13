@@ -5,13 +5,13 @@
 </p>
 
 <p align="center">
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.3.Setup.exe'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.4.Setup.exe'>
     <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
   </a>
   <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen.dmg'>
     <img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.3_amd64.deb'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.4_amd64.deb'>
     <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
   </a>
 </p>
