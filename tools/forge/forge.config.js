@@ -31,7 +31,6 @@ module.exports = {
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        name: packageJson.productName,
         overwrite: true,
         background: path.join(rootDir, 'assets/build/background-dmg.png'),
         icon: path.join(rootDir, 'assets/build/icon.icns'),
