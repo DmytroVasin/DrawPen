@@ -8,7 +8,7 @@ module.exports = {
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
-    // osxSign: {},
+    osxSign: {},
     // osxNotarize: {
     //   tool: 'notarytool',
     //   appleId: process.env.APPLE_ID,
