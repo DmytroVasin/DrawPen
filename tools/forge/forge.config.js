@@ -7,23 +7,12 @@ module.exports = {
     asar: true,
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
-    // osxSign: {
-    //   identity: 'Developer ID Application: Your Name (TeamID)', // Ваша цифровая подпись Apple Developer
-    //   hardenedRuntime: true, // Включает защищённую среду исполнения (требуется для некоторых API)
-    //   entitlements: 'path/to/entitlements.plist', // Путь к файлу с разрешениями (опционально)
-    //   'entitlements-inherit': 'path/to/entitlements.plist', // Права наследования для дочерних процессов (опционально)
-    //   'gatekeeper-assess': false, // Проверка с помощью Gatekeeper (по умолчанию false)
-    // },
-    // osxNotarize: {
-    //   appBundleId: 'com.example.app', // Bundle ID вашего приложения
-    //   appleId: 'your-apple-id@example.com', // Apple ID разработчика
-    //   appleIdPassword: 'your-app-specific-password', // Пароль для входа (используйте App-Specific Password)
-    // }
+    appBundleId: packageJson.appId,
     // osxSign: {},
     // osxNotarize: {
     //   tool: 'notarytool',
     //   appleId: process.env.APPLE_ID,
-    //   appleIdPassword: process.env.APPLE_PASSWORD,
+    //   appleIdPassword: process.env.APPLE_ID_PASSWORD,
     //   teamId: process.env.APPLE_TEAM_ID,
     // },
   },

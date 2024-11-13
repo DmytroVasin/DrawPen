@@ -3,7 +3,7 @@
   "productName": "DrawPen",
   "version": "0.0.5",
   "description": "DrawPen is a screen annotation tool built with web technology",
-  "appId": "todo",
+  "appId": "app.drawpen",
   "author": {
     "name": "DmytroVasin",
     "email": "dmytro.vasin@gmail.com"
