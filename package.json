@@ -17,6 +17,7 @@
   "main": ".webpack/main",
   "scripts": {
     "start": "NODE_ENV=development electron-forge start",
+    "package_no_sign": "electron-forge package -- --no-sign",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish"
@@ -42,6 +43,7 @@
     "babel-loader": "^9.1.3",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
+    "dotenv": "^16.4.5",
     "electron": "^32.0.1",
     "node-loader": "^2.0.0",
     "sass": "^1.77.8",
@@ -50,14 +52,14 @@
     "webpack": "^5.94.0"
   },
   "dependencies": {
-    "update-electron-app": "^3.0.0",
     "electron-store": "^10.0.0",
     "lazy-brush": "^2.0.1",
     "lodash.throttle": "^4.1.1",
     "perfect-freehand": "^1.2.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-icons": "^5.2.1"
+    "react-icons": "^5.2.1",
+    "update-electron-app": "^3.0.0"
   },
   "browserslist": {
     "development": [
