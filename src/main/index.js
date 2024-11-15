@@ -49,7 +49,12 @@ let tray
 let mainWindow
 let aboutWindow
 
-let foregroundMode = true
+let foregroundMode = false
+
+if (process.env.NODE_ENV === 'development') {
+  foregroundMode = true
+}
+
 let showWhiteboard = store.get('show_whiteboard')
 let showToolbar = store.get('show_tool_bar')
 
@@ -176,7 +181,9 @@ function createMainWindow () {
   })
 
   mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.show()
+    if (foregroundMode) {
+      mainWindow.show()
+    }
   })
 }
 
