@@ -1,128 +1,128 @@
-name: Build Installers
+# name: Build Installers
 
-on: push
-# on: pull_request
+# on: push
+# # on: pull_request
 
-jobs:
-  macos:
-    name: Build for macOS
+# jobs:
+#   macos:
+#     name: Build for macOS
 
-    strategy:
-      matrix:
-        os: [macos-13, macos-latest]
+#     strategy:
+#       matrix:
+#         os: [macos-13, macos-latest]
 
-    runs-on: ${{ matrix.os }}
+#     runs-on: ${{ matrix.os }}
 
-    steps:
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+#     steps:
+#       - name: Install Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: 3.12
 
-      # https://github.com/electron/forge/issues/2807
-      # - run: python3 -m pip install setuptools --break-system-packages
-      - name: Set up Python for appdmg to be installed
-        run: python3 -m pip install setuptools
+#       # https://github.com/electron/forge/issues/2807
+#       # - run: python3 -m pip install setuptools --break-system-packages
+#       - name: Set up Python for appdmg to be installed
+#         run: python3 -m pip install setuptools
 
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
 
-      - run: |
-          npm install
-          npm install -g appdmg@0.6.6
+#       - run: |
+#           npm install
+#           npm install -g appdmg@0.6.6
 
-      - name: macOS certificate
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.DEVELOPER_ID_APPLICATION }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
-        run: |
-          KEY_CHAIN=build.keychain
-          CERTIFICATE_P12=certificate.p12
-          echo $APPLE_CERTIFICATE | base64 --decode > $CERTIFICATE_P12
-          security create-keychain -p actions $KEY_CHAIN
-          security default-keychain -s $KEY_CHAIN
-          security unlock-keychain -p actions $KEY_CHAIN
-          security import $CERTIFICATE_P12 -k $KEY_CHAIN -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign;
-          security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
-          rm -fr *.p12
+#       - name: macOS certificate
+#         env:
+#           APPLE_CERTIFICATE: ${{ secrets.DEVELOPER_ID_APPLICATION }}
+#           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
+#         run: |
+#           KEY_CHAIN=build.keychain
+#           CERTIFICATE_P12=certificate.p12
+#           echo $APPLE_CERTIFICATE | base64 --decode > $CERTIFICATE_P12
+#           security create-keychain -p actions $KEY_CHAIN
+#           security default-keychain -s $KEY_CHAIN
+#           security unlock-keychain -p actions $KEY_CHAIN
+#           security import $CERTIFICATE_P12 -k $KEY_CHAIN -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign;
+#           security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
+#           rm -fr *.p12
 
-      - name: Run Make
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          npm run make
+#       - name: Run Make
+#         env:
+#           APPLE_ID: ${{ secrets.APPLE_ID }}
+#           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+#           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+#         run: |
+#           npm run make
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_${{ matrix.os }}
-          path: out/make
-          if-no-files-found: error
+#       - uses: actions/upload-artifact@v4
+#         with:
+#           name: build_${{ matrix.os }}
+#           path: out/make
+#           if-no-files-found: error
 
-  # linux:
-  #   name: Build for Linux
+#   # linux:
+#   #   name: Build for Linux
 
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest]
+#   #   strategy:
+#   #     matrix:
+#   #       os: [ubuntu-latest]
 
-  #   runs-on: ${{ matrix.os }}
+#   #   runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+#   #   steps:
+#   #     - uses: actions/checkout@v4
+#   #     - uses: actions/setup-node@v4
+#   #       with:
+#   #         node-version: 20
 
-  #     # - name: Fix Permissions
-  #     #   # Workaround for https://github.com/electron/electron/issues/17972
-  #     #   run: |
-  #     #     sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
-  #     #     sudo chown root node_modules/electron/dist/chrome-sandbox
+#   #     # - name: Fix Permissions
+#   #     #   # Workaround for https://github.com/electron/electron/issues/17972
+#   #     #   run: |
+#   #     #     sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+#   #     #     sudo chown root node_modules/electron/dist/chrome-sandbox
 
-  #     # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
-  #     - run: npm install
+#   #     # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
+#   #     - run: npm install
 
-  #     - run: npm run make
+#   #     - run: npm run make
 
-  #     - uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build_${{ matrix.os }}
-  #         path: out/make
-  #         if-no-files-found: error
+#   #     - uses: actions/upload-artifact@v4
+#   #       with:
+#   #         name: build_${{ matrix.os }}
+#   #         path: out/make
+#   #         if-no-files-found: error
 
-  # windows:
-  #   name: Build for Windows
+#   # windows:
+#   #   name: Build for Windows
 
-  #   strategy:
-  #     matrix:
-  #       os: [windows-latest]
+#   #   strategy:
+#   #     matrix:
+#   #       os: [windows-latest]
 
-  #   runs-on: ${{ matrix.os }}
+#   #   runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+#   #   steps:
+#   #     - uses: actions/checkout@v4
+#   #     - uses: actions/setup-node@v4
+#   #       with:
+#   #         node-version: 20
 
-  #     # - name: Install Dependencies
-  #     #   # For some reason cmake.js sometimes skips the build step in CI on Windows in this
-  #     #   # case. So we install and execute cmake.js manually.
-  #     #   run: |
-  #     #     npm install cmake-js -g
-  #     #     npx cmake-js install
-  #     #     npm install
+#   #     # - name: Install Dependencies
+#   #     #   # For some reason cmake.js sometimes skips the build step in CI on Windows in this
+#   #     #   # case. So we install and execute cmake.js manually.
+#   #     #   run: |
+#   #     #     npm install cmake-js -g
+#   #     #     npx cmake-js install
+#   #     #     npm install
 
-  #     - run: npm install
+#   #     - run: npm install
 
-  #     - run: npm run make
+#   #     - run: npm run make
 
-  #     - uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build_${{ matrix.os }}
-  #         path: out/make
-  #         if-no-files-found: error
+#   #     - uses: actions/upload-artifact@v4
+#   #       with:
+#   #         name: build_${{ matrix.os }}
+#   #         path: out/make
+#   #         if-no-files-found: error
