@@ -60,9 +60,9 @@ module.exports = {
       name: '@electron-forge/plugin-webpack',
       config: {
         devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' data:`,
-        mainConfig: path.join(rootDir, 'tools/webpack/webpack.main.js'),
+        mainConfig: path.join(rootDir, 'tools/webpack/main.js'),
         renderer: {
-          config: path.join(rootDir, 'tools/webpack/webpack.renderer.js'),
+          config: path.join(rootDir, 'tools/webpack/renderer.js'),
           entryPoints: [
             {
               name: 'app_window',

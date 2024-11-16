@@ -1,4 +1,4 @@
-import './DrawDesk.css';
+import './DrawDesk.scss';
 
 import React, { useEffect, useRef } from 'react';
 import { getMouseCoordinates } from '../utils/general.js';

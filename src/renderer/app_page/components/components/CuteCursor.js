@@ -1,4 +1,4 @@
-import "./CuteCursor.css";
+import "./CuteCursor.scss";
 
 import React from "react";
 
