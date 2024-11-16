@@ -59,27 +59,23 @@ module.exports = {
     {
       name: '@electron-forge/plugin-webpack',
       config: {
-        // Fix content-security-policy error when image or video src isn't same origin
-        // Remove 'unsafe-eval' to get rid of console warning in development mode.
         devContentSecurityPolicy: `default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' data:`,
-        port: 3000,
-        loggerPort: 9000,
         mainConfig: path.join(rootDir, 'tools/webpack/webpack.main.js'),
         renderer: {
           config: path.join(rootDir, 'tools/webpack/webpack.renderer.js'),
           entryPoints: [
             {
               name: 'app_window',
-              html: path.join(rootDir, 'src/renderer/app.html'),
-              js: path.join(rootDir, 'src/renderer/index.js'),
+              html: path.join(rootDir, 'src/renderer/app_page/index.html'),
+              js: path.join(rootDir, 'src/renderer/app_page/index.js'),
               preload: {
-                js: path.join(rootDir, 'src/renderer/preload.js'),
+                js: path.join(rootDir, 'src/renderer/app_page/preload.js'),
               },
             },
             {
               name: 'about_window',
-              html: path.join(rootDir, 'src/renderer/about_page/about.html'),
-              js: path.join(rootDir, 'src/renderer/about_page/about.js'),
+              html: path.join(rootDir, 'src/renderer/about_page/index.html'),
+              js: path.join(rootDir, 'src/renderer/about_page/index.js'),
               preload: {
                 js: path.join(rootDir, 'src/renderer/about_page/preload.js'),
               },
