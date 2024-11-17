@@ -36,6 +36,9 @@ const schema = {
     type: 'string',
     default: 'arrow'
   },
+  active_monitor_id: {
+    type: 'number',
+  },
 };
 
 // app.getPath('userData') + '/config.json'
@@ -52,15 +55,15 @@ let aboutWindow
 let foregroundMode = false
 
 if (process.env.NODE_ENV === 'development') {
-  foregroundMode = true
+  // foregroundMode = true
 }
 
 let showWhiteboard = store.get('show_whiteboard')
 let showToolbar = store.get('show_tool_bar')
 
 const iconSrc = {
-  DEFAULT: path.resolve('assets/web/trayIcon.png'),
-  darwin: path.resolve('assets/web/trayIconTemplate@2x.png'),
+  DEFAULT: path.resolve(__dirname, '../renderer/assets/trayIcon.png'),
+  darwin: path.resolve(__dirname, '../renderer/assets/trayIconTemplate@2x.png'),
 }
 
 const trayIcon = iconSrc[process.platform] || iconSrc.DEFAULT
@@ -113,6 +116,14 @@ function updateContextMenu() {
     },
     { type: 'separator' },
     {
+      label: 'Reset to original',
+      click: () => {
+        store.clear()
+        mainWindow.reload()
+      }
+    },
+    { type: 'separator' },
+    {
       label: 'About DrawPen',
       click: () => {
         if (aboutWindow) {
@@ -134,8 +145,25 @@ function updateContextMenu() {
   tray.setContextMenu(contextMenu);
 }
 
+function getActiveMonitor() {
+  const activeMonitorId = store.get('active_monitor_id')
+
+  screen.getAllDisplays().forEach((display) => {
+    if (display.id === activeMonitorId) {
+      return display
+    }
+  })
+
+  const primaryDisplay = screen.getPrimaryDisplay()
+  store.set('active_monitor_id', primaryDisplay.id)
+
+  return primaryDisplay
+}
+
 function createMainWindow () {
-  let { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const mainDisplay = getActiveMonitor()
+
+  let { width, height } = mainDisplay.workAreaSize
   let isResizable = false
 
   if (process.env.NODE_ENV === 'development') {
@@ -182,14 +210,19 @@ function createMainWindow () {
 
   mainWindow.webContents.on('did-finish-load', () => {
     if (foregroundMode) {
-      mainWindow.show()
+      showWindowOnActiveScreen();
     }
   })
 }
 
 function createAboutWindow() {
+  const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  const { x, y } = currentDisplay.workArea;
+
   aboutWindow = new BrowserWindow({
     show: false,
+    x: x,
+    y: y,
     width: 250,
     height: 250,
     resizable: false,
@@ -200,6 +233,7 @@ function createAboutWindow() {
       preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
     }
   })
+  aboutWindow.center();
 
   aboutWindow.loadURL(ABOUT_WINDOW_WEBPACK_ENTRY)
 
@@ -217,11 +251,10 @@ function createAboutWindow() {
     aboutWindow.show()
   })
 
-  // Open URL in user's browser.
   aboutWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
 
-    return { action: "deny" }; // Prevent the app from opening the URL.
+    return { action: "deny" };
   })
 }
 
@@ -347,7 +380,7 @@ function toggleWindow() {
 }
 
 function showDrawWindow() {
-  mainWindow.show()
+  showWindowOnActiveScreen()
 
   foregroundMode = true
   updateContextMenu() // Need to rerender the context menu
@@ -381,4 +414,27 @@ function toggleWhiteboard() {
 
   mainWindow.webContents.send('toggle_whiteboard')
   updateContextMenu() // Need to rerender the context menu
+}
+
+function showWindowOnActiveScreen() {
+  const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+
+  if (store.get('active_monitor_id') === currentDisplay.id) {
+    mainWindow.show()
+    return
+  }
+
+  mainWindow.setBounds(currentDisplay.workArea)
+
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.setBounds({
+      width: 500,
+      height: 500
+    })
+  }
+
+  store.set('active_monitor_id', currentDisplay.id)
+  store.reset('tool_bar_x')
+  store.reset('tool_bar_y')
+  mainWindow.reload()
 }

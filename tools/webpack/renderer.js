@@ -31,8 +31,8 @@ const copyPlugins = [
   new CopyWebpackPlugin({
     patterns: [
       {
-        from: path.resolve('assets/web'),
-        to: path.resolve('.webpack/renderer/web'),
+        from: path.resolve('src/assets'),
+        to: path.resolve('.webpack/renderer/assets'),
       }
     ]
   })
