@@ -26,6 +26,17 @@
 
 You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases) or install it from [AppStore](https://todo...)
 
+### Keybindings
+
+| Command                                 | Keybindings                                                  | Comment |
+| --------------------------------------- | ------------------------------------------------------------ | - |
+| Show/Hide App                           | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | Global shortcut |
+| Show/Hide ToolBar                       | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>T</kbd> | |
+| Show/Hide Whiteboard                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>W</kbd> | |
+| Clear Desk                              | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>C</kbd> | |
+| Undo                                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Z</kbd> | |
+| Reset to original                       | | Resets all app settings <br /> (chosen colors, toolbar position, etc.)  |
+
 ### Contributing
 
 Please read our [Contributing Guidelines](CONTRIBUTING.md) for more information.
