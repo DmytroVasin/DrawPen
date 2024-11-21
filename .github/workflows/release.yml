@@ -59,61 +59,61 @@ jobs:
         run: |
           npm run publish
 
-  # linux:
-  #   name: Build for Linux
+  linux:
+    name: Build for Linux
 
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
 
-  #   runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-  #     # - name: Fix Permissions
-  #     #   # Workaround for https://github.com/electron/electron/issues/17972
-  #     #   run: |
-  #     #     sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
-  #     #     sudo chown root node_modules/electron/dist/chrome-sandbox
+      # - name: Fix Permissions
+      #   # Workaround for https://github.com/electron/electron/issues/17972
+      #   run: |
+      #     sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      #     sudo chown root node_modules/electron/dist/chrome-sandbox
 
-  #     # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
-  #     - run: npm install
+      # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
+      - run: npm install
 
-  #     - name: publish
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: npm run publish
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
 
-  # windows:
-  #   name: Build for Windows
+  windows:
+    name: Build for Windows
 
-  #   strategy:
-  #     matrix:
-  #       os: [windows-latest]
+    strategy:
+      matrix:
+        os: [windows-latest]
 
-  #   runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-  #     # - name: Install Dependencies
-  #     #   # For some reason cmake.js sometimes skips the build step in CI on Windows in this
-  #     #   # case. So we install and execute cmake.js manually.
-  #     #   run: |
-  #     #     npm install cmake-js -g
-  #     #     npx cmake-js install
-  #     #     npm install
+      # - name: Install Dependencies
+      #   # For some reason cmake.js sometimes skips the build step in CI on Windows in this
+      #   # case. So we install and execute cmake.js manually.
+      #   run: |
+      #     npm install cmake-js -g
+      #     npx cmake-js install
+      #     npm install
 
-  #     - run: npm install
+      - run: npm install
 
-  #     - name: publish
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: npm run publish
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
