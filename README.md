@@ -5,13 +5,13 @@
 </p>
 
 <p align="center">
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.5.Setup.exe'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.13.Setup.exe'>
     <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.5-arm64.dmg'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.13-arm64.dmg'>
     <img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.5_amd64.deb'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.13_amd64.deb'>
     <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
   </a>
 </p>
@@ -24,7 +24,7 @@
 
 ### Installation
 
-You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases) or install it from [AppStore](https://todo...)
+You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases)
 
 ### Keybindings
 
