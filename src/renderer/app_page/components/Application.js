@@ -1,6 +1,6 @@
 import './Application.scss';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
@@ -79,6 +79,7 @@ const Application = (settings) => {
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onCallUndo(handleUndo);
+    window.electronAPI.onActivateTool(handleActivateTool);
   }, []);
 
   useEffect(() => {
@@ -166,6 +167,10 @@ const Application = (settings) => {
 
   const handleChangeTool = (toolName) => {
     setActiveTool(toolName);
+
+    if (["arrow", "rectangle", "oval", "line"].includes(toolName)) {
+      setToolbarLastActiveFigure(toolName);
+    }
   };
 
   const moveFigureToTop = (figureId) => {
@@ -430,6 +435,12 @@ const Application = (settings) => {
     })
   };
 
+  const handleActivateTool = (toolName) => {
+    console.log('Main -> Renderer: Hot Key Press', toolName);
+
+    setActiveTool(toolName)
+  };
+
   return (
     <div id="root_wrapper" onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
       <div id="zone_borders"></div>
@@ -464,7 +475,6 @@ const Application = (settings) => {
             position={toolbarPosition}
             setPosition={setToolbarPosition}
             lastActiveFigure={toolbarLastActiveFigure}
-            setLastActiveFigure={setToolbarLastActiveFigure}
             activeTool={activeTool}
             activeColorIndex={activeColorIndex}
             activeWidthIndex={activeWidthIndex}

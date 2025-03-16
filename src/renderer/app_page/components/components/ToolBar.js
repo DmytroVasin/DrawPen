@@ -9,7 +9,6 @@ const ToolBar = ({
   position,
   setPosition,
   lastActiveFigure,
-  setLastActiveFigure,
   activeTool,
   activeColorIndex,
   activeWidthIndex,
@@ -84,12 +83,13 @@ const ToolBar = ({
     };
   }, [onMouseMove, onMouseUp]);
 
+  useEffect(() => {
+    setSlide("");
+  }, [activeTool])
+
   const pickTool = (tool) => {
     handleChangeTool(tool);
-    if (["arrow", "rectangle", "oval", "line"].includes(tool)) {
-      setLastActiveFigure(tool);
-    }
-    switchView("");
+    switchView("")
   };
 
   const onChangeColor = (index) => {

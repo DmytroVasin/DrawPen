@@ -30,6 +30,9 @@ You can download DrawPen for **free** from [releases](https://github.com/DmytroV
 
 | Command                                 | Keybindings                                                  | Comment |
 | --------------------------------------- | ------------------------------------------------------------ | - |
+| Activate Pen                            | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>1</kbd> | |
+| Activate Shapes (Arrow/Square/Circle)   | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>2</kbd> | |
+| Activate Laser                          | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>3</kbd> | |
 | Show/Hide App                           | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | Global shortcut |
 | Show/Hide ToolBar                       | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>T</kbd> | |
 | Show/Hide Whiteboard                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>W</kbd> | |
