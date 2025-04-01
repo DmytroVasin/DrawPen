@@ -74,9 +74,6 @@ const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+W'
 const KEY_CLEAR_DESK = 'CmdOrCtrl+C'
 const KEY_UNDO = 'CmdOrCtrl+Z'
 const KEY_Q = 'CmdOrCtrl+Q'
-const KEY_1 = 'CmdOrCtrl+1'
-const KEY_2 = 'CmdOrCtrl+2'
-const KEY_3 = 'CmdOrCtrl+3'
 
 function updateContextMenu() {
   const contextMenu = Menu.buildFromTemplate([
@@ -320,20 +317,6 @@ function registerShortcats() {
   globalShortcut.register(KEY_Q, () => {
     app.quit()
   })
-
-  globalShortcut.register(KEY_1, () => {
-    callActivateTool('pen')
-  })
-
-  globalShortcut.register(KEY_2, () => {
-    const shapeName = store.get('tool_bar_default_figure')
-
-    callActivateTool(shapeName)
-  })
-
-  globalShortcut.register(KEY_3, () => {
-    callActivateTool('laser')
-  })
 }
 
 function unregisterShortcats() {
@@ -342,9 +325,6 @@ function unregisterShortcats() {
   globalShortcut.unregister(KEY_CLEAR_DESK)
   globalShortcut.unregister(KEY_UNDO)
   globalShortcut.unregister(KEY_Q)
-  globalShortcut.unregister(KEY_1)
-  globalShortcut.unregister(KEY_2)
-  globalShortcut.unregister(KEY_3)
 }
 
 ipcMain.handle('get_app_version', () => {
@@ -428,10 +408,6 @@ function toggleWhiteboard() {
 
   mainWindow.webContents.send('toggle_whiteboard')
   updateContextMenu() // Need to rerender the context menu
-}
-
-function callActivateTool(tool) {
-  mainWindow.webContents.send('call_activate_tool', tool)
 }
 
 function showWindowOnActiveScreen() {

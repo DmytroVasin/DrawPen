@@ -5,13 +5,13 @@
 </p>
 
 <p align="center">
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.13.Setup.exe'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.14.Setup.exe'>
     <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.13-arm64.dmg'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.14-arm64.dmg'>
     <img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.13_amd64.deb'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.14_amd64.deb'>
     <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
   </a>
 </p>
@@ -30,9 +30,11 @@ You can download DrawPen for **free** from [releases](https://github.com/DmytroV
 
 | Command                                 | Keybindings                                                  | Comment |
 | --------------------------------------- | ------------------------------------------------------------ | - |
-| Activate Pen                            | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>1</kbd> | |
-| Activate Shapes (Arrow/Square/Circle)   | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>2</kbd> | |
-| Activate Laser                          | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>3</kbd> | |
+| Activate Pen                            | <kbd>1</kbd> | |
+| Activate/Switch Shapes (Arrow/Square/etc.)   | <kbd>2</kbd> | |
+| Activate Laser                          | <kbd>3</kbd> | |
+| Switch Color                            | <kbd>4</kbd> | |
+| Switch Thickness (Width)                | <kbd>5</kbd> | |
 | Show/Hide App                           | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | Global shortcut |
 | Show/Hide ToolBar                       | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>T</kbd> | |
 | Show/Hide Whiteboard                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>W</kbd> | |

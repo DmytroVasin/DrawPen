@@ -1,6 +1,6 @@
 import './Application.scss';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
@@ -22,6 +22,9 @@ import { MdOutlineCancel } from "react-icons/md";
 
 import {
   laserTime,
+  shapeList,
+  colorList,
+  widthList,
 } from './constants.js'
 
 const Icons = {
@@ -79,8 +82,49 @@ const Application = (settings) => {
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onCallUndo(handleUndo);
-    window.electronAPI.onActivateTool(handleActivateTool);
   }, []);
+
+
+  const handleKeyPress = useCallback((event) => {
+    if (isDrawing || isActiveFigureMoving()) {
+      return
+    }
+
+    switch (event.key) {
+      case '1':
+        handleChangeTool('pen');
+        break;
+      case '2':
+        let nextShape = toolbarLastActiveFigure;
+
+        if (activeTool === toolbarLastActiveFigure) {
+          const activeShapeIndex = shapeList.indexOf(activeTool);
+          const nextShapeIndex = (activeShapeIndex + 1) % shapeList.length;
+
+          nextShape = shapeList[nextShapeIndex];
+        }
+
+        handleChangeTool(nextShape);
+        break;
+      case '3':
+        handleChangeTool('laser');
+        break;
+      case '4':
+        handleChangeColor((activeColorIndex + 1) % colorList.length);
+        break;
+      case '5':
+        handleChangeWidth((activeWidthIndex + 1) % widthList.length);
+        break;
+    }
+  }, [isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   useEffect(() => {
     const debouncedUpdateSettings = debounce(() => {
@@ -168,7 +212,7 @@ const Application = (settings) => {
   const handleChangeTool = (toolName) => {
     setActiveTool(toolName);
 
-    if (["arrow", "rectangle", "oval", "line"].includes(toolName)) {
+    if (shapeList.includes(toolName)) {
       setToolbarLastActiveFigure(toolName);
     }
   };
@@ -299,7 +343,7 @@ const Application = (settings) => {
       rainbowColorDeg: rainbowColorDeg,
     };
 
-    if (['line', 'arrow', 'oval', 'rectangle'].includes(newFigure.type)) {
+    if (shapeList.includes(newFigure.type)) {
       newFigure.points.push([x, y]);
     }
 
@@ -344,7 +388,7 @@ const Application = (settings) => {
         return
       }
 
-      if (['line', 'arrow', 'oval', 'rectangle'].includes(activeTool)) {
+      if (shapeList.includes(activeTool)) {
         const currentFigure = allFigures[allFigures.length - 1];
 
         currentFigure.points[1] = [x, y];
@@ -433,12 +477,6 @@ const Application = (settings) => {
     setAllFigures((prevAllFigures) => {
       return prevAllFigures.slice(0, -1);
     })
-  };
-
-  const handleActivateTool = (toolName) => {
-    console.log('Main -> Renderer: Hot Key Press', toolName);
-
-    setActiveTool(toolName)
   };
 
   return (
