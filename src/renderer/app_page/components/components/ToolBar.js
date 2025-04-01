@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.scss";
-import { colorList, widthList } from "../constants.js";
+import { shapeList, colorList, widthList } from "../constants.js";
 
 const STICKY_DISTANCE = 15;
 const ZONE_BORDER = 5; // Equals to "--border-size"
@@ -85,7 +85,7 @@ const ToolBar = ({
 
   useEffect(() => {
     setSlide("");
-  }, [activeTool])
+  }, [activeTool, activeColorIndex, activeWidthIndex]);
 
   const pickTool = (tool) => {
     handleChangeTool(tool);
@@ -118,7 +118,7 @@ const ToolBar = ({
   };
 
   const pickFigureOrSwitchView = () => {
-    if (["arrow", "rectangle", "oval", "line"].includes(activeTool)) {
+    if (shapeList.includes(activeTool)) {
       switchView("tool-slide");
     } else {
       pickTool(lastActiveFigure);
@@ -144,7 +144,7 @@ const ToolBar = ({
                 <Icons.FaPaintBrush />
               </button>
             </li>
-            <li className={["arrow", "rectangle", "oval", "line"].includes(activeTool) ? "active more_figures" : undefined}>
+            <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined}>
               <button onClick={() => pickFigureOrSwitchView()} title="Shapes">
                 {renderGroupIcon()}
               </button>
