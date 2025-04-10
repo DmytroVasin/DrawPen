@@ -1,4 +1,5 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import path from 'path';
@@ -55,7 +56,7 @@ let aboutWindow
 let foregroundMode = false
 
 if (process.env.NODE_ENV === 'development') {
-  // foregroundMode = true
+  foregroundMode = true
 }
 
 let showWhiteboard = store.get('show_whiteboard')
@@ -267,6 +268,10 @@ app.on('ready', () => {
   registerGlobalShortcats()
 
   updateElectronApp()
+
+  if (process.env.NODE_ENV === 'development') {
+    installExtension([REACT_DEVELOPER_TOOLS])
+  }
 })
 
 app.on('will-quit', () => {

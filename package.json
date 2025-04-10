@@ -43,6 +43,7 @@
     "css-loader": "^7.1.2",
     "dotenv": "^16.4.5",
     "electron": "33.2.0",
+    "electron-devtools-installer": "^4.0.0",
     "sass": "^1.77.8",
     "sass-loader": "^14.2.1",
     "style-loader": "^4.0.0",

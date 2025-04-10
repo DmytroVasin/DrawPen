@@ -5,8 +5,9 @@ import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
+import RippleEffect from './components/RippleEffect.js';
 import DisableZoom from './components/DisableZoom.js';
-import { filterClosePoints, getMouseCoordinates } from './utils/general.js';
+import { filterClosePoints, getMouseCoordinates, distanceBetweenPoints } from './utils/general.js';
 import {
   IsOnLine,
   IsOnArrow,
@@ -25,6 +26,7 @@ import {
   shapeList,
   colorList,
   widthList,
+  minObjectDistance,
 } from './constants.js'
 
 const Icons = {
@@ -60,8 +62,6 @@ const Application = (settings) => {
     ]
   }
 
-  // ================================================================================================
-
   const [rainbowColorDeg, updateRainbowColorDeg] = useState(initialColorDeg);
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState(initialFigures);
@@ -76,6 +76,7 @@ const Application = (settings) => {
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
+  const [rippleEffects, setRippleEffects] = useState([]);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -400,21 +401,63 @@ const Application = (settings) => {
     setMouseCursorThrottle(x, y)
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = ({ x, y }) => {
     if (isDrawing) {
+      const upPoint = [x, y];
+      let rippleNeeded = false;
+
+      if (activeTool === 'laser') {
+        const currentLaser = allLaserFigures[allLaserFigures.length - 1];
+        const amountOfPoints = currentLaser.points.length;
+
+        let laserDistance = 0;
+        if (amountOfPoints > 0) {
+          laserDistance = distanceBetweenPoints(currentLaser.points[0], upPoint);
+        }
+
+        if (laserDistance < minObjectDistance && amountOfPoints < 15) {
+          rippleNeeded = true;
+        }
+      }
+
       if (activeTool === 'pen') {
         const currentFigure = allFigures[allFigures.length - 1];
+        const penDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
+        const amountOfPoints = currentFigure.points.length;
 
         if (currentFigure.colorIndex !== 0) { // Not Rainbow
           currentFigure.points = [...filterClosePoints(currentFigure.points)];
         }
 
-        if (currentFigure.points.length < 3) { // Min number of points to draw a curve
-          currentFigure.points = [];
+        if (penDistance < minObjectDistance && amountOfPoints < 15) {
+          rippleNeeded = true;
+          allFigures.pop();
         }
-
-        setAllFigures([...allFigures]);
       }
+
+      if (shapeList.includes(activeTool)) {
+        const currentFigure = allFigures[allFigures.length - 1];
+        const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
+
+        if (shapeDistance < minObjectDistance) {
+          rippleNeeded = true;
+          allFigures.pop();
+        }
+      }
+
+      if (rippleNeeded) {
+        let ripple = {
+          id: Date.now(),
+          type: activeTool,
+          colorIndex: activeColorIndex,
+          rainbowColorDeg: rainbowColorDeg,
+          points: upPoint,
+        };
+
+        setRippleEffects([...rippleEffects, ripple]);
+      }
+
+      setAllFigures([...allFigures]);
     }
 
     if (isActiveFigureMoving()) {
@@ -449,6 +492,7 @@ const Application = (settings) => {
     setActiveFigureInfo(null);
     setAllFigures([]);
     setLaserFigure([]);
+    setRippleEffects([]);
   };
 
   const handleToggleToolbar = () => {
@@ -487,6 +531,13 @@ const Application = (settings) => {
       {
         showWhiteboard &&
         <div id="whiteboard"></div>
+      }
+
+      {
+        rippleEffects &&
+          <RippleEffect
+            rippleEffects={rippleEffects}
+          />
       }
 
       <CuteCursor

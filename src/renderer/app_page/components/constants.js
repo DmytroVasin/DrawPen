@@ -1,5 +1,6 @@
 export const laserTime = 2000;
 export const rainbowScaleFactor = 0.03;
+export const minObjectDistance = 5; // Minimum length of drawn object
 
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 

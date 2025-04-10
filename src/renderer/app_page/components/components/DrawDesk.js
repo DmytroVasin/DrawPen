@@ -98,6 +98,12 @@ const DrawDesk = ({
     handleMouseMove(coordinates);
   }
 
+  const onMouseUp = (event) => {
+    const coordinates = getMouseCoordinates(event)
+
+    handleMouseUp(coordinates);
+  }
+
   return (
     <canvas
       id="canvas"
@@ -105,7 +111,7 @@ const DrawDesk = ({
       style={{ cursor: cursorType }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
-      onMouseUp={handleMouseUp}
+      onMouseUp={onMouseUp}
     />
   );
 };
