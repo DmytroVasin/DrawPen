@@ -1,7 +1,7 @@
 {
   "name": "drawpen",
   "productName": "DrawPen",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "DrawPen is a screen annotation tool built with web technology",
   "appId": "dmytro.vasin.drawpen",
   "author": {
