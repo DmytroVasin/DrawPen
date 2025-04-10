@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.16] - 2025-04-10
+- Added Ripple effect on click
+
 ## [0.0.15] - 2025-04-02
 - Chnaged hotkeys From CMD+1/2/3 to 1/2/3 to activate Pen/Shapes/Laser
 - Added hotkeys 4/5 to switch Color and Thickness
