@@ -1,7 +1,5 @@
 import React from 'react';
 import './RippleEffect.scss';
-import { colorList } from '../constants.js'
-import { hslColor } from './drawer/figures.js';
 
 const RippleEffect = ({ rippleEffects }) => {
   return (
@@ -9,15 +7,6 @@ const RippleEffect = ({ rippleEffects }) => {
       {
         rippleEffects.map((ripple) => {
           const [x, y] = ripple.points;
-          let rippleColor = colorList[ripple.colorIndex].color
-
-          if (colorList[ripple.colorIndex].name === 'color_rainbow') {
-            rippleColor = hslColor(ripple.rainbowColorDeg);
-          }
-
-          if (ripple.type === 'laser') {
-            rippleColor = '#E60000';
-          }
 
           return (
             <div
@@ -28,7 +17,7 @@ const RippleEffect = ({ rippleEffects }) => {
                 left: `${x}px`,
               }}
             >
-              <span style={{ borderColor: rippleColor }}></span>
+              <span></span>
             </div>
           );
         })

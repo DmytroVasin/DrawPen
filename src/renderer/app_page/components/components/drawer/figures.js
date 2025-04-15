@@ -2,7 +2,7 @@ import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../../utils/general.js';
 import { colorList, widthList, rainbowScaleFactor } from '../../constants.js'
 
-export const hslColor = (degree) => {
+const hslColor = (degree) => {
   return `hsl(${degree % 360}, 70%, 60%)`
 }
 

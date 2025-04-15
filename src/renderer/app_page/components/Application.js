@@ -404,7 +404,6 @@ const Application = (settings) => {
   const handleMouseUp = ({ x, y }) => {
     if (isDrawing) {
       const upPoint = [x, y];
-      let rippleNeeded = false;
 
       if (activeTool === 'laser') {
         const currentLaser = allLaserFigures[allLaserFigures.length - 1];
@@ -415,23 +414,21 @@ const Application = (settings) => {
           laserDistance = distanceBetweenPoints(currentLaser.points[0], upPoint);
         }
 
-        if (laserDistance < minObjectDistance && amountOfPoints < 15) {
-          rippleNeeded = true;
+        if (laserDistance < minObjectDistance && amountOfPoints < 10) {
+          const ripple = {
+            id: Date.now(),
+            points: upPoint,
+          };
+
+          setRippleEffects([...rippleEffects, ripple]);
         }
       }
 
       if (activeTool === 'pen') {
         const currentFigure = allFigures[allFigures.length - 1];
-        const penDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
-        const amountOfPoints = currentFigure.points.length;
 
         if (currentFigure.colorIndex !== 0) { // Not Rainbow
           currentFigure.points = [...filterClosePoints(currentFigure.points)];
-        }
-
-        if (penDistance < minObjectDistance && amountOfPoints < 15) {
-          rippleNeeded = true;
-          allFigures.pop();
         }
       }
 
@@ -440,21 +437,8 @@ const Application = (settings) => {
         const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
 
         if (shapeDistance < minObjectDistance) {
-          rippleNeeded = true;
           allFigures.pop();
         }
-      }
-
-      if (rippleNeeded) {
-        let ripple = {
-          id: Date.now(),
-          type: activeTool,
-          colorIndex: activeColorIndex,
-          rainbowColorDeg: rainbowColorDeg,
-          points: upPoint,
-        };
-
-        setRippleEffects([...rippleEffects, ripple]);
       }
 
       setAllFigures([...allFigures]);
