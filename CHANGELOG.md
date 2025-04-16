@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.17] - 2025-04-10
+- Removed Ripple effect on click from Pen and Shapes (keep it only on Laser)
+- Fix bug with close point detection in "filter close points"
+
 ## [0.0.16] - 2025-04-10
 - Added Ripple effect on click
 
