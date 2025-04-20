@@ -1,6 +1,9 @@
 # Change Log
 
-## [0.0.17] - 2025-04-10
+## [0.0.18] - 2025-04-20
+- Crispy drawings, support for High DPI displays
+
+## [0.0.17] - 2025-04-17
 - Removed Ripple effect on click from Pen and Shapes (keep it only on Laser)
 - Fix bug with close point detection in "filter close points"
 
