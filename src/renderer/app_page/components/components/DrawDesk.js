@@ -30,9 +30,16 @@ const DrawDesk = ({
   const dpr = window.devicePixelRatio || 1;
 
   useEffect(() => {
-    canvasRef.current.width = Math.floor(window.innerWidth * dpr);
-    canvasRef.current.height = Math.floor(window.innerHeight * dpr);
-    canvasRef.current.getContext('2d').scale(dpr, dpr);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+
+    ctx.scale(dpr, dpr);
+
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
   }, []);
 
   useEffect(() => {
