@@ -160,7 +160,7 @@ function getActiveMonitor() {
   return primaryDisplay
 }
 
-function createMainWindow () {
+function createMainWindow() {
   const mainDisplay = getActiveMonitor()
 
   let { width, height } = mainDisplay.workAreaSize
@@ -387,8 +387,10 @@ function showDrawWindow() {
 
 function hideDrawWindow() {
   resetScreen()
-  mainWindow.hide()
 
+  mainWindow.minimize();
+  mainWindow.hide();
+  if (process.platform == "darwin") app.hide()
   foregroundMode = false
   updateContextMenu() // Need to rerender the context menu
 }
