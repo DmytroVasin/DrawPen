@@ -180,6 +180,7 @@ function createMainWindow() {
     height: height,
     transparent: true,
     resizable: isResizable,
+    focusable: !(process.platform === "win32"),
     skipTaskbar: true,
     hasShadow: false,
     frame: false,
@@ -388,9 +389,13 @@ function showDrawWindow() {
 function hideDrawWindow() {
   resetScreen()
 
-  mainWindow.minimize();
   mainWindow.hide();
-  if (process.platform == "darwin") app.hide()
+  if (process.platform == "darwin") {
+    app.hide()
+    aboutWindow && aboutWindow.close()
+  }
+
+
   foregroundMode = false
   updateContextMenu() // Need to rerender the context menu
 }
