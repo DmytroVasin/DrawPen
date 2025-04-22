@@ -27,6 +27,14 @@ const ToolBar = ({
   const toolbarRef = useRef()
   const [slide, setSlide] = useState("");
 
+  const onKeyDown = useCallback((e) => {
+    switch (e.key) {
+      case "Escape":
+        switchView("");
+        break;
+    }
+  });
+
   const onMouseDown = useCallback((e) => {
     setDragging(true);
     setOffset({
@@ -76,12 +84,13 @@ const ToolBar = ({
   useEffect(() => {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
-
+    window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.addEventListener("keydown", onKeyDown);
     };
-  }, [onMouseMove, onMouseUp]);
+  }, [onMouseMove, onMouseUp, onKeyDown]);
 
   useEffect(() => {
     setSlide("");
