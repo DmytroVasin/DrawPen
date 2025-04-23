@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.19] - 2025-04-23
+- App gives focus back to prev. window (MacOs only)
+
 ## [0.0.18] - 2025-04-20
 - Crispy drawings, support for High DPI displays
 
