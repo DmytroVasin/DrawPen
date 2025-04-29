@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.20] - 2025-04-29
+- Cancel subview selection by pressing the ESC key
+
 ## [0.0.19] - 2025-04-23
 - App gives focus back to prev. window (MacOs only)
 
