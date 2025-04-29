@@ -22,6 +22,13 @@ const ToolBar = ({
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
+  const figureIcons = {
+    arrow: <Icons.FaArrowRight />,
+    rectangle: <Icons.FaRegSquare />,
+    oval: <Icons.FaRegCircle />,
+    line: <Icons.AiOutlineLine />,
+  };
+
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const toolbarRef = useRef()
@@ -71,17 +78,27 @@ const ToolBar = ({
 
   const onMouseUp = useCallback(() => {
     setDragging(false);
-  }, [dragging, position]);
+  }, []);
+
+  const onKeyDown = useCallback((e) => {
+    switch (e.key) {
+      case "Escape":
+        setSlide("");
+        break;
+    }
+  }, [setSlide]);
 
   useEffect(() => {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onMouseMove, onMouseUp]);
+  }, [onMouseMove, onMouseUp, onKeyDown]);
 
   useEffect(() => {
     setSlide("");
@@ -89,44 +106,27 @@ const ToolBar = ({
 
   const pickTool = (tool) => {
     handleChangeTool(tool);
-    switchView("")
+    setSlide("")
   };
 
   const onChangeColor = (index) => {
     handleChangeColor(index);
-    switchView("")
+    setSlide("")
   };
 
   const onChangeWidth = (index) => {
     handleChangeWidth(index);
-    switchView("")
+    setSlide("")
   };
 
-  const renderGroupIcon = () => {
-    switch (lastActiveFigure) {
-      case "arrow":
-        return <Icons.FaArrowRight />
-      case "rectangle":
-        return <Icons.FaRegSquare />
-      case "oval":
-        return <Icons.FaRegCircle />
-      case "line":
-        return <Icons.AiOutlineLine />
-      default:
-        null
-    }
-  };
+  const renderGroupIcon = () => figureIcons[lastActiveFigure] || null;
 
   const pickFigureOrSwitchView = () => {
     if (shapeList.includes(activeTool)) {
-      switchView("tool-slide");
+      setSlide("tool-slide");
     } else {
       pickTool(lastActiveFigure);
     }
-  };
-
-  const switchView = (name) => {
-    setSlide(name);
   };
 
   return (
@@ -158,13 +158,13 @@ const ToolBar = ({
             <li>
               <button
                 className={`toolbar__color-picker ${colorList[activeColorIndex].name} ${activeTool === "laser" ? "color_laser" : undefined}`}
-                onClick={() => switchView("color-slide")}
+                onClick={() => setSlide("color-slide")}
                 title="Change Color"
                 disabled={activeTool === "laser"}
               />
             </li>
             <li>
-              <button className="toolbar__width-button" onClick={() => switchView("width-slide")} title="Change Brush Size">
+              <button className="toolbar__width-button" onClick={() => setSlide("width-slide")} title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
               </button>
             </li>
