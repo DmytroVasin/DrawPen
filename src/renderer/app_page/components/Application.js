@@ -421,6 +421,9 @@ const Application = (settings) => {
           };
 
           setRippleEffects([...rippleEffects, ripple]);
+
+          currentLaser.points = [];
+          setLaserFigure([...allLaserFigures]);
         }
       }
 
