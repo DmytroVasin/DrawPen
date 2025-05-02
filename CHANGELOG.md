@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.21] - 2025-05-02
+- Remove small dot after laser ripple effect
+
 ## [0.0.20] - 2025-04-29
 - Cancel subview selection by pressing the ESC key
 
