@@ -1,7 +1,7 @@
 #ripple-wrapper {
   .ripple-loader {
     position: absolute;
-    z-index: -1;
+    pointer-events: none;
 
     span {
       position: absolute;
