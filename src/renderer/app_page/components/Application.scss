@@ -1,5 +1,5 @@
 :root {
-  --toolbar-width: calc(236px + 20px + 30px);
+  --toolbar-width: calc(7*36px + 2*10px + 20px + 30px);
   --toolbar-height: 44px;
 
   --border-size: 5px; // Equals to ZONE_BORDER
@@ -74,6 +74,19 @@ body {
           outline: var(--border-size);
         }
       }
+
+      &.manipulation_mode {
+        #toolbar {
+          pointer-events: none;
+        }
+      }
     }
   }
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  src: url('../../../assets/Excalifont-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
 }

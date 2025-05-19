@@ -71,8 +71,7 @@ const trayIcon = iconSrc[process.platform] || iconSrc.DEFAULT
 const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+W'
-const KEY_CLEAR_DESK = 'CmdOrCtrl+C'
-const KEY_UNDO = 'CmdOrCtrl+Z'
+const KEY_CLEAR_DESK = 'CmdOrCtrl+K'
 const KEY_Q = 'CmdOrCtrl+Q'
 
 function updateContextMenu() {
@@ -104,13 +103,6 @@ function updateContextMenu() {
       accelerator: KEY_CLEAR_DESK,
       click: () => {
         resetScreen()
-      }
-    },
-    {
-      label: 'Undo',
-      accelerator: KEY_UNDO,
-      click: () => {
-        callUndo()
       }
     },
     { type: 'separator' },
@@ -310,10 +302,6 @@ function registerShortcats() {
     resetScreen()
   })
 
-  globalShortcut.register(KEY_UNDO, () => {
-    callUndo()
-  })
-
   globalShortcut.register(KEY_Q, () => {
     app.quit()
   })
@@ -323,7 +311,6 @@ function unregisterShortcats() {
   globalShortcut.unregister(KEY_SHOW_HIDE_TOOLBAR)
   globalShortcut.unregister(KEY_SHOW_HIDE_WHITEBOARD)
   globalShortcut.unregister(KEY_CLEAR_DESK)
-  globalShortcut.unregister(KEY_UNDO)
   globalShortcut.unregister(KEY_Q)
 }
 
@@ -359,10 +346,6 @@ ipcMain.handle('hide_app', () => {
 
 function resetScreen() {
   mainWindow.webContents.send('reset_screen');
-}
-
-function callUndo() {
-  mainWindow.webContents.send('call_undo');
 }
 
 function toggleWindow() {

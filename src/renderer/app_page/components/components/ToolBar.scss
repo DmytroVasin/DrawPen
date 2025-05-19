@@ -1,4 +1,4 @@
-.toolbar {
+#toolbar {
   width: var(--toolbar-width);
   height: var(--toolbar-height);
   display: flex;
@@ -194,14 +194,14 @@
   }
 }
 
-.toolbar.tool-slide .toolbar__body,
-.toolbar.color-slide .toolbar__body,
-.toolbar.width-slide .toolbar__body {
+#toolbar.tool-slide .toolbar__body,
+#toolbar.color-slide .toolbar__body,
+#toolbar.width-slide .toolbar__body {
   top: -70px;
 }
 
-.toolbar.tool-slide .tool-group,
-.toolbar.color-slide .color-group,
-.toolbar.width-slide .width-group {
+#toolbar.tool-slide .tool-group,
+#toolbar.color-slide .color-group,
+#toolbar.width-slide .width-group {
   top: 0;
 }

@@ -22,11 +22,11 @@ function DisableZoom() {
         }
       };
 
-      window.addEventListener('wheel', handleWheel);
+      window.addEventListener('wheel', handleWheel, { passive: false });
       window.addEventListener('keydown', handleKeyDown);
 
       return () => {
-        window.removeEventListener('wheel', handleWheel);
+        window.removeEventListener('wheel', handleWheel, { passive: false });
         window.removeEventListener('keydown', handleKeyDown);
       };
     }, []);

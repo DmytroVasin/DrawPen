@@ -19,6 +19,7 @@ const ToolBar = ({
   handleReset,
   Icons,
 }) => {
+
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
@@ -130,7 +131,7 @@ const ToolBar = ({
   };
 
   return (
-    <aside ref={toolbarRef} className={`toolbar ${slide}`} style={{ left: position.x, top: position.y }}>
+    <aside id="toolbar" ref={toolbarRef} className={`${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar} title="Close">
           <Icons.MdOutlineCancel size={16} />
@@ -147,6 +148,11 @@ const ToolBar = ({
             <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined}>
               <button onClick={() => pickFigureOrSwitchView()} title="Shapes">
                 {renderGroupIcon()}
+              </button>
+            </li>
+            <li className={activeTool === "text" ? "active" : undefined}>
+              <button onClick={() => handleChangeTool("text")} title="Text">
+                <Icons.FaFont />
               </button>
             </li>
             <li className={activeTool === "laser" ? "active" : undefined}>
@@ -183,6 +189,7 @@ const ToolBar = ({
                 <button
                   className={`toolbar__color-picker ${color.name}`}
                   onClick={() => onChangeColor(index)}
+                  tabIndex={-1}
                 />
               </li>
             ))}
@@ -191,22 +198,22 @@ const ToolBar = ({
         <div className="side-view-body tool-group">
           <ul className="toolbar__items">
             <li className={activeTool === "arrow" ? "active" : undefined}>
-              <button onClick={() => pickTool("arrow")}>
+              <button onClick={() => pickTool("arrow")} tabIndex={-1}>
                 <Icons.FaArrowRight />
               </button>
             </li>
             <li className={activeTool === "rectangle" ? "active" : undefined}>
-              <button onClick={() => pickTool("rectangle")}>
+              <button onClick={() => pickTool("rectangle")} tabIndex={-1}>
                 <Icons.FaRegSquare />
               </button>
             </li>
             <li className={activeTool === "oval" ? "active" : undefined}>
-              <button onClick={() => pickTool("oval")}>
+              <button onClick={() => pickTool("oval")} tabIndex={-1}>
                 <Icons.FaRegCircle />
               </button>
             </li>
             <li className={activeTool === "line" ? "active" : undefined}>
-              <button onClick={() => pickTool("line")}>
+              <button onClick={() => pickTool("line")} tabIndex={-1}>
                 <Icons.AiOutlineLine />
               </button>
             </li>
@@ -216,7 +223,7 @@ const ToolBar = ({
           <ul className="toolbar__items">
             {widthList.map((width, index) => (
               <li key={index}>
-                <button className="toolbar__width-button" onClick={() => onChangeWidth(index)}>
+                <button className="toolbar__width-button" onClick={() => onChangeWidth(index)} tabIndex={-1}>
                   <div className={width.name} />
                 </button>
               </li>

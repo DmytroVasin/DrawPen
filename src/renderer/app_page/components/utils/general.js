@@ -1,4 +1,5 @@
 import { LazyBrush } from "lazy-brush";
+import { widthList } from '../constants.js'
 
 // https://github.com/steveruizok/perfect-freehand/tree/main
 export const getSvgPathFromStroke = (stroke) => {
@@ -127,4 +128,31 @@ export const distanceBetweenPoints = (pointA, pointB) => {
   const [endX, endY] = pointB
 
   return Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
+}
+
+export const calculateCanvasTextWidth = (text, widthIndex) => {
+  const dummyCanvas = document.createElement('canvas');
+  const dummyCanvasCtx = dummyCanvas.getContext('2d');
+
+  const fontSize = widthList[widthIndex].font_size
+  const font_line_height_compensation = widthList[widthIndex].font_line_height_compensation
+
+  dummyCanvasCtx.font = `${fontSize}px Excalifont`;
+
+  const lines = text.split('\n');
+
+  // Width Detection:
+  const maxLineWidth = Math.max(...lines.map(line => dummyCanvasCtx.measureText(line).width));
+
+  // Height Detection:
+  const standardText = "bpgyЯФ" // єталонний текст!
+  const standardMetrics = dummyCanvasCtx.measureText(standardText);
+
+  const lineHeight = standardMetrics.actualBoundingBoxAscent
+                      + standardMetrics.actualBoundingBoxDescent
+                      + font_line_height_compensation
+
+  const totalHeight = lines.length * lineHeight;
+
+  return [maxLineWidth, totalHeight]
 }

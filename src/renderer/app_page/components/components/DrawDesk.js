@@ -13,6 +13,7 @@ import {
   drawRectangle,
   drawRectangleActive,
   drawLaser,
+  drawText,
 } from './drawer/figures.js';
 
 const DrawDesk = ({
@@ -23,6 +24,7 @@ const DrawDesk = ({
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
+  handleDoubleClick,
   updateRainbowColorDeg,
 }) => {
   // console.log('DrawDesk render');
@@ -86,6 +88,16 @@ const DrawDesk = ({
           drawOvalActive(ctx, figure)
         }
       }
+
+      if (figure.type === 'text') {
+        let isActive = false;
+
+        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
+          isActive = true;
+        }
+
+        drawText(ctx, figure, updateRainbowColorDeg, isActive)
+      }
     })
 
     allLaserFigures.forEach((figure) => {
@@ -99,10 +111,13 @@ const DrawDesk = ({
     const coordinates = getMouseCoordinates(event)
 
     handleMouseDown(coordinates);
+
+    event.preventDefault();
+    // event.stopPropagation();
   }
 
   const onMouseMove = (event) => {
-    let coordinates = getMouseCoordinates(event)
+    const coordinates = getMouseCoordinates(event)
 
     handleMouseMove(coordinates);
   }
@@ -113,6 +128,12 @@ const DrawDesk = ({
     handleMouseUp(coordinates);
   }
 
+  const onDoubleClick = (event) => {
+    const coordinates = getMouseCoordinates(event);
+
+    handleDoubleClick(coordinates);
+  }
+
   return (
     <canvas
       id="canvas"
@@ -121,6 +142,7 @@ const DrawDesk = ({
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
+      onDoubleClick={onDoubleClick}
     />
   );
 };

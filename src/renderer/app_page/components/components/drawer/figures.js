@@ -1,6 +1,6 @@
 import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../../utils/general.js';
-import { colorList, widthList, rainbowScaleFactor } from '../../constants.js'
+import { colorList, widthList, rainbowScaleFactor, dotMargin } from '../../constants.js'
 
 const hslColor = (degree) => {
   return `hsl(${degree % 360}, 70%, 60%)`
@@ -26,26 +26,39 @@ const drawDot = (ctx, point) => {
 }
 
 const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg) => {
-  let colorDeg = rainbowColorDeg
+  const [distance, hslStops] = hslTextGradientStops(pointA, pointB, rainbowColorDeg)
 
-  const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
-
-  const amountOfColorChanges = Math.round(distance)
-
-  if (amountOfColorChanges === 0) {
-    return hslColor(colorDeg)
+  if (hslStops.length === 1) {
+    return hslStops[0]
   }
 
   const gradient = ctx.createLinearGradient(...pointA, ...pointB);
 
-  for (let i = 0; i <= amountOfColorChanges; i++) {
-    let color = hslColor(colorDeg + i)
-
-    gradient.addColorStop(i / amountOfColorChanges, color)
-  }
+  hslStops.forEach((color, index) => {
+    gradient.addColorStop(index / (hslStops.length - 1), color)
+  })
 
   updateRainbowColorDeg(rainbowColorDeg + distance)
   return gradient
+}
+
+export const hslTextGradientStops = (pointA, pointB, colorDeg) => {
+  const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
+
+  const amountOfColorChanges = Math.round(distance)
+
+  const hslStops = []
+  for (let i = 0; i <= amountOfColorChanges; i++) {
+    let color = hslColor(colorDeg + i)
+
+    hslStops.push(color)
+  }
+
+  if (amountOfColorChanges === 0) {
+    hslStops.push(hslColor(colorDeg))
+  }
+
+  return [distance, hslStops];
 }
 
 const activeColorAndWidth = () => {
@@ -61,6 +74,20 @@ const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbo
   }
 
   return [color, width]
+}
+
+const detectColorAndFontSize = (ctx, pointA, width, height, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+  let color = colorList[colorIndex].color
+  const fontSize = widthList[widthIndex].font_size
+  const font_y_offset_compensation = widthList[widthIndex].font_y_offset_compensation
+
+  if (colorList[colorIndex].name === 'color_rainbow') {
+    const pointB = [pointA[0], pointA[1] + height] // Vertical Gradient
+
+    color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
+  }
+
+  return [color, fontSize, font_y_offset_compensation]
 }
 
 export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
@@ -375,6 +402,64 @@ export const drawLaser = (ctx, figure) => {
   });
   const pathData2 = getSvgPathFromStroke(myStroke2);
   ctx.fill(new Path2D(pathData2));
+
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent'; // Reset shadows
+}
+
+export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
+  const { points: [startAt], text, colorIndex, widthIndex, rainbowColorDeg, scale, width, height } = figure;
+
+  const [color, fontSize, font_y_offset_compensation] = detectColorAndFontSize(ctx, startAt, width, height, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
+
+  drawTextSkeleton(ctx, startAt, text, color, fontSize, font_y_offset_compensation, scale)
+
+  if (isActive) {
+    const [startX, startY] = startAt;
+    const endX = startX + width * scale;
+    const endY = startY + height * scale;
+
+    const startXwithMargin = startX - dotMargin
+    const startYwithMargin = startY - dotMargin
+    const endXwithMargin = endX + dotMargin
+    const endYwithMargin = endY + dotMargin
+
+    drawSelectionBox(ctx, startXwithMargin, startYwithMargin, endXwithMargin, endYwithMargin)
+    drawDot(ctx, [startXwithMargin, startYwithMargin])
+    drawDot(ctx, [endXwithMargin,   endYwithMargin])
+    drawDot(ctx, [startXwithMargin, endYwithMargin])
+    drawDot(ctx, [endXwithMargin,   startYwithMargin])
+
+    // FOR DEV: Обведення прямокутника
+    // ctx.strokeStyle = "red";
+    // ctx.lineWidth = 1;
+    // ctx.strokeRect(startX, startY, width * scale, height * scale);
+  }
+}
+
+const drawTextSkeleton = (ctx, [startX, startY], text, color, fontSize, font_y_offset_compensation, scale) => {
+  ctx.save();
+  ctx.translate(startX, startY);
+  ctx.scale(scale, scale);
+
+  ctx.textBaseline = "top";
+  ctx.font = `${fontSize}px Excalifont`;
+  ctx.fillStyle = color;
+
+  const lineHeightMultiplier = 1.25;
+
+  const lines = text.split('\n');
+  const lineHeight = fontSize * lineHeightMultiplier;
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 0, index * lineHeight + font_y_offset_compensation);
+  });
+
+  ctx.restore();
+}
+
+const drawSelectionBox = (ctx, startX, startY, endX, endY) => {
+  ctx.strokeStyle = "#6CC3E2";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(startX, startY, endX - startX, endY - startY);
 }

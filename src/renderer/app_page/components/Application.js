@@ -7,19 +7,24 @@ import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
 import RippleEffect from './components/RippleEffect.js';
 import DisableZoom from './components/DisableZoom.js';
-import { filterClosePoints, getMouseCoordinates, distanceBetweenPoints } from './utils/general.js';
+import TextEditor from './components/TextEditor.js';
 import {
-  IsOnLine,
-  IsOnArrow,
-  IsOnOval,
-  IsOnRectangle,
-  IsOnTwoDots,
-  IsOnFourDots,
+  filterClosePoints,
+  getMouseCoordinates,
+  distanceBetweenPoints,
+  calculateCanvasTextWidth,
+} from './utils/general.js';
+import {
+  isOnFigure,
+  getDotNameOnFigure,
+  dragFigure,
+  resizeFigure,
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
+import { FaFont } from "react-icons/fa6";
 
 import {
   laserTime,
@@ -38,6 +43,7 @@ const Icons = {
   GiLaserburn,
   MdOutlineCancel,
   FaEraser,
+  FaFont,
 };
 
 const Application = (settings) => {
@@ -59,6 +65,7 @@ const Application = (settings) => {
       { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
       { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
       { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 4, type: 'text', colorIndex: 2, widthIndex: 2, points: [[152, 118]], rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
   }
 
@@ -71,6 +78,7 @@ const Application = (settings) => {
   const [activeColorIndex, setActiveColorIndex] = useState(initialActiveColor);
   const [activeWidthIndex, setActiveWidthIndex] = useState(initialActiveWidth);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [textEditorContainer, setTextEditorContainer] = useState(null);
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
@@ -82,15 +90,78 @@ const Application = (settings) => {
     window.electronAPI.onResetScreen(handleReset);
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
-    window.electronAPI.onCallUndo(handleUndo);
   }, []);
 
   const handleKeyPress = useCallback((event) => {
-    if (isDrawing || isActiveFigureMoving()) {
+    if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
       return
     }
 
     switch (event.key) {
+      case 'z':
+      case 'Z':
+        if (event.shiftKey) {
+          // Do nothing
+          return
+        }
+
+        if (event.ctrlKey || event.metaKey) {
+          if (activeFigureInfo) {
+            setActiveFigureInfo(null);
+            return
+          }
+
+          setAllFigures(prevAllFigures => prevAllFigures.slice(0, -1));
+        }
+        break;
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        if (activeFigureInfo) {
+          const activeFigure = findActiveFigure()
+          const offset = 2;
+
+          const directionMap = {
+            ArrowLeft:  [-offset, 0],
+            ArrowRight: [offset, 0],
+            ArrowUp:    [0, -offset],
+            ArrowDown:  [0, offset],
+          };
+
+          const [dx, dy] = directionMap[event.key];
+
+          activeFigure.points.forEach((point) => {
+            point[0] += dx;
+            point[1] += dy;
+          });
+
+          setAllFigures([...allFigures]);
+        }
+        break;
+      case 'Delete':
+      case 'Backspace':
+        if (activeFigureInfo) {
+          setAllFigures(allFigures.filter(figure => figure.id !== activeFigureInfo.id));
+          setActiveFigureInfo(null);
+        }
+        break;
+      case 'Enter':
+        if (activeFigureInfo) {
+          const activeFigure = findActiveFigure()
+
+          if (activeFigure.type === 'text') {
+            activateTextEditor(activeFigure);
+
+            event.preventDefault();
+          }
+        }
+        break;
+      case 'Escape':
+        if (activeFigureInfo) {
+          setActiveFigureInfo(null);
+        }
+        break;
       case '1':
         handleChangeTool('pen');
         break;
@@ -107,16 +178,19 @@ const Application = (settings) => {
         handleChangeTool(nextShape);
         break;
       case '3':
-        handleChangeTool('laser');
+        handleChangeTool('text');
         break;
       case '4':
-        handleChangeColor((activeColorIndex + 1) % colorList.length);
+        handleChangeTool('laser');
         break;
       case '5':
+        handleChangeColor((activeColorIndex + 1) % colorList.length);
+        break;
+      case '6':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
-  }, [allFigures, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure]);
+  }, [allFigures, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -203,6 +277,14 @@ const Application = (settings) => {
       const activeFigure = findActiveFigure()
 
       activeFigure.widthIndex = newWidthIndex
+
+      if (activeFigure.type === 'text') {
+        const [width, height] = calculateCanvasTextWidth(activeFigure.text, activeFigure.widthIndex);
+
+        activeFigure.width = width;
+        activeFigure.height = height;
+        activeFigure.scale = 1;
+      }
     }
 
     setActiveWidthIndex(newWidthIndex);
@@ -224,86 +306,51 @@ const Application = (settings) => {
     setAllFigures([...allFigures, figure]);
   };
 
-  const isOnFigure = (x, y, figure) => {
-    switch (figure.type) {
-      case 'arrow':
-        return IsOnArrow(x, y, figure.points)
-      case 'rectangle':
-        return IsOnRectangle(x, y, figure.points)
-      case 'oval':
-        return IsOnOval(x, y, figure.points)
-      case 'line':
-        return IsOnLine(x, y, figure.points)
-      default:
-        return false
-    }
-  };
-
   const getFigureAtMousePosition = (x, y) => {
-    return allFigures.findLast((figure) => isOnFigure(x, y, figure));
+    return allFigures.findLast((figure) => isOnFigure(x, y, figure))
   };
 
   const getDotNameAtMousePosition = (x, y) => {
     const activeFigure = findActiveFigure()
 
-    switch (activeFigure.type) {
-      case 'line':
-      case 'arrow':
-        return IsOnTwoDots(x, y, activeFigure.points) // ['pointA', 'pointB', null]
-      case 'oval':
-      case 'rectangle':
-        return IsOnFourDots(x, y, activeFigure.points) // ['pointA', 'pointB', 'pointC', 'pointD', null]
-    }
+    return getDotNameOnFigure(x, y, activeFigure)
   }
 
   const setMouseCursor = (x, y) => {
+    if (activeFigureInfo) {
+      const resizingDotName = getDotNameAtMousePosition(x, y);
+
+      if (resizingDotName) {
+        setCursorType('move');
+        return
+      }
+    }
+
     if (getFigureAtMousePosition(x, y)) {
       setCursorType('move');
-    } else {
-      setCursorType('crosshair');
+      return
     }
+
+    setCursorType('crosshair');
   };
   const setMouseCursorThrottle = throttle(setMouseCursor, 50);
 
-  const dragFigure = (figure, oldCoordinates, newCoordinates) => {
-    const offsetX = newCoordinates.x - oldCoordinates.x;
-    const offsetY = newCoordinates.y - oldCoordinates.y;
-
-    figure.points.forEach((point) => {
-      point[0] += offsetX
-      point[1] += offsetY
-    })
-  }
-
-  const resizeFigure = (figure, resizingDotName, { x, y }) => {
-    switch (resizingDotName) {
-      case 'pointA':
-        figure.points[0][0] = x
-        figure.points[0][1] = y
-        break;
-      case 'pointB':
-        figure.points[1][0] = x
-        figure.points[1][1] = y
-        break;
-      case 'pointC':
-        figure.points[0][0] = x
-        figure.points[1][1] = y
-        break;
-      case 'pointD':
-        figure.points[1][0] = x
-        figure.points[0][1] = y
-        break;
-    }
-  }
-
   const handleMouseDown = ({ x, y }) => {
-    // Click on dots of the active figure
+    // Diactivate text editor
+    if (textEditorContainer) {
+      setTextEditorContainer({ ...textEditorContainer, isActive: false });
+    }
+
+    // With Active Figure
     if (activeFigureInfo) {
+      // Click on dots of the active figure
       const resizingDotName = getDotNameAtMousePosition(x, y);
       if (resizingDotName) {
         setActiveFigureInfo({ ...activeFigureInfo, resizing: true, resizingDotName: resizingDotName });
         return;
       }
+      // Diactivate active figure
+      setActiveFigureInfo(null);
     }
 
     // Click on the figure
@@ -311,12 +358,6 @@ const Application = (settings) => {
     if (selectedFigure) {
       moveFigureToTop(selectedFigure.id)
       setActiveFigureInfo({ id: selectedFigure.id, dragging: true, x, y });
-      return;
-    }
-
-    // Click out of figure
-    if (activeFigureInfo) {
-      setActiveFigureInfo(null);
       return;
     }
 
@@ -331,6 +372,22 @@ const Application = (settings) => {
       setLaserFigure([...allLaserFigures, laserFigure]);
       scheduleClearLaserTail(laserFigure.id)
       setIsDrawing(true);
+      return;
+    }
+
+    if (activeTool === 'text') {
+      if (!textEditorContainer) {
+        const newTextEditor = {
+          isActive: true,
+          startAt: [x, y],
+          colorIndex: activeColorIndex,
+          widthIndex: activeWidthIndex,
+          rainbowColorDeg: rainbowColorDeg,
+          text: '',
+          scale: 1,
+        };
+        setTextEditorContainer(newTextEditor);
+      }
       return;
     }
 
@@ -454,6 +511,16 @@ const Application = (settings) => {
     setIsDrawing(false);
   };
 
+  const handleDoubleClick = ({ x, y }) => {
+    if (activeFigureInfo) {
+      const activeFigure = findActiveFigure()
+
+      if (activeFigure.type === 'text') {
+        activateTextEditor(activeFigure);
+      }
+    }
+  };
+
   const handleMousePosition = (event) => {
     setMouseCoordinates(getMouseCoordinates(event));
   }
@@ -480,6 +547,7 @@ const Application = (settings) => {
     setAllFigures([]);
     setLaserFigure([]);
     setRippleEffects([]);
+    setTextEditorContainer(null);
   };
 
   const handleToggleToolbar = () => {
@@ -500,19 +568,53 @@ const Application = (settings) => {
     window.electronAPI.invokeSetSettings(settings);
   };
 
-  const handleUndo = () => {
-    console.log('Main -> Renderer: Call Undo');
+  const handleTextEditorBlur = (text) => {
+    const cleanedText = text.replace(/[\s\u200B\u200C\u200D\uFEFF]+$/g, ''); // прибираємо сміття з кінця
 
-    setIsDrawing(false);
-    setActiveFigureInfo(null);
+    if (cleanedText === '') {
+      setTextEditorContainer(null);
+      return;
+    }
 
-    setAllFigures((prevAllFigures) => {
-      return prevAllFigures.slice(0, -1);
-    })
+    const [width, height] = calculateCanvasTextWidth(cleanedText, activeWidthIndex);
+
+    const textFigure = {
+      id: Date.now(),
+      type: 'text',
+      colorIndex: textEditorContainer.colorIndex,
+      widthIndex: textEditorContainer.widthIndex,
+      rainbowColorDeg: textEditorContainer.rainbowColorDeg,
+      text: cleanedText,
+      points: [textEditorContainer.startAt],
+      scale: textEditorContainer.scale,
+      width: width,
+      height: height,
+    };
+
+    setAllFigures([...allFigures, textFigure]);
+    setTextEditorContainer(null);
   };
 
+  const activateTextEditor = (pickedFigure) => {
+    const newTextEditor = {
+      isActive: true,
+      startAt: pickedFigure.points[0],
+      colorIndex: pickedFigure.colorIndex,
+      widthIndex: pickedFigure.widthIndex,
+      rainbowColorDeg: pickedFigure.rainbowColorDeg,
+      text: pickedFigure.text,
+      scale: pickedFigure.scale,
+    };
+
+    setTextEditorContainer(newTextEditor);
+    setActiveFigureInfo(null);
+    setAllFigures(allFigures.filter(figure => figure.id !== pickedFigure.id));
+  }
+
+  const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
+
   return (
-    <div id="root_wrapper" onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
+    <div id="root_wrapper" className={`${manipulation}`} onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
       <div id="zone_borders"></div>
 
       {
@@ -524,6 +626,14 @@ const Application = (settings) => {
         rippleEffects &&
           <RippleEffect
             rippleEffects={rippleEffects}
+          />
+      }
+
+      {
+        textEditorContainer &&
+          <TextEditor
+            textEditorContainer={textEditorContainer}
+            handleTextEditorBlur={handleTextEditorBlur}
           />
       }
 
@@ -543,6 +653,7 @@ const Application = (settings) => {
         handleMouseDown={handleMouseDown}
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
+        handleDoubleClick={handleDoubleClick}
         updateRainbowColorDeg={updateRainbowColorDeg}
       />
 
