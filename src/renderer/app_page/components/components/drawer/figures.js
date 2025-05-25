@@ -90,6 +90,16 @@ const detectColorAndFontSize = (ctx, pointA, width, height, colorIndex, widthInd
   return [color, fontSize, font_y_offset_compensation]
 }
 
+export const getCursorColor = (colorIndex, rainbowColorDeg) => {
+  const colorInfo = colorList[colorIndex]
+
+  if (colorInfo.name === 'color_rainbow') {
+    return hslColor(rainbowColorDeg)
+  }
+
+  return colorInfo.color
+}
+
 export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
   const { points, colorIndex, widthIndex, rainbowColorDeg } = figure;
 
