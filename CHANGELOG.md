@@ -1,5 +1,28 @@
 # Change Log
 
+## [0.0.22] - 2025-05-25
+### Features:
+- Add Text Editor
+
+### Bug Fixes:
+- Keep ripple above all elements
+- Fix issue when onMove we put Cursor over toolbar
+- Fix Oval pick detection
+- Fix Mouse detection (crosshair) above Oval Resize buttons
+- Fix TabIndex (When Tab ruins markup)
+
+
+### Improvments:
+- Remove "Undo" from global events
+- Clear Desk moved to "CRTL+K"
+- Move figures by Arrow keys
+- Add escape to unselect active figure
+- Add "CRTL+Z" to undo last action
+- Add "Delete/Backspace" to delete selected figure
+
+### Infrastructure:
+- Update Electron (Remove deprecation warnings)
+
 ## [0.0.21] - 2025-05-02
 - Remove small dot after laser ripple effect
 
