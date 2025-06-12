@@ -64,6 +64,7 @@ let showToolbar = store.get('show_tool_bar')
 const iconSrc = {
   DEFAULT: path.resolve(__dirname, '../renderer/assets/trayIcon.png'),
   darwin: path.resolve(__dirname, '../renderer/assets/trayIconTemplate@2x.png'),
+  linux: path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
 }
 
 const trayIcon = iconSrc[process.platform] || iconSrc.DEFAULT
