@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.23] - 2025-06-13
+- Added white logo for Linux
+
 ## [0.0.22] - 2025-05-25
 ### Features:
 - Add Text Editor
