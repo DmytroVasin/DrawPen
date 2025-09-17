@@ -32,9 +32,10 @@ You can download DrawPen for **free** from [releases](https://github.com/DmytroV
 | --------------------------------------- | ------------------------------------------------------------ | - |
 | Activate Pen                            | <kbd>1</kbd> | |
 | Activate/Switch Shapes (Arrow/Square/etc.)   | <kbd>2</kbd> | |
-| Activate Laser                          | <kbd>3</kbd> | |
-| Switch Color                            | <kbd>4</kbd> | |
-| Switch Thickness (Width)                | <kbd>5</kbd> | |
+| Activate Text                           | <kbd>3</kbd> | |
+| Activate Laser                          | <kbd>4</kbd> | |
+| Switch Color                            | <kbd>5</kbd> | |
+| Switch Thickness (Width)                | <kbd>6</kbd> | |
 | Show/Hide App                           | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | Global shortcut |
 | Show/Hide ToolBar                       | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>T</kbd> | |
 | Show/Hide Whiteboard                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>W</kbd> | |
