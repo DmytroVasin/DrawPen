@@ -26,6 +26,17 @@
 
 You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases)
 
+Or install via **package managers**:
+
+```bash
+# macOS (Homebrew)
+brew install --cask drawpen
+
+# Windows (Scoop)
+scoop install drawpen
+# ⚠️ Scoop PR is pending — may not work until merged
+```
+
 ### Keybindings
 
 | Command                                 | Keybindings                                                  | Comment |
