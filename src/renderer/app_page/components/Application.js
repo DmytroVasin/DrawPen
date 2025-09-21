@@ -85,6 +85,7 @@ const Application = (settings) => {
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [rippleEffects, setRippleEffects] = useState([]);
+  const [redoStackFigures, setRedoStackFigures] = useState([]);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -100,18 +101,31 @@ const Application = (settings) => {
     switch (event.key) {
       case 'z':
       case 'Z':
-        if (event.shiftKey) {
-          // Do nothing
-          return
-        }
-
         if (event.ctrlKey || event.metaKey) {
           if (activeFigureInfo) {
             setActiveFigureInfo(null);
-            return
+            break;
           }
 
-          setAllFigures(prevAllFigures => prevAllFigures.slice(0, -1));
+          if (event.shiftKey) {
+            if (redoStackFigures.length > 0) {
+              const restoredFigure = redoStackFigures.at(-1);
+              const newRedoStack = redoStackFigures.slice(0, -1);
+
+              setRedoStackFigures(newRedoStack);
+              setAllFigures(prevAllFigures => [...prevAllFigures, restoredFigure]);
+            }
+
+            break;
+          }
+
+          if (allFigures.length > 0) {
+            const figureToRemove = allFigures.at(-1);
+            const newActiveFigures = allFigures.slice(0, -1)
+
+            setRedoStackFigures(prevRedoStack => [...prevRedoStack, figureToRemove]);
+            setAllFigures(newActiveFigures);
+          }
         }
         break;
       case 'ArrowUp':
@@ -142,8 +156,12 @@ const Application = (settings) => {
       case 'Delete':
       case 'Backspace':
         if (activeFigureInfo) {
-          setAllFigures(allFigures.filter(figure => figure.id !== activeFigureInfo.id));
+          const figureToRemove = allFigures.find(figure => figure.id === activeFigureInfo.id);
+          const newActiveFigures = allFigures.filter(figure => figure.id !== activeFigureInfo.id)
+
           setActiveFigureInfo(null);
+          setRedoStackFigures(prevRedoStack => [...prevRedoStack, figureToRemove]);
+          setAllFigures(newActiveFigures);
         }
         break;
       case 'Enter':
@@ -405,6 +423,7 @@ const Application = (settings) => {
     }
 
     setAllFigures([...allFigures, newFigure]);
+    setRedoStackFigures([]);
     setIsDrawing(true);
   };
 
