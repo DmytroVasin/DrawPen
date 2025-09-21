@@ -157,11 +157,13 @@ function createMainWindow() {
 
   let { width, height } = mainDisplay.workAreaSize
   let isResizable = false
+  let hasDevTools = false
 
   if (process.env.NODE_ENV === 'development') {
     width = 500
     height = 500
     isResizable = true
+    hasDevTools = true
   }
 
   mainWindow = new BrowserWindow({
@@ -178,6 +180,7 @@ function createMainWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     webPreferences: {
+      devTools: hasDevTools,
       nodeIntegration: false,
       preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
     }
@@ -210,6 +213,11 @@ function createMainWindow() {
 function createAboutWindow() {
   const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
   const { x, y } = currentDisplay.workArea;
+  let hasDevTools = false
+
+  if (process.env.NODE_ENV === 'development') {
+    hasDevTools = true
+  }
 
   aboutWindow = new BrowserWindow({
     show: false,
@@ -221,6 +229,7 @@ function createAboutWindow() {
     minimizable: false,
     autoHideMenuBar: true,
     webPreferences: {
+      devTools: hasDevTools,
       nodeIntegration: false,
       preload: ABOUT_WINDOW_PRELOAD_WEBPACK_ENTRY,
     }
