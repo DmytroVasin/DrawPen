@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.24] - 2025-09-21
+- Add ability to make Redo via CTRL+SHIFT+Z
+- Disable DevTools for Package build
+
 ## [0.0.23] - 2025-06-13
 - Added white logo for Linux
 
@@ -13,7 +17,6 @@
 - Fix Oval pick detection
 - Fix Mouse detection (crosshair) above Oval Resize buttons
 - Fix TabIndex (When Tab ruins markup)
-
 
 ### Improvments:
 - Remove "Undo" from global events
