@@ -307,3 +307,30 @@ export const resizeFigure = (figure, resizingDotName, { x, y }) => {
     }
   }
 }
+
+const getPointsCenter = (figure) => {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const [x, y] of figure.points) {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+
+  if (figure.type === 'text') {
+    maxX += figure.width * figure.scale
+    maxY += figure.height * figure.scale
+  }
+
+  return [(minX + maxX) / 2, (minY + maxY) / 2];
+};
+
+export const moveToCoordinates = (figure, cursorX, cursorY) => {
+  const [centerX, centerY] = getPointsCenter(figure);
+
+  return figure.points.map(([pointX, pointY]) => [pointX + cursorX - centerX, pointY + cursorY - centerY]);
+};

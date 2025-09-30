@@ -19,6 +19,7 @@ import {
   getDotNameOnFigure,
   dragFigure,
   resizeFigure,
+  moveToCoordinates,
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
@@ -86,6 +87,7 @@ const Application = (settings) => {
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [rippleEffects, setRippleEffects] = useState([]);
   const [redoStackFigures, setRedoStackFigures] = useState([]);
+  const [clipboardFigure, setClipboardFigure] = useState(null);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -99,6 +101,38 @@ const Application = (settings) => {
     }
 
     switch (event.key) {
+      case 'v':
+      case 'V':
+        if (event.ctrlKey || event.metaKey) {
+          if (clipboardFigure) {
+            const { x, y } = mouseCoordinates;
+
+            const newFigure = {
+              ...clipboardFigure,
+              id: Date.now(),
+              points: moveToCoordinates(clipboardFigure, x, y),
+            };
+
+            setActiveFigureInfo({ id: newFigure.id, x, y });
+            setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
+          }
+        }
+
+        break;
+      case 'c':
+      case 'C':
+        if (event.ctrlKey || event.metaKey) {
+          if (activeFigureInfo) {
+            const activeFigure = findActiveFigure();
+
+            setClipboardFigure({
+              ...activeFigure,
+              points: activeFigure.points.map(p => [...p]) // Avoid mutation
+            });
+          }
+        }
+
+        break;
       case 'z':
       case 'Z':
         if (event.ctrlKey || event.metaKey) {
@@ -208,7 +242,7 @@ const Application = (settings) => {
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
-  }, [allFigures, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer]);
+  }, [allFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
