@@ -1,9 +1,11 @@
 #cute_cursor {
-  transform: translate(15px, -25px);
+  will-change: transform;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 1;
+  pointer-events: none;
+  user-select: none;
 
   svg {
     display: block;

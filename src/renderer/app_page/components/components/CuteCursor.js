@@ -60,8 +60,11 @@ const CuteCursor = ({
     }
   };
 
+  let xPosition = mouseCoordinates.x + 15;
+  let yPosition = mouseCoordinates.y - 25;
+
   return (
-    <div id="cute_cursor" style={{ left: mouseCoordinates.x, top: mouseCoordinates.y }}>
+    <div id="cute_cursor" style={{ transform: `translate3d(${xPosition}px, ${yPosition}px, 0)` }}>
       <svg width="0" height="0">
         <linearGradient id="svg-gradient" gradientTransform="rotate(350)">
           <stop stopColor="red"    offset="0%" />
