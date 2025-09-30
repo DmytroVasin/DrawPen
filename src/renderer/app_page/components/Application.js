@@ -95,6 +95,10 @@ const Application = (settings) => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
   }, []);
 
+
+  const lastPasteAtRef = useRef(null);
+  const PASTE_COOLDOWN_MS = 300;
+
   const handleKeyPress = useCallback((event) => {
     if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
       return
@@ -105,6 +109,10 @@ const Application = (settings) => {
       case 'V':
         if (event.ctrlKey || event.metaKey) {
           if (clipboardFigure) {
+            const now = Date.now();
+            if (now - lastPasteAtRef.current < PASTE_COOLDOWN_MS) return;
+            lastPasteAtRef.current = now;
+
             const { x, y } = mouseCoordinates;
 
             const newFigure = {
