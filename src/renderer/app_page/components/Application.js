@@ -16,6 +16,7 @@ import {
 } from './utils/general.js';
 import {
   isOnFigure,
+  areFiguresIntersecting,
   getDotNameOnFigure,
   dragFigure,
   resizeFigure,
@@ -29,6 +30,7 @@ import { FaFont } from "react-icons/fa6";
 
 import {
   laserTime,
+  eraserTime,
   shapeList,
   colorList,
   widthList,
@@ -62,11 +64,11 @@ const Application = (settings) => {
 
   if (process.env.NODE_ENV === 'development') {
     initialFigures = [
-      { id: 0, type: 'arrow', colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      { id: 1, type: 'line', colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]], rainbowColorDeg: (Math.random() * 360) },
-      { id: 3, type: 'oval', colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
-      { id: 4, type: 'text', colorIndex: 2, widthIndex: 2, points: [[152, 118]], rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360) },
+      { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
   }
 
@@ -74,6 +76,7 @@ const Application = (settings) => {
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
   const [allFigures, setAllFigures] = useState(initialFigures);
   const [allLaserFigures, setLaserFigure] = useState([]);
+  const [allEraserFigures, setEraserFigure] = useState([]);
   const [activeTool, setActiveTool] = useState(initialActiveTool);
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
   const [activeColorIndex, setActiveColorIndex] = useState(initialActiveColor);
@@ -244,9 +247,12 @@ const Application = (settings) => {
         handleChangeTool('laser');
         break;
       case '5':
-        handleChangeColor((activeColorIndex + 1) % colorList.length);
+        handleChangeTool('eraser');
         break;
       case '6':
+        handleChangeColor((activeColorIndex + 1) % colorList.length);
+        break;
+      case '7':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
@@ -295,6 +301,11 @@ const Application = (settings) => {
     allLasersFiguresByRef.current = allLaserFigures;
   }, [allLaserFigures]);
 
+  const allErasersFiguresByRef = useRef(null)
+  useEffect(() => {
+    allErasersFiguresByRef.current = allEraserFigures;
+  }, [allEraserFigures]);
+
   const isActiveFigureMoving = () => {
     return activeFigureInfo && (activeFigureInfo.dragging || activeFigureInfo.resizing)
   }
@@ -306,13 +317,21 @@ const Application = (settings) => {
   const scheduleClearLaserTail = (id) => {
     // https://felixgerschau.com/react-hooks-settimeout/
     setTimeout(() => {
-      const updatedLaserFigures = clearLaserTail(id, allLasersFiguresByRef.current);
+      const updatedLaserFigures = clearTail(id, allLasersFiguresByRef.current);
 
       setLaserFigure([...updatedLaserFigures])
     }, laserTime)
   }
 
-  const clearLaserTail = (id, figures) => {
+  const scheduleClearEraserTail = (id) => {
+    setTimeout(() => {
+      const updatedEraserFigures = clearTail(id, allErasersFiguresByRef.current);
+
+      setEraserFigure([...updatedEraserFigures])
+    }, eraserTime)
+  }
+
+  const clearTail = (id, figures) => {
     const figure = figures.find(figure => figure.id === id);
     if (figure) {
       figure.points.shift();
@@ -352,6 +371,11 @@ const Application = (settings) => {
   };
 
   const handleChangeTool = (toolName) => {
+    if (activeTool === toolName) {
+      return
+    }
+
+    setActiveFigureInfo(null);
     setActiveTool(toolName);
 
     if (shapeList.includes(toolName)) {
@@ -386,7 +410,7 @@ const Application = (settings) => {
       }
     }
 
-    if (getFigureAtMousePosition(x, y)) {
+    if (!['eraser', 'laser'].includes(activeTool) && getFigureAtMousePosition(x, y)) {
       setCursorType('move');
       return
     }
@@ -394,6 +418,26 @@ const Application = (settings) => {
     setCursorType('crosshair');
   };
   const setMouseCursorThrottle = throttle(setMouseCursor, 50);
+
+  const eraseFiguresOnIntersection = (eraserFigure) => {
+    setAllFigures(prevFigures => {
+      let hasChanges = false;
+
+      const updatedFigures = prevFigures.map(figure => {
+        if (!figure.erased && areFiguresIntersecting(eraserFigure, figure)) {
+          hasChanges = true;
+
+          return { ...figure, erased: true };
+        }
+
+        return figure;
+      });
+
+      console.log('Erased hasChanges: ', hasChanges);
+
+      return hasChanges ? updatedFigures : prevFigures;
+    });
+  }
 
   const handleMouseDown = ({ x, y }) => {
     // Diactivate text editor
@@ -414,11 +458,14 @@ const Application = (settings) => {
     }
 
     // Click on the figure
-    const selectedFigure = getFigureAtMousePosition(x, y);
-    if (selectedFigure) {
-      moveFigureToTop(selectedFigure.id)
-      setActiveFigureInfo({ id: selectedFigure.id, dragging: true, x, y });
-      return;
+    if (!['eraser', 'laser'].includes(activeTool)) {
+      const selectedFigure = getFigureAtMousePosition(x, y);
+
+      if (selectedFigure) {
+        moveFigureToTop(selectedFigure.id)
+        setActiveFigureInfo({ id: selectedFigure.id, dragging: true, x, y });
+        return;
+      }
     }
 
     if (activeTool === 'laser') {
@@ -431,6 +478,21 @@ const Application = (settings) => {
 
       setLaserFigure([...allLaserFigures, laserFigure]);
       scheduleClearLaserTail(laserFigure.id)
+      setIsDrawing(true);
+      return;
+    }
+
+    if (activeTool === 'eraser') {
+      let eraserFigure = {
+        id: Date.now(),
+        type: activeTool,
+        widthIndex: activeWidthIndex,
+        points: [[x, y]],
+      };
+
+      eraseFiguresOnIntersection(eraserFigure);
+      setEraserFigure([...allEraserFigures, eraserFigure]);
+      scheduleClearEraserTail(eraserFigure.id)
       setIsDrawing(true);
       return;
     }
@@ -497,6 +559,17 @@ const Application = (settings) => {
         return;
       }
 
+      if (activeTool === 'eraser') {
+        const currentEraser = allEraserFigures[allEraserFigures.length - 1];
+
+        currentEraser.points = [...currentEraser.points, [x, y]];
+
+        eraseFiguresOnIntersection(currentEraser);
+        setEraserFigure([...allEraserFigures]);
+        scheduleClearEraserTail(currentEraser.id)
+        return;
+      }
+
       if (activeTool === 'pen') {
         const currentFigure = allFigures[allFigures.length - 1];
 
@@ -545,12 +618,21 @@ const Application = (settings) => {
         }
       }
 
+      if (activeTool === 'eraser') {
+        const figuresToRemove = allFigures.filter(figure => figure.erased).map(figure => ({ ...figure, erased: false }));
+
+        setRedoStackFigures(prevRedoStack => [...prevRedoStack, ...figuresToRemove]);
+        setAllFigures(allFigures.filter(figure => !figure.erased));
+      }
+
       if (activeTool === 'pen') {
         const currentFigure = allFigures[allFigures.length - 1];
 
         if (currentFigure.colorIndex !== 0) { // Not Rainbow
           currentFigure.points = [...filterClosePoints(currentFigure.points)];
         }
+
+        setAllFigures([...allFigures]);
       }
 
       if (shapeList.includes(activeTool)) {
@@ -560,9 +642,9 @@ const Application = (settings) => {
         if (shapeDistance < minObjectDistance) {
           allFigures.pop();
         }
-      }
 
-      setAllFigures([...allFigures]);
+        setAllFigures([...allFigures]);
+      }
     }
 
     if (isActiveFigureMoving()) {
@@ -607,6 +689,7 @@ const Application = (settings) => {
     setActiveFigureInfo(null);
     setAllFigures([]);
     setLaserFigure([]);
+    setEraserFigure([]);
     setRippleEffects([]);
     setTextEditorContainer(null);
   };
@@ -709,6 +792,7 @@ const Application = (settings) => {
       <DrawDesk
         allFigures={allFigures}
         allLaserFigures={allLaserFigures}
+        allEraserFigures={allEraserFigures}
         activeFigureInfo={activeFigureInfo}
         cursorType={cursorType}
         handleMouseDown={handleMouseDown}

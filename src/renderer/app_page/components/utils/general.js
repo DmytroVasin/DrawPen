@@ -66,6 +66,11 @@ export const pointToSegmentDistance = (px, py, pointA, pointB) => {
   const BPx = px - x2;
   const BPy = py - y2;
 
+  // A and B are the same point
+  if (ABx === 0 && ABy === 0) {
+    return Math.hypot(APx, APy);
+  }
+
   // Dot product AP . AB
   const AB_AB = ABx * ABx + ABy * ABy;
   const AP_AB = APx * ABx + APy * ABy;
@@ -75,10 +80,10 @@ export const pointToSegmentDistance = (px, py, pointA, pointB) => {
 
   if (d < 0) {
     // P projects outside the segment, on the side of A
-    return Math.sqrt(APx * APx + APy * APy);
+    return Math.hypot(APx, APy);
   } else if (d > 1) {
     // P projects outside the segment, on the side of B
-    return Math.sqrt(BPx * BPx + BPy * BPy);
+    return Math.hypot(BPx, BPy);
   } else {
     // P projects onto the line, calculate the projection
     const projx = x1 + d * ABx;
@@ -87,7 +92,7 @@ export const pointToSegmentDistance = (px, py, pointA, pointB) => {
     const dx = px - projx;
     const dy = py - projy;
 
-    return Math.sqrt(dx * dx + dy * dy);
+    return Math.hypot(dx, dy);
   }
 }
 
@@ -156,3 +161,16 @@ export const calculateCanvasTextWidth = (text, widthIndex) => {
 
   return [maxLineWidth, totalHeight]
 }
+
+// https://en.m.wikipedia.org/wiki/Intersection_(geometry)#Two_line_segments
+export const segmentsIntersect = (p1, p2, q1, q2) => {
+  const cross = (a, b, c) =>
+    (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+
+  const o1 = cross(p1, p2, q1);
+  const o2 = cross(p1, p2, q2);
+  const o3 = cross(q1, q2, p1);
+  const o4 = cross(q1, q2, p2);
+
+  return (o1 * o2 < 0) && (o3 * o4 < 0);
+};

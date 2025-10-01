@@ -160,24 +160,23 @@ const ToolBar = ({
                 <Icons.GiLaserburn />
               </button>
             </li>
+            <li className={activeTool === "eraser" ? "active" : undefined}>
+              <button onClick={() => handleChangeTool("eraser")} title="Eraser">
+                <Icons.FaEraser />
+              </button>
+            </li>
             <li className="cross-line"></li>
             <li>
               <button
-                className={`toolbar__color-picker ${colorList[activeColorIndex].name} ${activeTool === "laser" ? "color_laser" : undefined}`}
+                className={`toolbar__color-picker ${colorList[activeColorIndex].name} color_tool_${activeTool}`}
                 onClick={() => setSlide("color-slide")}
                 title="Change Color"
-                disabled={activeTool === "laser"}
+                disabled={["laser", "eraser"].includes(activeTool)}
               />
             </li>
             <li>
               <button className="toolbar__width-button" onClick={() => setSlide("width-slide")} title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
-              </button>
-            </li>
-            <li className="cross-line"></li>
-            <li>
-              <button onClick={handleReset} title="Clear All">
-                <Icons.FaEraser />
               </button>
             </li>
           </ul>

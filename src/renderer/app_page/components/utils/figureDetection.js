@@ -1,4 +1,4 @@
-import { pointToSegmentDistance } from './general.js';
+import { pointToSegmentDistance, segmentsIntersect } from './general.js';
 import { dotMargin, figureMinScale } from '../constants.js'
 
 const withinRadius = (x, y) => {
@@ -184,6 +184,147 @@ export const isOnFigure = (x, y, figure) => {
       return false
   }
 };
+
+const isSegmentIntersectCurve = (segmentPoints, points) => {
+  if (segmentPoints.length < 2) {
+    return false
+  }
+
+  const [startAt, endAt] = segmentPoints.slice(-2);
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const pointA = points[i];
+    const pointB = points[i + 1];
+
+    if (segmentsIntersect(startAt, endAt, pointA, pointB)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const isSegmentTouchCurve = (segmentPoints, figure) => {
+  const { points } = figure
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (points.length < 2) {
+    const [pointX, pointY] = points[0];
+
+    const threshold = 10
+    const distance = Math.hypot(eraseAtX - pointX, eraseAtY - pointY);
+
+    return distance <= threshold
+  }
+
+  if (IsOnCurve(eraseAtX, eraseAtY, points)) {
+    return true
+  }
+
+  return isSegmentIntersectCurve(segmentPoints, points)
+}
+
+const isSegmentTouchLine = (segmentPoints, figure) => {
+  const { points } = figure
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (IsOnLine(eraseAtX, eraseAtY, figure)) {
+    return true
+  }
+
+  return isSegmentIntersectCurve(segmentPoints, points)
+}
+
+const isSegmentTouchRectangle = (segmentPoints, figure) => {
+  const { points } = figure
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (IsOnRectangle(eraseAtX, eraseAtY, figure)) {
+    return true
+  }
+
+  const [startX, startY] = points[0];
+  const [endX, endY] = points[1];
+
+  const allRectPoints = [
+    [startX, startY],
+    [endX, startY],
+    [endX, endY],
+    [startX, endY],
+  ];
+
+  return isSegmentIntersectCurve(segmentPoints, allRectPoints)
+}
+
+const isSegmentTouchText = (segmentPoints, figure) => {
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (IsOnText(eraseAtX, eraseAtY, figure)) {
+    return true
+  }
+
+  const { points, width, height, scale } = figure
+  const startAt = points[0];
+
+  const rectPoints = [
+    [startAt[0],                 startAt[1]],
+    [startAt[0] + width * scale, startAt[1]],
+    [startAt[0] + width * scale, startAt[1] + height * scale],
+    [startAt[0],                 startAt[1] + height * scale],
+  ];
+
+  return isSegmentIntersectCurve(segmentPoints, rectPoints)
+}
+
+const isSegmentTouchOval = (segmentPoints, figure) => {
+  const { points } = figure
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (IsOnOval(eraseAtX, eraseAtY, figure)) {
+    return true
+  }
+
+  const [startX, startY] = points[0];
+  const [endX, endY] = points[1];
+
+  const numPoints = 32;
+  const ovalPoints = [];
+
+  const radiusX = Math.abs(endX - startX) / 2;
+  const radiusY = Math.abs(endY - startY) / 2;
+  const centerX = Math.min(startX, endX) + radiusX;
+  const centerY = Math.min(startY, endY) + radiusY;
+
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i / numPoints) * 2 * Math.PI;
+    const x = centerX + radiusX * Math.cos(angle);
+    const y = centerY + radiusY * Math.sin(angle);
+    ovalPoints.push([x, y]);
+  }
+
+  ovalPoints.push(ovalPoints[0]);
+
+  return isSegmentIntersectCurve(segmentPoints, ovalPoints)
+}
+
+export const areFiguresIntersecting = (eraserFigure, figure) => {
+  switch (figure.type) {
+    case 'pen':
+      return isSegmentTouchCurve(eraserFigure.points, figure)
+    case 'arrow':
+      return isSegmentTouchLine(eraserFigure.points, figure)
+    case 'rectangle':
+      return isSegmentTouchRectangle(eraserFigure.points, figure)
+    case 'oval':
+      return isSegmentTouchOval(eraserFigure.points, figure)
+    case 'line':
+      return isSegmentTouchLine(eraserFigure.points, figure)
+    case 'text':
+      return isSegmentTouchText(eraserFigure.points, figure)
+    default:
+      return false
+  }
+}
 
 export const getDotNameOnFigure = (x, y, figure) => {
   switch (figure.type) {

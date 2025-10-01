@@ -188,7 +188,8 @@
         &.color_green { background-color: var(--color-picker-green); }
         &.color_orange { background-color: var(--color-picker-orange); }
         &.color_black { background-color: var(--color-picker-black); }
-        &.color_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
+        &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
+        &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
       }
     }
   }

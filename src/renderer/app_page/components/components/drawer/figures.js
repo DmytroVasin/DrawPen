@@ -1,6 +1,13 @@
 import { getStroke } from 'perfect-freehand';
 import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../../utils/general.js';
-import { colorList, widthList, rainbowScaleFactor, dotMargin } from '../../constants.js'
+import {
+  colorList,
+  widthList,
+  rainbowScaleFactor,
+  dotMargin,
+  erasedFigureColor,
+  eraserTailColor,
+} from '../../constants.js'
 
 const hslColor = (degree) => {
   return `hsl(${degree % 360}, 70%, 60%)`
@@ -65,7 +72,9 @@ const activeColorAndWidth = () => {
   return ['#FFF', 2]
 }
 
-const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+const detectColorAndWidth = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg, erased } = figure
+
   let color = colorList[colorIndex].color
   const width = widthList[widthIndex].figure_size
 
@@ -73,10 +82,16 @@ const detectColorAndWidth = (ctx, pointA, pointB, colorIndex, widthIndex, rainbo
     color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
   }
 
+  if (erased) {
+    color = erasedFigureColor;
+  }
+
   return [color, width]
 }
 
-const detectColorAndFontSize = (ctx, pointA, width, height, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg) => {
+const detectColorAndFontSize = (ctx, figure, updateRainbowColorDeg) => {
+  const { points: [pointA], colorIndex, widthIndex, rainbowColorDeg, width, height, erased } = figure;
+
   let color = colorList[colorIndex].color
   const fontSize = widthList[widthIndex].font_size
   const font_y_offset_compensation = widthList[widthIndex].font_y_offset_compensation
@@ -85,6 +100,10 @@ const detectColorAndFontSize = (ctx, pointA, width, height, colorIndex, widthInd
     const pointB = [pointA[0], pointA[1] + height] // Vertical Gradient
 
     color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
+  }
+
+  if (erased) {
+    color = erasedFigureColor;
   }
 
   return [color, fontSize, font_y_offset_compensation]
@@ -101,28 +120,35 @@ export const getCursorColor = (colorIndex, rainbowColorDeg) => {
 }
 
 export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
-  const { points, colorIndex, widthIndex, rainbowColorDeg } = figure;
+  const { points, colorIndex, widthIndex } = figure;
 
   const colorInfo = colorList[colorIndex]
   const widthInfo = widthList[widthIndex]
 
   if (colorInfo.name === 'color_rainbow') {
-    drawLazyPen(ctx, points, widthInfo.rainbow_pen_width, rainbowColorDeg, updateRainbowColorDeg)
+    drawLazyPen(ctx, figure, widthInfo.rainbow_pen_width, updateRainbowColorDeg)
     return;
   }
 
-  drawPerfectPen(ctx, points, colorInfo.color, widthInfo.pen_width)
+  let penColor = colorInfo.color
+  if (figure.erased) {
+    penColor = erasedFigureColor
+  }
+
+  drawPerfectPen(ctx, points, penColor, widthInfo.pen_width)
 }
 
-const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg) => {
-  points = getLazyPoints(points, { size: width })
+const drawLazyPen = (ctx, figure, width, updateRainbowColorDeg) => {
+  const { points, rainbowColorDeg, erased } = figure;
+
+  const lazyPoints = getLazyPoints(points, { size: width })
 
   let colorDeg = rainbowColorDeg
 
-  points.forEach((point, index) => {
+  lazyPoints.forEach((point, index) => {
     if (index === 0) return;
 
-    const pointA = points[index-1]
+    const pointA = lazyPoints[index-1]
     const pointB = point
 
     const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
@@ -130,7 +156,9 @@ const drawLazyPen = (ctx, points, width, rainbowColorDeg, updateRainbowColorDeg)
     const amountOfColorChanges = Math.round(distance)
 
     let color
-    if (amountOfColorChanges === 0) {
+    if (erased) {
+      color = erasedFigureColor
+    } else if (amountOfColorChanges === 0) {
       color = hslColor(colorDeg)
     } else {
       const gradient = ctx.createLinearGradient(...pointA, ...pointB);
@@ -219,7 +247,7 @@ const getArrowParams = (pointA, pointB, widthIndex) => {
 }
 
 export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure;
+  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg, erased } = figure;
   const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
 
   let fillStyle = colorList[colorIndex].color
@@ -230,6 +258,10 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 
   if (colorList[colorIndex].name === 'color_rainbow') {
     fillStyle = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
+  }
+
+  if (erased) {
+    fillStyle = erasedFigureColor;
   }
 
   ctx.fillStyle = fillStyle;
@@ -266,8 +298,8 @@ export const drawArrowActive = (ctx, figure) => {
 }
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
-  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
+  const { points: [pointA, pointB] } = figure
+  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 }
@@ -297,8 +329,8 @@ const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
 };
 
 export const drawOval = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
-  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
+  const { points: [pointA, pointB] } = figure
+  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 }
@@ -337,8 +369,8 @@ const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
 }
 
 export const drawRectangle = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg } = figure
-  const [color, width] = detectColorAndWidth(ctx, pointA, pointB, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
+  const { points: [pointA, pointB] } = figure
+  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 }
@@ -417,10 +449,27 @@ export const drawLaser = (ctx, figure) => {
   ctx.shadowColor = 'transparent'; // Reset shadows
 }
 
-export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
-  const { points: [startAt], text, colorIndex, widthIndex, rainbowColorDeg, scale, width, height } = figure;
+export const drawEraserTail = (ctx, figure) => {
+  const { points, widthIndex } = figure
+  const width = widthList[widthIndex].figure_size
 
-  const [color, fontSize, font_y_offset_compensation] = detectColorAndFontSize(ctx, startAt, width, height, colorIndex, widthIndex, rainbowColorDeg, updateRainbowColorDeg)
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = eraserTailColor;
+  const myStroke1 = getStroke(points, {
+    size: width,
+    simulatePressure: false,
+    start: { taper: true, cap: true },
+  });
+  const pathData1 = getSvgPathFromStroke(myStroke1);
+  ctx.fill(new Path2D(pathData1));
+
+  ctx.shadowBlur = 0;
+}
+
+export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
+  const { points: [startAt], text, scale, width, height } = figure;
+
+  const [color, fontSize, font_y_offset_compensation] = detectColorAndFontSize(ctx, figure, updateRainbowColorDeg)
 
   drawTextSkeleton(ctx, startAt, text, color, fontSize, font_y_offset_compensation, scale)
 

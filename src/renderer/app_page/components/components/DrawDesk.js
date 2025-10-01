@@ -13,12 +13,14 @@ import {
   drawRectangle,
   drawRectangleActive,
   drawLaser,
+  drawEraserTail,
   drawText,
 } from './drawer/figures.js';
 
 const DrawDesk = ({
   allFigures,
   allLaserFigures,
+  allEraserFigures,
   activeFigureInfo,
   cursorType,
   handleMouseDown,
@@ -45,10 +47,10 @@ const DrawDesk = ({
   }, []);
 
   useEffect(() => {
-    draw(allFigures, allLaserFigures, activeFigureInfo)
-  }, [allFigures, allLaserFigures, activeFigureInfo]);
+    draw(allFigures, allLaserFigures, allEraserFigures, activeFigureInfo)
+  }, [allFigures, allLaserFigures, allEraserFigures, activeFigureInfo]);
 
-  const draw = (allFigures, allLaserFigures, activeFigureInfo) => {
+  const draw = (allFigures, allLaserFigures, allEraserFigures, activeFigureInfo) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
@@ -102,6 +104,10 @@ const DrawDesk = ({
 
     allLaserFigures.forEach((figure) => {
       drawLaser(ctx, figure)
+    })
+
+    allEraserFigures.forEach((figure) => {
+      drawEraserTail(ctx, figure)
     })
   };
 

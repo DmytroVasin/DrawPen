@@ -34,15 +34,18 @@ const CuteCursor = ({
       };
     }
 
-    const laserIconProps = {
+    const monochromeIconProps = {
       size: iconSize,
       fill: '#333',
-      style: { stroke: "#DDD", strokeWidth: "10" },
+      stroke: "#DDD",
+      strokeWidth: "10",
     }
 
     switch (toolName) {
+      case "eraser":
+        return <Icons.FaEraser {...monochromeIconProps} />
       case "laser":
-        return <Icons.GiLaserburn {...laserIconProps} />
+        return <Icons.GiLaserburn {...monochromeIconProps} />
       case "pen":
         return <Icons.FaPaintBrush {...iconProps} />
       case "arrow":

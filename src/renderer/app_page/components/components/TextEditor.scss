@@ -17,22 +17,3 @@
   // FOR DEV: Обведення прямокутника
   // border: 1px solid green;
 }
-
-// For Text shadow:
-// text-shadow: 1px 1px 1px #373737;
-
-// drawText:
-//
-// if (isActive) {
-//   ctx.shadowColor = '#333';
-//   ctx.shadowBlur = 1;
-//   ctx.shadowOffsetX = 1;
-//   ctx.shadowOffsetY = 1;
-// }
-
-// drawTextSkeleton(ctx, startAt, text, color, fontSize, font_y_offset_compensation, scale)
-
-// if (isActive) {
-//   ctx.shadowBlur = 0;
-//   ctx.shadowColor = 'transparent'; // Reset shadows
-// }
