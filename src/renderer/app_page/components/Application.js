@@ -89,6 +89,7 @@ const Application = (settings) => {
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [rippleEffects, setRippleEffects] = useState([]);
+  const [undoStackFigures, setUndoStackFigures] = useState([]);
   const [redoStackFigures, setRedoStackFigures] = useState([]);
   const [clipboardFigure, setClipboardFigure] = useState(null);
 
@@ -98,6 +99,25 @@ const Application = (settings) => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
   }, []);
 
+  // useEffect(() => {
+  //   console.log('Clipboard Figure: ', clipboardFigure);
+  // }, [clipboardFigure]);
+
+  // useEffect(() => {
+  //   console.log('All Figures: ', allFigures);
+  // }, [allFigures]);
+
+  // useEffect(() => {
+  //   console.log('activeFigureInfo: ', activeFigureInfo);
+  // }, [activeFigureInfo]);
+
+  // useEffect(() => {
+  //   console.log('UNDO: ', undoStackFigures);
+  // }, [undoStackFigures]);
+
+  // useEffect(() => {
+  //   console.log('REDO: ', redoStackFigures);
+  // }, [redoStackFigures]);
 
   const lastPasteAtRef = useRef(null);
   const PASTE_COOLDOWN_MS = 300;
@@ -126,6 +146,9 @@ const Application = (settings) => {
 
             setActiveFigureInfo({ id: newFigure.id, x, y });
             setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
+
+            setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [newFigure] }]);
+            setRedoStackFigures([]);
           }
         }
 
@@ -152,24 +175,44 @@ const Application = (settings) => {
             break;
           }
 
+          // REDO:
           if (event.shiftKey) {
             if (redoStackFigures.length > 0) {
-              const restoredFigure = redoStackFigures.at(-1);
-              const newRedoStack = redoStackFigures.slice(0, -1);
+              const lastAction = redoStackFigures.at(-1);
+              let newActiveFigures
 
-              setRedoStackFigures(newRedoStack);
-              setAllFigures(prevAllFigures => [...prevAllFigures, restoredFigure]);
+              if (lastAction.type === 'add') {
+                newActiveFigures = [...allFigures, ...lastAction.figures];
+              }
+
+              if (lastAction.type === 'remove') {
+                newActiveFigures = allFigures.filter(figure => !lastAction.figures.some(f => f.id === figure.id))
+              }
+
+              setAllFigures(newActiveFigures);
+              setUndoStackFigures(prevUndoStack => [...prevUndoStack, lastAction]);
+              setRedoStackFigures(prevRedoStack => prevRedoStack.slice(0, -1));
             }
 
             break;
           }
 
-          if (allFigures.length > 0) {
-            const figureToRemove = allFigures.at(-1);
-            const newActiveFigures = allFigures.slice(0, -1)
+          // UNDO:
+          if (undoStackFigures.length > 0) {
+            const lastAction = undoStackFigures.at(-1);
+            let newActiveFigures
 
-            setRedoStackFigures(prevRedoStack => [...prevRedoStack, figureToRemove]);
+            if (lastAction.type === 'add') {
+              newActiveFigures = allFigures.filter(figure => !lastAction.figures.some(f => f.id === figure.id))
+            }
+
+            if (lastAction.type === 'remove') {
+              newActiveFigures = [...allFigures, ...lastAction.figures];
+            }
+
             setAllFigures(newActiveFigures);
+            setUndoStackFigures(prevUndoStack => prevUndoStack.slice(0, -1));
+            setRedoStackFigures(prevRedoStack => [...prevRedoStack, lastAction]);
           }
         }
         break;
@@ -205,8 +248,10 @@ const Application = (settings) => {
           const newActiveFigures = allFigures.filter(figure => figure.id !== activeFigureInfo.id)
 
           setActiveFigureInfo(null);
-          setRedoStackFigures(prevRedoStack => [...prevRedoStack, figureToRemove]);
           setAllFigures(newActiveFigures);
+
+          setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'remove', figures: [figureToRemove] }]);
+          setRedoStackFigures([]);
         }
         break;
       case 'Enter':
@@ -250,13 +295,18 @@ const Application = (settings) => {
         handleChangeTool('eraser');
         break;
       case '6':
+        if (['eraser', 'laser'].includes(activeTool)) {
+          break;
+        }
+
         handleChangeColor((activeColorIndex + 1) % colorList.length);
+
         break;
       case '7':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
-  }, [allFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -433,8 +483,6 @@ const Application = (settings) => {
         return figure;
       });
 
-      console.log('Erased hasChanges: ', hasChanges);
-
       return hasChanges ? updatedFigures : prevFigures;
     });
   }
@@ -508,8 +556,10 @@ const Application = (settings) => {
           text: '',
           scale: 1,
         };
+
         setTextEditorContainer(newTextEditor);
       }
+
       return;
     }
 
@@ -527,7 +577,6 @@ const Application = (settings) => {
     }
 
     setAllFigures([...allFigures, newFigure]);
-    setRedoStackFigures([]);
     setIsDrawing(true);
   };
 
@@ -621,29 +670,37 @@ const Application = (settings) => {
       if (activeTool === 'eraser') {
         const figuresToRemove = allFigures.filter(figure => figure.erased).map(figure => ({ ...figure, erased: false }));
 
-        setRedoStackFigures(prevRedoStack => [...prevRedoStack, ...figuresToRemove]);
-        setAllFigures(allFigures.filter(figure => !figure.erased));
+        if (figuresToRemove.length > 0) {
+          setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'remove', figures: figuresToRemove }]);
+          setRedoStackFigures([]);
+
+          setAllFigures(allFigures.filter(figure => !figure.erased));
+        }
       }
 
       if (activeTool === 'pen') {
-        const currentFigure = allFigures[allFigures.length - 1];
+        const currentFigure = allFigures.at(-1);
 
         if (currentFigure.colorIndex !== 0) { // Not Rainbow
           currentFigure.points = [...filterClosePoints(currentFigure.points)];
         }
 
+        setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+        setRedoStackFigures([]);
+
         setAllFigures([...allFigures]);
       }
 
       if (shapeList.includes(activeTool)) {
-        const currentFigure = allFigures[allFigures.length - 1];
+        const currentFigure = allFigures.at(-1);
         const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
 
         if (shapeDistance < minObjectDistance) {
-          allFigures.pop();
+          setAllFigures(allFigures => allFigures.slice(0, -1));
+        } else {
+          setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+          setRedoStackFigures([]);
         }
-
-        setAllFigures([...allFigures]);
       }
     }
 
@@ -692,6 +749,9 @@ const Application = (settings) => {
     setEraserFigure([]);
     setRippleEffects([]);
     setTextEditorContainer(null);
+    setUndoStackFigures([]);
+    setRedoStackFigures([]);
+    setClipboardFigure(null);
   };
 
   const handleToggleToolbar = () => {
@@ -737,6 +797,9 @@ const Application = (settings) => {
 
     setAllFigures([...allFigures, textFigure]);
     setTextEditorContainer(null);
+
+    setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [textFigure] }]);
+    setRedoStackFigures([]);
   };
 
   const activateTextEditor = (pickedFigure) => {
@@ -753,6 +816,9 @@ const Application = (settings) => {
     setTextEditorContainer(newTextEditor);
     setActiveFigureInfo(null);
     setAllFigures(allFigures.filter(figure => figure.id !== pickedFigure.id));
+
+    setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'remove', figures: [pickedFigure] }]);
+    setRedoStackFigures([]);
   }
 
   const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
