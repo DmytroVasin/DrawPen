@@ -35,6 +35,7 @@ import {
   colorList,
   widthList,
   minObjectDistance,
+  pastCooldownMs,
 } from './constants.js'
 
 const Icons = {
@@ -120,8 +121,6 @@ const Application = (settings) => {
   // }, [redoStackFigures]);
 
   const lastPasteAtRef = useRef(null);
-  const PASTE_COOLDOWN_MS = 300;
-
   const handleKeyPress = useCallback((event) => {
     if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
       return
@@ -133,7 +132,7 @@ const Application = (settings) => {
         if (event.ctrlKey || event.metaKey) {
           if (clipboardFigure) {
             const now = Date.now();
-            if (now - lastPasteAtRef.current < PASTE_COOLDOWN_MS) return;
+            if (now - lastPasteAtRef.current < pastCooldownMs) return;
             lastPasteAtRef.current = now;
 
             const { x, y } = mouseCoordinates;

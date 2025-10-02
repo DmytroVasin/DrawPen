@@ -4,6 +4,7 @@ export const rainbowScaleFactor = 0.03;
 export const minObjectDistance = 5; // Minimum length of drawn object
 export const dotMargin = 5; // Margin from figure to dot
 export const figureMinScale = 0.2;
+export const pastCooldownMs = 300;
 
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 
