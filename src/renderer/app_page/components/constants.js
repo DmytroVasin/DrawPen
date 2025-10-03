@@ -9,12 +9,12 @@ export const pastCooldownMs = 300;
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 
 export const colorList = [
-  { color: '#000000', highlighterColor: '#00000080', name: 'color_rainbow' },
-  { color: '#529be0', highlighterColor: '#529be080', name: 'color_blue' },
-  { color: '#e05252', highlighterColor: '#e0525280', name: 'color_red' },
-  { color: '#52e06c', highlighterColor: '#52e06c80', name: 'color_green' },
-  { color: '#e0a552', highlighterColor: '#e0a55280', name: 'color_orange' },
-  { color: '#1e1e1e', highlighterColor: '#1e1e1e80', name: 'color_black' },
+  { color: '#000000', highlighterColor: '#00000070', name: 'color_rainbow' },
+  { color: '#529be0', highlighterColor: '#529be070', name: 'color_blue' },
+  { color: '#e05252', highlighterColor: '#e0525270', name: 'color_red' },
+  { color: '#52e06c', highlighterColor: '#52e06c70', name: 'color_green' },
+  { color: '#e0a552', highlighterColor: '#e0a55270', name: 'color_orange' },
+  { color: '#1e1e1e', highlighterColor: '#1e1e1e70', name: 'color_black' },
 ];
 
 // - font_y_offset_compensation: Hack to make HTML similar to Canvas
