@@ -6,7 +6,6 @@ import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
 import RippleEffect from './components/RippleEffect.js';
-import DisableZoom from './components/DisableZoom.js';
 import TextEditor from './components/TextEditor.js';
 import {
   filterClosePoints,
@@ -901,8 +900,6 @@ const Application = (settings) => {
             Icons={Icons}
           />
       }
-
-      <DisableZoom />
     </div>
   );
 };

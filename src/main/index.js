@@ -229,6 +229,13 @@ function createMainWindow() {
       showWindowOnActiveScreen();
     }
   })
+
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
+      event.preventDefault();
+    }
+  });
 }
 
 function createAboutWindow() {
@@ -278,8 +285,16 @@ function createAboutWindow() {
 
     return { action: "deny" };
   })
+
+  aboutWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  aboutWindow.webContents.on('before-input-event', (event, input) => {
+    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
+      event.preventDefault();
+    }
+  });
 }
 
+app.commandLine.appendSwitch('disable-pinch');
 app.on('ready', () => {
   hideDock()
   createMainWindow()
