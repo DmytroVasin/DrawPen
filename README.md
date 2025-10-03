@@ -44,10 +44,11 @@ scoop install drawpen
 | Activate Pen                            | <kbd>1</kbd> | |
 | Activate/Switch Shapes (Arrow/Square/etc.)   | <kbd>2</kbd> | |
 | Activate Text                           | <kbd>3</kbd> | |
-| Activate Laser                          | <kbd>4</kbd> | |
-| Activate Eraser                         | <kbd>5</kbd> | |
-| Switch Color                            | <kbd>6</kbd> | |
-| Switch Thickness (Width)                | <kbd>7</kbd> | |
+| Activate Highlighter                    | <kbd>4</kbd> | |
+| Activate Laser                          | <kbd>5</kbd> | |
+| Activate Eraser                         | <kbd>6</kbd> | |
+| Switch Color                            | <kbd>7</kbd> | |
+| Switch Thickness (Width)                | <kbd>8</kbd> | |
 | Show/Hide App                           | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> | Global shortcut |
 | Show/Hide ToolBar                       | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>T</kbd> | |
 | Show/Hide Whiteboard                    | <kbd>CMD</kbd>/<kbd>CTRL</kbd> + <kbd>W</kbd> | |

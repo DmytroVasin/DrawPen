@@ -207,7 +207,7 @@ export const drawHighlighter = (ctx, figure) => {
     highlighterColor = erasedFigureColorWithOpacity
   }
 
-  drawPerfectPen(ctx, points, highlighterColor, { size: widthInfo.highlighter_width, simulatePressure: false });
+  drawPerfectPen(ctx, points, highlighterColor, { size: widthInfo.highlighter_width, simulatePressure: false, thinning: 0.0 });
 }
 
 const getArrowParams = (pointA, pointB, widthIndex) => {

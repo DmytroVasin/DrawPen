@@ -100,28 +100,6 @@ const Application = (settings) => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
   }, []);
 
-  // ------------------------------------------------------------------------------
-  useEffect(() => {
-    console.log('Clipboard Figure: ', clipboardFigure);
-  }, [clipboardFigure]);
-
-  useEffect(() => {
-    console.log('All Figures: ', allFigures);
-  }, [allFigures]);
-
-  // useEffect(() => {
-  //   console.log('activeFigureInfo: ', activeFigureInfo);
-  // }, [activeFigureInfo]);
-
-  useEffect(() => {
-    console.log('UNDO: ', undoStackFigures);
-  }, [undoStackFigures]);
-
-  useEffect(() => {
-    console.log('REDO: ', redoStackFigures);
-  }, [redoStackFigures]);
-  // ------------------------------------------------------------------------------
-
   const lastPasteAtRef = useRef(null);
   const handleKeyPress = useCallback((event) => {
     if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
