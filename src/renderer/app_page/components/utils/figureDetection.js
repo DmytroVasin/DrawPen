@@ -310,6 +310,7 @@ const isSegmentTouchOval = (segmentPoints, figure) => {
 export const areFiguresIntersecting = (eraserFigure, figure) => {
   switch (figure.type) {
     case 'pen':
+    case 'highlighter':
       return isSegmentTouchCurve(eraserFigure.points, figure)
     case 'arrow':
       return isSegmentTouchLine(eraserFigure.points, figure)

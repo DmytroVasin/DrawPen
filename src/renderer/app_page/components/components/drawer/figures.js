@@ -6,6 +6,7 @@ import {
   rainbowScaleFactor,
   dotMargin,
   erasedFigureColor,
+  erasedFigureColorWithOpacity,
   eraserTailColor,
 } from '../../constants.js'
 
@@ -83,7 +84,7 @@ const detectColorAndWidth = (ctx, figure, updateRainbowColorDeg) => {
   }
 
   if (erased) {
-    color = erasedFigureColor;
+    color = erasedFigureColorWithOpacity;
   }
 
   return [color, width]
@@ -103,7 +104,7 @@ const detectColorAndFontSize = (ctx, figure, updateRainbowColorDeg) => {
   }
 
   if (erased) {
-    color = erasedFigureColor;
+    color = erasedFigureColorWithOpacity;
   }
 
   return [color, fontSize, font_y_offset_compensation]
@@ -132,7 +133,7 @@ export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
 
   let penColor = colorInfo.color
   if (figure.erased) {
-    penColor = erasedFigureColor
+    penColor = erasedFigureColorWithOpacity
   }
 
   drawPerfectPen(ctx, points, penColor, widthInfo.pen_width)
@@ -189,9 +190,38 @@ const drawLazyPen = (ctx, figure, width, updateRainbowColorDeg) => {
 const drawPerfectPen = (ctx, points, color, width) => {
   const myStroke = getStroke(points, { size: width });
   const pathData = getSvgPathFromStroke(myStroke);
+  const path2DData = new Path2D(pathData);
 
   ctx.fillStyle = color;
-  ctx.fill(new Path2D(pathData));
+  ctx.fill(path2DData);
+}
+
+const drawPerfectHighlighter = (ctx, points, color, width) => {
+  const myStroke = getStroke(points, { size: width, simulatePressure: false });
+  const pathData = getSvgPathFromStroke(myStroke);
+  const path2DData = new Path2D(pathData);
+
+  ctx.fillStyle = color;
+
+  ctx.globalCompositeOperation = "destination-out"; // 1) Прибираємо будь-які попередні пікселі саме там, де пройде новий штрих
+  ctx.fill(path2DData);
+
+  ctx.globalCompositeOperation = "source-over"; // 2) Малюємо свіжий штрих з потрібною прозорістю (без накопичення)
+  ctx.fill(path2DData);
+}
+
+export const drawHighlighter = (ctx, figure) => {
+  const { points, colorIndex, widthIndex } = figure;
+
+  const colorInfo = colorList[colorIndex]
+  const widthInfo = widthList[widthIndex]
+
+  let highlighterColor = colorInfo.highlighterColor
+  if (figure.erased) {
+    highlighterColor = erasedFigureColorWithOpacity
+  }
+
+  drawPerfectHighlighter(ctx, points, highlighterColor, widthInfo.highlighter_width);
 }
 
 const getArrowParams = (pointA, pointB, widthIndex) => {
@@ -261,7 +291,7 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
   }
 
   if (erased) {
-    fillStyle = erasedFigureColor;
+    fillStyle = erasedFigureColorWithOpacity;
   }
 
   ctx.fillStyle = fillStyle;

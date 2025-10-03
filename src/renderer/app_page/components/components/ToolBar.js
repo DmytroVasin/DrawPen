@@ -155,6 +155,11 @@ const ToolBar = ({
                 <Icons.FaFont />
               </button>
             </li>
+            <li className={activeTool === "highlighter" ? "active" : undefined}>
+              <button onClick={() => handleChangeTool("highlighter")} title="Text">
+                <Icons.FaHighlighter />
+              </button>
+            </li>
             <li className={activeTool === "laser" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("laser")} title="Laser">
                 <Icons.GiLaserburn />

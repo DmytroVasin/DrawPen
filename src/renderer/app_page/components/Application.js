@@ -22,7 +22,7 @@ import {
   resizeFigure,
   moveToCoordinates,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
+import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -47,6 +47,7 @@ const Icons = {
   GiLaserburn,
   MdOutlineCancel,
   FaEraser,
+  FaHighlighter,
   FaFont,
 };
 
@@ -100,25 +101,27 @@ const Application = (settings) => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
   }, []);
 
-  // useEffect(() => {
-  //   console.log('Clipboard Figure: ', clipboardFigure);
-  // }, [clipboardFigure]);
+  // ------------------------------------------------------------------------------
+  useEffect(() => {
+    console.log('Clipboard Figure: ', clipboardFigure);
+  }, [clipboardFigure]);
 
-  // useEffect(() => {
-  //   console.log('All Figures: ', allFigures);
-  // }, [allFigures]);
+  useEffect(() => {
+    console.log('All Figures: ', allFigures);
+  }, [allFigures]);
 
   // useEffect(() => {
   //   console.log('activeFigureInfo: ', activeFigureInfo);
   // }, [activeFigureInfo]);
 
-  // useEffect(() => {
-  //   console.log('UNDO: ', undoStackFigures);
-  // }, [undoStackFigures]);
+  useEffect(() => {
+    console.log('UNDO: ', undoStackFigures);
+  }, [undoStackFigures]);
 
-  // useEffect(() => {
-  //   console.log('REDO: ', redoStackFigures);
-  // }, [redoStackFigures]);
+  useEffect(() => {
+    console.log('REDO: ', redoStackFigures);
+  }, [redoStackFigures]);
+  // ------------------------------------------------------------------------------
 
   const lastPasteAtRef = useRef(null);
   const handleKeyPress = useCallback((event) => {
@@ -288,12 +291,15 @@ const Application = (settings) => {
         handleChangeTool('text');
         break;
       case '4':
-        handleChangeTool('laser');
+        handleChangeTool('highlighter');
         break;
       case '5':
-        handleChangeTool('eraser');
+        handleChangeTool('laser');
         break;
       case '6':
+        handleChangeTool('eraser');
+        break;
+      case '7':
         if (['eraser', 'laser'].includes(activeTool)) {
           break;
         }
@@ -301,7 +307,7 @@ const Application = (settings) => {
         handleChangeColor((activeColorIndex + 1) % colorList.length);
 
         break;
-      case '7':
+      case '8':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
@@ -459,7 +465,7 @@ const Application = (settings) => {
       }
     }
 
-    if (!['eraser', 'laser'].includes(activeTool) && getFigureAtMousePosition(x, y)) {
+    if (!['highlighter', 'eraser', 'laser'].includes(activeTool) && getFigureAtMousePosition(x, y)) {
       setCursorType('move');
       return
     }
@@ -505,7 +511,7 @@ const Application = (settings) => {
     }
 
     // Click on the figure
-    if (!['eraser', 'laser'].includes(activeTool)) {
+    if (!['highlighter', 'eraser', 'laser'].includes(activeTool)) {
       const selectedFigure = getFigureAtMousePosition(x, y);
 
       if (selectedFigure) {
@@ -575,6 +581,10 @@ const Application = (settings) => {
       newFigure.points.push([x, y]);
     }
 
+    if (newFigure.type === 'highlighter' && newFigure.colorIndex === 0) {
+      newFigure.colorIndex = Math.floor(Math.random() * (colorList.length - 1)) + 1
+    }
+
     setAllFigures([...allFigures, newFigure]);
     setIsDrawing(true);
   };
@@ -618,7 +628,7 @@ const Application = (settings) => {
         return;
       }
 
-      if (activeTool === 'pen') {
+      if (['pen', 'highlighter'].includes(activeTool)) {
         const currentFigure = allFigures[allFigures.length - 1];
 
         currentFigure.points = [...currentFigure.points, [x, y]];
@@ -675,6 +685,13 @@ const Application = (settings) => {
 
           setAllFigures(allFigures.filter(figure => !figure.erased));
         }
+      }
+
+      if (activeTool === 'highlighter') {
+        const currentFigure = allFigures.at(-1);
+
+        setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+        setRedoStackFigures([]);
       }
 
       if (activeTool === 'pen') {

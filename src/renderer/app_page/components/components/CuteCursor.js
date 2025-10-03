@@ -58,6 +58,8 @@ const CuteCursor = ({
         return <Icons.AiOutlineLine {...iconProps} />;
       case "text":
         return <Icons.FaFont {...iconProps} />;
+      case "highlighter":
+        return <Icons.FaHighlighter {...iconProps} />
       default:
         null
     }

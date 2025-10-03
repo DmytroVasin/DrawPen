@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { getMouseCoordinates } from '../utils/general.js';
 import {
   drawPen,
+  drawHighlighter,
   drawLine,
   drawLineActive,
   drawArrow,
@@ -57,6 +58,10 @@ const DrawDesk = ({
     allFigures.forEach((figure) => {
       if (figure.type === 'pen') {
         drawPen(ctx, figure, updateRainbowColorDeg)
+      }
+
+      if (figure.type === 'highlighter') {
+        drawHighlighter(ctx, figure)
       }
 
       if (figure.type === 'arrow') {
