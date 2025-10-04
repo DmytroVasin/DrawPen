@@ -69,26 +69,12 @@ const iconSrc = {
 }
 
 function getTrayIconPath() {
-  // macOS uses template images that adapt automatically
-  if (process.platform === 'darwin') {
-    return iconSrc.darwin
-  }
+   if (process.platform === 'darwin') return iconSrc.darwin
+   if (process.platform === 'linux')  return iconSrc.linux
+   if (process.platform === 'win32')  return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
 
-  // Linux uses white icon by default
-  if (process.platform === 'linux') {
-    return iconSrc.linux
-  }
-
-  // Windows: detect system theme and choose appropriate icon
-  if (process.platform === 'win32') {
-    return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
-  }
-
-  // Fallback for other platforms
-  return iconSrc.DEFAULT
-}
-
-const trayIcon = getTrayIconPath()
+   return iconSrc.DEFAULT
+ }
 
 const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
@@ -158,14 +144,19 @@ function updateContextMenu() {
   tray.setContextMenu(contextMenu);
 }
 
+function registerTrayIconUpdate() {
+  nativeTheme.on('updated', () => {
+    tray.setImage(getTrayIconPath())
+  })
+}
+
 function getActiveMonitor() {
   const activeMonitorId = store.get('active_monitor_id')
 
-  screen.getAllDisplays().forEach((display) => {
-    if (display.id === activeMonitorId) {
-      return display
-    }
-  })
+  const matchedMonitor = screen.getAllDisplays().find(display => display.id === activeMonitorId)
+  if (matchedMonitor) {
+    return matchedMonitor
+  }
 
   const primaryDisplay = screen.getPrimaryDisplay()
   store.set('active_monitor_id', primaryDisplay.id)
@@ -195,7 +186,6 @@ function createMainWindow() {
     height: height,
     transparent: true,
     resizable: isResizable,
-    skipTaskbar: true,
     hasShadow: false,
     frame: false,
     alwaysOnTop: true,
@@ -299,14 +289,9 @@ app.on('ready', () => {
   hideDock()
   createMainWindow()
 
-  tray = new Tray(trayIcon)
+  tray = new Tray(getTrayIconPath())
   updateContextMenu()
-
-  // Update tray icon when system theme changes
-  nativeTheme.on('updated', () => {
-    const newIconPath = getTrayIconPath()
-    tray.setImage(newIconPath)
-  })
+  registerTrayIconUpdate()
 
   registerGlobalShortcats()
 
@@ -380,12 +365,15 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_color_index: store.get('tool_bar_active_color_index'),
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
+    active_monitor_id: store.get('active_monitor_id'),
   };
 });
 
 ipcMain.handle('set_settings', (_event, newSettings) => {
-  console.log('New store: ', newSettings)
-  store.set(newSettings)
+  const mergedSettings = { ...store.store, ...newSettings }
+
+  console.log('New store: ', mergedSettings)
+  store.set(mergedSettings)
 
   return null
 });
