@@ -95,7 +95,12 @@ const detectColorAndFontSize = (ctx, figure, updateRainbowColorDeg) => {
 
   let color = colorList[colorIndex].color
   const fontSize = widthList[widthIndex].font_size
-  const font_y_offset_compensation = widthList[widthIndex].font_y_offset_compensation
+  let font_y_offset_compensation = widthList[widthIndex].font_y_offset_compensation
+
+  const dpr = (window.devicePixelRatio || 1);
+  if (dpr > 1) {
+    font_y_offset_compensation = widthList[widthIndex].font_y_offset_compensation_retina
+  }
 
   if (colorList[colorIndex].name === 'color_rainbow') {
     const pointB = [pointA[0], pointA[1] + height] // Vertical Gradient
