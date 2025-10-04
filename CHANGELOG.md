@@ -1,5 +1,18 @@
 # Change Log
 
+## [0.0.25] - 2025-10-04
+### Features:
+- Tool: Highlighter
+- Tool: Eraser
+- UNDO Improved (CTRL+Z) / REDO Added (CTRL+SHIFT+Z)
+- Implemented CTRL+C / CTRL+V
+
+### Bug Fixes:
+- Figure selection / hover when using the Laser Tool
+- Zoom In/Out on the About page
+- Font size compensation for non-Retina displays
+- Fix bug with Active Monitor selection
+
 ## [0.0.24] - 2025-09-21
 - Add ability to make Redo via CTRL+SHIFT+Z
 - Disable DevTools for Package build
