@@ -1,4 +1,4 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain } from 'electron';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme } from 'electron';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import path from 'path';
@@ -63,11 +63,32 @@ let showToolbar = store.get('show_tool_bar')
 
 const iconSrc = {
   DEFAULT: path.resolve(__dirname, '../renderer/assets/trayIcon.png'),
+  DEFAULT_WHITE: path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
   darwin: path.resolve(__dirname, '../renderer/assets/trayIconTemplate@2x.png'),
   linux: path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
 }
 
-const trayIcon = iconSrc[process.platform] || iconSrc.DEFAULT
+function getTrayIconPath() {
+  // macOS uses template images that adapt automatically
+  if (process.platform === 'darwin') {
+    return iconSrc.darwin
+  }
+
+  // Linux uses white icon by default
+  if (process.platform === 'linux') {
+    return iconSrc.linux
+  }
+
+  // Windows: detect system theme and choose appropriate icon
+  if (process.platform === 'win32') {
+    return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
+  }
+
+  // Fallback for other platforms
+  return iconSrc.DEFAULT
+}
+
+const trayIcon = getTrayIconPath()
 
 const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
 const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
@@ -265,6 +286,12 @@ app.on('ready', () => {
 
   tray = new Tray(trayIcon)
   updateContextMenu()
+
+  // Update tray icon when system theme changes
+  nativeTheme.on('updated', () => {
+    const newIconPath = getTrayIconPath()
+    tray.setImage(newIconPath)
+  })
 
   registerGlobalShortcats()
 
