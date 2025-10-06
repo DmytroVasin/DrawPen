@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.26] - 2025-10-06
+- Update Electron due to productivity issue
+
 ## [0.0.25] - 2025-10-04
 ### Features:
 - Tool: Highlighter
