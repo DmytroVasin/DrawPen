@@ -93,6 +93,7 @@ const Application = (settings) => {
   const [undoStackFigures, setUndoStackFigures] = useState([]);
   const [redoStackFigures, setRedoStackFigures] = useState([]);
   const [clipboardFigure, setClipboardFigure] = useState(null);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -108,7 +109,15 @@ const Application = (settings) => {
     const shiftKey = event.shiftKey;
     const eventRepeat = event.repeat;
 
-    if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
+    if (textEditorContainer) {
+      return
+    }
+
+    if (eventKey === 'shift' && !eventRepeat) {
+      setIsShiftPressed(true);
+    }
+
+    if (isDrawing || isActiveFigureMoving()) {
       return
     }
 
@@ -294,13 +303,23 @@ const Application = (settings) => {
     }
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
 
+  const handleKeyUp = useCallback((event) => {
+    const eventKey = (event.key || '').toLowerCase();
+
+    if (eventKey === 'shift') {
+      setIsShiftPressed(false);
+    }
+  }, []);
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleKeyDown]);
+  }, [handleKeyDown, handleKeyUp]);
 
   useEffect(() => {
     const debouncedUpdateSettings = debounce(() => {
