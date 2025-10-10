@@ -101,15 +101,20 @@ const Application = (settings) => {
   }, []);
 
   const lastPasteAtRef = useRef(null);
-  const handleKeyPress = useCallback((event) => {
+
+  const handleKeyDown = useCallback((event) => {
+    const eventKey = (event.key || '').toLowerCase();
+    const ctrlOrMeta = event.ctrlKey || event.metaKey;
+    const shiftKey = event.shiftKey;
+    const eventRepeat = event.repeat;
+
     if (isDrawing || textEditorContainer || isActiveFigureMoving()) {
       return
     }
 
-    switch (event.key) {
+    switch (eventKey) {
       case 'v':
-      case 'V':
-        if (event.ctrlKey || event.metaKey) {
+        if (ctrlOrMeta) {
           if (clipboardFigure) {
             const now = Date.now();
             if (now - lastPasteAtRef.current < pastCooldownMs) return;
@@ -133,8 +138,7 @@ const Application = (settings) => {
 
         break;
       case 'c':
-      case 'C':
-        if (event.ctrlKey || event.metaKey) {
+        if (ctrlOrMeta) {
           if (activeFigureInfo) {
             const activeFigure = findActiveFigure();
 
@@ -147,15 +151,14 @@ const Application = (settings) => {
 
         break;
       case 'z':
-      case 'Z':
-        if (event.ctrlKey || event.metaKey) {
+        if (ctrlOrMeta) {
           if (activeFigureInfo) {
             setActiveFigureInfo(null);
             break;
           }
 
           // REDO:
-          if (event.shiftKey) {
+          if (shiftKey) {
             if (redoStackFigures.length > 0) {
               const lastAction = redoStackFigures.at(-1);
               let newActiveFigures
@@ -195,22 +198,24 @@ const Application = (settings) => {
           }
         }
         break;
-      case 'ArrowUp':
-      case 'ArrowDown':
-      case 'ArrowLeft':
-      case 'ArrowRight':
+      case 'arrowleft':
+      case 'arrowright':
+      case 'arrowup':
+      case 'arrowdown':
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
-          const offset = 2;
+
+          let offset = 2;
+          if (shiftKey) { offset *= 5 }
 
           const directionMap = {
-            ArrowLeft:  [-offset, 0],
-            ArrowRight: [offset, 0],
-            ArrowUp:    [0, -offset],
-            ArrowDown:  [0, offset],
+            arrowleft:  [-offset, 0],
+            arrowright: [offset, 0],
+            arrowup:    [0, -offset],
+            arrowdown:  [0, offset],
           };
 
-          const [dx, dy] = directionMap[event.key];
+          const [dx, dy] = directionMap[eventKey];
 
           activeFigure.points.forEach((point) => {
             point[0] += dx;
@@ -220,8 +225,8 @@ const Application = (settings) => {
           setAllFigures([...allFigures]);
         }
         break;
-      case 'Delete':
-      case 'Backspace':
+      case 'delete':
+      case 'backspace':
         if (activeFigureInfo) {
           const figureToRemove = allFigures.find(figure => figure.id === activeFigureInfo.id);
           const newActiveFigures = allFigures.filter(figure => figure.id !== activeFigureInfo.id)
@@ -233,7 +238,7 @@ const Application = (settings) => {
           setRedoStackFigures([]);
         }
         break;
-      case 'Enter':
+      case 'enter':
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
 
@@ -244,7 +249,7 @@ const Application = (settings) => {
           }
         }
         break;
-      case 'Escape':
+      case 'escape':
         if (activeFigureInfo) {
           setActiveFigureInfo(null);
         }
@@ -282,7 +287,6 @@ const Application = (settings) => {
         }
 
         handleChangeColor((activeColorIndex + 1) % colorList.length);
-
         break;
       case '8':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
@@ -291,12 +295,12 @@ const Application = (settings) => {
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleKeyPress]);
+  }, [handleKeyDown]);
 
   useEffect(() => {
     const debouncedUpdateSettings = debounce(() => {
