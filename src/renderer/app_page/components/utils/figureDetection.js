@@ -310,6 +310,7 @@ const isSegmentTouchRectangle = (segmentPoints, figure) => {
     [endX, startY],
     [endX, endY],
     [startX, endY],
+    [startX, startY],
   ];
 
   return isSegmentIntersectCurve(segmentPoints, allRectPoints)
@@ -330,6 +331,7 @@ const isSegmentTouchText = (segmentPoints, figure) => {
     [startAt[0] + width * scale, startAt[1]],
     [startAt[0] + width * scale, startAt[1] + height * scale],
     [startAt[0],                 startAt[1] + height * scale],
+    [startAt[0],                 startAt[1]],
   ];
 
   return isSegmentIntersectCurve(segmentPoints, rectPoints)
