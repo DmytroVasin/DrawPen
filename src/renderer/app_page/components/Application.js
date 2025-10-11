@@ -12,6 +12,7 @@ import {
   getMouseCoordinates,
   distanceBetweenPoints,
   calculateCanvasTextWidth,
+  applySoftSnap,
 } from './utils/general.js';
 import {
   isOnFigure,
@@ -598,7 +599,7 @@ const Application = (settings) => {
       }
 
       if (activeFigureInfo.resizing) {
-        resizeFigure(activeFigure, activeFigureInfo.resizingDotName, { x, y })
+        resizeFigure(activeFigure, activeFigureInfo.resizingDotName, { x, y, isShiftPressed })
       }
 
       setActiveFigureInfo({ ...activeFigureInfo, x, y });
@@ -639,6 +640,16 @@ const Application = (settings) => {
 
       if (shapeList.includes(activeTool)) {
         const currentFigure = allFigures[allFigures.length - 1];
+
+        if (isShiftPressed) {
+          if (['line', 'arrow'].includes(currentFigure.type)) {
+            const startPoint = currentFigure.points[0];
+
+            const result = applySoftSnap(startPoint[0], startPoint[1], x, y);
+            x = result.x;
+            y = result.y;
+          }
+        }
 
         currentFigure.points[1] = [x, y];
 

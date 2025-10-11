@@ -1,4 +1,9 @@
-import { pointToSegmentDistance, segmentsIntersect } from './general.js';
+import {
+  pointToSegmentDistance,
+  segmentsIntersect,
+  applySoftSnap
+} from './general.js';
+
 import { dotMargin, figureMinScale } from '../constants.js'
 
 const withinRadius = (x, y) => {
@@ -371,7 +376,21 @@ const anchorPoints = {
   ],
 };
 
-export const resizeFigure = (figure, resizingDotName, { x, y }) => {
+export const resizeFigure = (figure, resizingDotName, { x, y, isShiftPressed }) => {
+  let pointA = figure.points[0];
+  let pointB = figure.points[1];
+
+  if (isShiftPressed) {
+    if (['line', 'arrow'].includes(figure.type)) {
+      let startPoint = (resizingDotName === 'pointA') ? pointB : pointA;
+
+      const result = applySoftSnap(startPoint[0], startPoint[1], x, y);
+
+      x = result.x;
+      y = result.y;
+    }
+  }
+
   switch (resizingDotName) {
     case 'pointA':
       figure.points[0][0] = x

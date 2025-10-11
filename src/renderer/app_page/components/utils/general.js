@@ -1,5 +1,5 @@
 import { LazyBrush } from "lazy-brush";
-import { widthList } from '../constants.js'
+import { widthList, SNAP_ANGLE } from '../constants.js'
 
 // https://github.com/steveruizok/perfect-freehand/tree/main
 export const getSvgPathFromStroke = (stroke) => {
@@ -173,4 +173,27 @@ export const segmentsIntersect = (p1, p2, q1, q2) => {
   const o4 = cross(q1, q2, p2);
 
   return (o1 * o2 < 0) && (o3 * o4 < 0);
-};
+}
+
+export function applySoftSnap(startX, startY, x, y) {
+  const dx = x - startX;
+  const dy = y - startY;
+
+  const dist = Math.hypot(dx, dy);
+  if (dist < 30) { // Minimum distance to apply snapping
+    return { x, y }
+  }
+
+  const angle = Math.atan2(dy, dx);
+  const nearest = Math.round(angle / SNAP_ANGLE) * SNAP_ANGLE;
+  const diff = Math.abs(angle - nearest);
+
+  if (diff >= 0.15) { // ~9°
+    return { x, y }
+  }
+
+  return {
+    x: startX + dist * Math.cos(nearest),
+    y: startY + dist * Math.sin(nearest),
+  };
+}
