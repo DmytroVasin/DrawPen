@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.0.27] - 2025-10-11
+### Features:
+- Press Shift Detection (Works with Line, Arrow, Rectangle, Circle)
+- Speed Up Figure movements on Shift press
+- Ability to drag the active figure
+
+### Bug Fixes:
+- Fix eraser bug that misses the last edge of the rectangle
+
 ## [0.0.26] - 2025-10-06
 - Update Electron due to productivity issue
 
