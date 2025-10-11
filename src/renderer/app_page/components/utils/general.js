@@ -197,3 +197,28 @@ export function applySoftSnap(startX, startY, x, y) {
     y: startY + dist * Math.sin(nearest),
   };
 }
+
+export function applyAspectRatioLock(startX, startY, x, y, ratio) {
+  const EPS = 0.01;
+  let dx = x - startX;
+  let dy = y - startY;
+
+  if (Math.abs(dx) < EPS) { dx = EPS }
+  if (Math.abs(dy) < EPS) { dy = EPS }
+
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+  const signX = Math.sign(dx);
+  const signY = Math.sign(dy);
+
+  const adjustedY = startY + signY * (absDx / ratio); // Варіант 1: фіксуємо ширину, обчислюємо висоту за ratio
+  const adjustedX = startX + signX * (absDy * ratio); // Варіант 2: фіксуємо висоту, обчислюємо ширину за ratio
+
+  const useWidthLock = (absDy <= (absDx / ratio)); // Якщо поточна висота курсора менша/рівна дозволеній при цій ширині,
+
+  if (useWidthLock) {
+    return { x: x, y: adjustedY } // тримаємо X курсора на вертикальній грані, підганяємо Y за ratio.
+  }
+
+  return { x: adjustedX, y: y }; // Інакше тримаємо Y курсора на горизонтальній грані, підганяємо X за ratio.
+}

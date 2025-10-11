@@ -13,6 +13,7 @@ import {
   distanceBetweenPoints,
   calculateCanvasTextWidth,
   applySoftSnap,
+  applyAspectRatioLock,
 } from './utils/general.js';
 import {
   isOnFigure,
@@ -21,6 +22,7 @@ import {
   dragFigure,
   resizeFigure,
   moveToCoordinates,
+  calculateAspectRatio,
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
@@ -68,8 +70,8 @@ const Application = (settings) => {
     initialFigures = [
       { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
       { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360) },
-      { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360) },
+      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
       { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
   }
@@ -576,6 +578,7 @@ const Application = (settings) => {
       widthIndex: activeWidthIndex,
       points: [[x, y]],
       rainbowColorDeg: rainbowColorDeg,
+      ratio: 1,
     };
 
     if (shapeList.includes(newFigure.type)) {
@@ -646,6 +649,14 @@ const Application = (settings) => {
             const startPoint = currentFigure.points[0];
 
             const result = applySoftSnap(startPoint[0], startPoint[1], x, y);
+            x = result.x;
+            y = result.y;
+          }
+
+          if (['rectangle', 'oval'].includes(currentFigure.type)) {
+            const startPoint = currentFigure.points[0];
+
+            const result = applyAspectRatioLock(startPoint[0], startPoint[1], x, y, currentFigure.ratio);
             x = result.x;
             y = result.y;
           }
@@ -722,16 +733,31 @@ const Application = (settings) => {
         const currentFigure = allFigures.at(-1);
         const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
 
+        if (['rectangle', 'oval'].includes(currentFigure.type)) {
+          currentFigure.ratio = calculateAspectRatio(currentFigure);
+        }
+
         if (shapeDistance < minObjectDistance) {
           setAllFigures(allFigures => allFigures.slice(0, -1));
         } else {
           setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
           setRedoStackFigures([]);
+          setAllFigures([...allFigures]);
         }
       }
     }
 
     if (isActiveFigureMoving()) {
+      const activeFigure = findActiveFigure()
+
+      if (activeFigureInfo.resizing) {
+        if (['rectangle', 'oval'].includes(activeFigure.type)) {
+          activeFigure.ratio = calculateAspectRatio(activeFigure);
+
+          setAllFigures([...allFigures]);
+        }
+      }
+
       setActiveFigureInfo({ id: activeFigureInfo.id });
     }
 

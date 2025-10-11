@@ -1,7 +1,8 @@
 import {
   pointToSegmentDistance,
   segmentsIntersect,
-  applySoftSnap
+  applySoftSnap,
+  applyAspectRatioLock,
 } from './general.js';
 
 import { dotMargin, figureMinScale } from '../constants.js'
@@ -377,14 +378,36 @@ const anchorPoints = {
 };
 
 export const resizeFigure = (figure, resizingDotName, { x, y, isShiftPressed }) => {
-  let pointA = figure.points[0];
-  let pointB = figure.points[1];
-
   if (isShiftPressed) {
     if (['line', 'arrow'].includes(figure.type)) {
-      let startPoint = (resizingDotName === 'pointA') ? pointB : pointA;
+      let pointA = figure.points[0];
+      let pointB = figure.points[1];
+
+      let startPoint
+
+      if (resizingDotName === 'pointA') { startPoint = pointB; }
+      if (resizingDotName === 'pointB') { startPoint = pointA; }
 
       const result = applySoftSnap(startPoint[0], startPoint[1], x, y);
+
+      x = result.x;
+      y = result.y;
+    }
+
+    if (['rectangle', 'oval'].includes(figure.type)) {
+      let pointA = figure.points[0];
+      let pointB = figure.points[1];
+      let pointC = [figure.points[0][0], figure.points[1][1]];
+      let pointD = [figure.points[1][0], figure.points[0][1]];
+
+      let startPoint
+
+      if (resizingDotName === 'pointA') { startPoint = pointB; }
+      if (resizingDotName === 'pointB') { startPoint = pointA; }
+      if (resizingDotName === 'pointC') { startPoint = pointD; }
+      if (resizingDotName === 'pointD') { startPoint = pointC; }
+
+      const result = applyAspectRatioLock(startPoint[0], startPoint[1], x, y, figure.ratio);
 
       x = result.x;
       y = result.y;
@@ -495,3 +518,13 @@ export const moveToCoordinates = (figure, cursorX, cursorY) => {
 
   return figure.points.map(([pointX, pointY]) => [pointX + cursorX - centerX, pointY + cursorY - centerY]);
 };
+
+export function calculateAspectRatio(figure) {
+  const [x1, y1] = figure.points[0];
+  const [x2, y2] = figure.points[1];
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  return Math.min(Math.max(Math.abs(dx / dy), 0.02), 50);
+}
