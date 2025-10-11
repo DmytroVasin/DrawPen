@@ -17,6 +17,7 @@ import {
 } from './utils/general.js';
 import {
   isOnFigure,
+  isOverFigure,
   areFiguresIntersecting,
   getDotNameOnFigure,
   dragFigure,
@@ -460,17 +461,27 @@ const Application = (settings) => {
 
   const setMouseCursor = (x, y) => {
     if (activeFigureInfo) {
+      const activeFigure = findActiveFigure()
       const resizingDotName = getDotNameAtMousePosition(x, y);
 
       if (resizingDotName) {
         setCursorType('move');
         return
       }
+
+      if (isOverFigure(x, y, activeFigure)) {
+        setCursorType('move');
+        return
+      }
     }
 
-    if (!['highlighter', 'eraser', 'laser'].includes(activeTool) && getFigureAtMousePosition(x, y)) {
-      setCursorType('move');
-      return
+    if (['pen', ...shapeList, 'text'].includes(activeTool)) {
+      const selectedFigure = getFigureAtMousePosition(x, y);
+
+      if (selectedFigure) {
+        setCursorType('move');
+        return
+      }
     }
 
     setCursorType('crosshair');
@@ -504,17 +515,25 @@ const Application = (settings) => {
     // With Active Figure
     if (activeFigureInfo) {
       // Click on dots of the active figure
+      const activeFigure = findActiveFigure()
       const resizingDotName = getDotNameAtMousePosition(x, y);
+
       if (resizingDotName) {
         setActiveFigureInfo({ ...activeFigureInfo, resizing: true, resizingDotName: resizingDotName });
         return;
       }
+
+      if (isOverFigure(x, y, activeFigure)) {
+        setActiveFigureInfo({ ...activeFigureInfo, dragging: true, x, y });
+        return;
+      }
+
       // Diactivate active figure
       setActiveFigureInfo(null);
     }
 
     // Click on the figure
-    if (!['highlighter', 'eraser', 'laser'].includes(activeTool)) {
+    if (['pen', ...shapeList, 'text'].includes(activeTool)) {
       const selectedFigure = getFigureAtMousePosition(x, y);
 
       if (selectedFigure) {

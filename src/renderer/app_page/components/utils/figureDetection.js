@@ -17,7 +17,7 @@ const withinRadius = (x, y) => {
   }
 }
 
-export const IsOnCurve = (x, y, points) => {
+const isOnCurve = (x, y, points) => {
   const threshold = 10
 
   for (let i = 0; i < points.length - 1; i++) {
@@ -34,40 +34,42 @@ export const IsOnCurve = (x, y, points) => {
   return false
 }
 
-export const IsOnLine = (x, y, figure) => {
+const isOnLine = (x, y, figure) => {
   const { points } = figure
 
-  return IsOnCurve(x, y, points)
+  return isOnCurve(x, y, points)
 }
 
-export const IsOnArrow = (x, y, figure) => {
+const isOnArrow = (x, y, figure) => {
   const { points } = figure
 
   // TODO: Make it smarter!
-  return IsOnCurve(x, y, points)
+  return isOnCurve(x, y, points)
 }
 
-export const IsOnOval = (x, y, figure) => {
+const isOnOval = (x, y, figure) => {
   const { points } = figure
-  const tolerance = 0.15;
 
   const [startX, startY] = points[0];
   const [endX, endY] = points[1];
 
-  let radiusX = Math.abs(endX - startX) / 2;
-  let radiusY = Math.abs(endY - startY) / 2;
-  let centerX = Math.min(startX, endX) + radiusX;
-  let centerY = Math.min(startY, endY) + radiusY;
+  const radiusX = Math.abs(endX - startX) / 2;
+  const radiusY = Math.abs(endY - startY) / 2;
+  const centerX = Math.min(startX, endX) + radiusX;
+  const centerY = Math.min(startY, endY) + radiusY;
 
   // If the oval is too narrow, treat it as a line
   if (radiusX < 5 || radiusY < 5) {
-    return IsOnLine(x, y, figure)
+    return isOnLine(x, y, figure)
   }
 
   const normalizedX = (x - centerX) / radiusX;
   const normalizedY = (y - centerY) / radiusY;
 
-  const distance = Math.abs(normalizedX * normalizedX + normalizedY * normalizedY - 1); // TODO: Rethink formula!
+  const ellipseValue = normalizedX * normalizedX + normalizedY * normalizedY;
+
+  const distance = Math.abs(ellipseValue - 1);
+  const tolerance = 0.15;
 
   if (distance <= tolerance) {
     return true
@@ -76,7 +78,7 @@ export const IsOnOval = (x, y, figure) => {
   return false
 }
 
-export const IsOnRectangle = (x, y, figure) => {
+const isOnRectangle = (x, y, figure) => {
   const { points } = figure
 
   const tolerance = 5;
@@ -108,7 +110,7 @@ export const IsOnRectangle = (x, y, figure) => {
   return false
 }
 
-export const IsOnText = (x, y, figure) => {
+const isOverText = (x, y, figure) => {
   const { points, width, height, scale } = figure
   const startAt = points[0]
 
@@ -127,7 +129,7 @@ export const IsOnText = (x, y, figure) => {
   return false
 }
 
-export const IsOnTwoDots = (x, y, figure) => {
+const isOnTwoDots = (x, y, figure) => {
   const { points } = figure
   const [a, b] = points
 
@@ -139,7 +141,7 @@ export const IsOnTwoDots = (x, y, figure) => {
   return null
 }
 
-export const IsOnFourDots = (x, y, figure) => {
+const isOnFourDots = (x, y, figure) => {
   const { points } = figure
 
   const [startX, startY] = points[0];
@@ -155,7 +157,7 @@ export const IsOnFourDots = (x, y, figure) => {
   return null
 }
 
-export const IsOnTextDots = (x, y, figure) => {
+const isOnTextDots = (x, y, figure) => {
   const { points, width, height, scale } = figure
   const startAt = points[0];
 
@@ -177,19 +179,70 @@ export const IsOnTextDots = (x, y, figure) => {
 export const isOnFigure = (x, y, figure) => {
   switch (figure.type) {
     case 'arrow':
-      return IsOnArrow(x, y, figure)
+      return isOnArrow(x, y, figure)
     case 'rectangle':
-      return IsOnRectangle(x, y, figure)
+      return isOnRectangle(x, y, figure)
     case 'oval':
-      return IsOnOval(x, y, figure)
+      return isOnOval(x, y, figure)
     case 'line':
-      return IsOnLine(x, y, figure)
+      return isOnLine(x, y, figure)
     case 'text':
-      return IsOnText(x, y, figure)
+      return isOverText(x, y, figure)
     default:
       return false
   }
-};
+}
+
+const isOverRectangle = (x, y, figure) => {
+  const [startX, startY] = figure.points[0];
+  const [endX, endY] = figure.points[1];
+
+  const minX = Math.min(startX, endX);
+  const maxX = Math.max(startX, endX);
+  const minY = Math.min(startY, endY);
+  const maxY = Math.max(startY, endY);
+
+  const withinHorizontalBounds = x >= minX && x <= maxX;
+  const withinVerticalBounds = y >= minY && y <= maxY;
+
+  if (withinHorizontalBounds && withinVerticalBounds) {
+    return true
+  }
+
+  return false
+}
+
+const isOverOval = (x, y, figure) => {
+  const { points } = figure
+
+  const [startX, startY] = points[0];
+  const [endX, endY] = points[1];
+
+  const radiusX = Math.abs(endX - startX) / 2;
+  const radiusY = Math.abs(endY - startY) / 2;
+  const centerX = Math.min(startX, endX) + radiusX;
+  const centerY = Math.min(startY, endY) + radiusY;
+
+  const normalizedX = (x - centerX) / radiusX;
+  const normalizedY = (y - centerY) / radiusY;
+
+  const ellipseValue = normalizedX * normalizedX + normalizedY * normalizedY;
+
+  return ellipseValue <= 1;
+}
+
+export const isOverFigure = (x, y, figure) => {
+  switch (figure.type) {
+    case 'rectangle':
+      return isOverRectangle(x, y, figure)
+    case 'oval':
+      return isOverOval(x, y, figure)
+    // case 'text':
+    //   return isOverText(x, y, figure)
+    default:
+      return false
+  }
+}
 
 const isSegmentIntersectCurve = (segmentPoints, points) => {
   if (segmentPoints.length < 2) {
@@ -223,7 +276,7 @@ const isSegmentTouchCurve = (segmentPoints, figure) => {
     return distance <= threshold
   }
 
-  if (IsOnCurve(eraseAtX, eraseAtY, points)) {
+  if (isOnCurve(eraseAtX, eraseAtY, points)) {
     return true
   }
 
@@ -234,7 +287,7 @@ const isSegmentTouchLine = (segmentPoints, figure) => {
   const { points } = figure
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
 
-  if (IsOnLine(eraseAtX, eraseAtY, figure)) {
+  if (isOnLine(eraseAtX, eraseAtY, figure)) {
     return true
   }
 
@@ -245,7 +298,7 @@ const isSegmentTouchRectangle = (segmentPoints, figure) => {
   const { points } = figure
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
 
-  if (IsOnRectangle(eraseAtX, eraseAtY, figure)) {
+  if (isOnRectangle(eraseAtX, eraseAtY, figure)) {
     return true
   }
 
@@ -265,7 +318,7 @@ const isSegmentTouchRectangle = (segmentPoints, figure) => {
 const isSegmentTouchText = (segmentPoints, figure) => {
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
 
-  if (IsOnText(eraseAtX, eraseAtY, figure)) {
+  if (isOverText(eraseAtX, eraseAtY, figure)) {
     return true
   }
 
@@ -286,7 +339,7 @@ const isSegmentTouchOval = (segmentPoints, figure) => {
   const { points } = figure
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
 
-  if (IsOnOval(eraseAtX, eraseAtY, figure)) {
+  if (isOnOval(eraseAtX, eraseAtY, figure)) {
     return true
   }
 
@@ -337,12 +390,12 @@ export const getDotNameOnFigure = (x, y, figure) => {
   switch (figure.type) {
     case 'line':
     case 'arrow':
-      return IsOnTwoDots(x, y, figure) // ['pointA', 'pointB', null]
+      return isOnTwoDots(x, y, figure) // ['pointA', 'pointB', null]
     case 'oval':
     case 'rectangle':
-      return IsOnFourDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
+      return isOnFourDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
     case 'text':
-      return IsOnTextDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
+      return isOnTextDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
     default:
       return false
   }
