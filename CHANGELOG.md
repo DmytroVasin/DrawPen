@@ -1,5 +1,9 @@
 # Change Log
 
+Упростів работу с tray окном ( для поддержки Linux/MacOS )
+Предотвратіл стіраніе данних прі закритіі додатка
+
+
 ## [0.0.27] - 2025-10-11
 ### Features:
 - Press Shift Detection (Works with Line, Arrow, Rectangle, Circle)

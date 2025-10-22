@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
+import {
+  MdKeyboardCommandKey,
+  MdOutlineKeyboardControlKey,
+  MdOutlineKeyboardOptionKey,
+} from "react-icons/md";
+import { ImShift } from "react-icons/im";
 
 const HotkeyPill = ({ accelerator }) => {
   const humanizedKey = (key) => {
     const keyMap = {
-      'Meta': '⌘',
-      'Control': '⌃',
-      'Alt': '⌥',
-      'Shift': '⇧',
+      'Meta': <MdKeyboardCommandKey />,
+      'Control': <MdOutlineKeyboardControlKey />,
+      'Alt': <MdOutlineKeyboardOptionKey />,
+      'Shift': <ImShift />,
     };
 
     return keyMap[key] || key;
@@ -25,7 +31,6 @@ const HotkeyPill = ({ accelerator }) => {
 };
 
 const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
-  console.log('Rendering ShortcutRecorder with accelerator:', accelerator);
   const isMac = window.electronAPI.isMac;
 
   const [isRecording, setIsRecording] = useState(false);
@@ -114,15 +119,11 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
   };
 
   const stopRecording = async (keys) => {
-    console.log('Stopping recording with keys:', keys);
-
     if (validateShortcut(keys)) {
       const electronKey = keys.join('+')
 
       if (await onCheck(electronKey)) {
         onChange(electronKey)
-      } else {
-        console.log('Shortcut cannot be registered:', electronKey);
       }
     }
 

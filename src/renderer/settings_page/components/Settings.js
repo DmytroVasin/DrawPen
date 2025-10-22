@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import './Settings.scss';
 import ShortcutRecorder from './ShortcutRecorder';
-import { IoRefreshCircleOutline, IoCloseCircleOutline } from "react-icons/io5";
+import { IoRefreshCircleOutline, IoCloseCircleOutline, IoGlobeOutline } from "react-icons/io5";
 
-const ShortcutRow = ({ title, description, shortcut, onCheck, onChange, onReset, onRemove }) => {
+const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
   const canReset  = !!shortcut.init && shortcut.init !== shortcut.accelerator;
   const canRemove = (shortcut.accelerator || shortcut.init) && shortcut.accelerator !== '[NULL]';
 
   return (
     <div className="settings-item">
+      {
+        hint && <div className="settings-item-hint"><IoGlobeOutline className="icon" title={hint} /></div>
+      }
+
       <div className="settings-item-info">
         <div className="settings-item-title">{title}</div>
         <div className="settings-item-description">{description}</div>
@@ -37,7 +41,6 @@ const Settings = (config) => {
   }
 
   const canRegisterShortcut = async (accelerator) => {
-    // TODO:...
     return await window.electronAPI.canRegisterShortcut(accelerator);
   }
 
@@ -118,6 +121,7 @@ const Settings = (config) => {
           <ShortcutRow
             title="Show/Hide App"
             description="Toggles the main application window"
+            hint="Global shortcut"
             shortcut={showHideApp}
             onCheck={canRegisterShortcut}
             onChange={(acc) => applyShortcut('key_binding_show_hide_app', acc)}
@@ -180,7 +184,7 @@ const Settings = (config) => {
 
           <div className="settings-item">
             <div className="settings-item-info">
-              <div className="settings-item-title">Reset to default shortcuts</div>
+              <div className="settings-item-title">Reset to defaults</div>
             </div>
 
             <div className="settings-item-control">
