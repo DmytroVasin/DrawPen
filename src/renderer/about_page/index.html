@@ -3,41 +3,47 @@
   <head>
     <title>About</title>
     <style>
-        body {
-          display: flex;
-          margin: 0;
-          justify-content: center;
-          height: 100vh;
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 10px;
-          background-color: #ECECEC;
-        }
+      :root {
+        --settings-bg: #DADEE0;
+        --settings-active: #1D76DC;
+        --settings-font: Arial, Helvetica, sans-serif;
+      }
 
-        .container {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
+      body {
+        display: flex;
+        margin: 0;
+        justify-content: center;
+        height: 100vh;
+        font-family: var(--settings-font);
+        font-size: 10px;
+        background-color: var(--settings-bg);
+      }
 
-        a {
-          font-weight: bold;
-          color: #1D76DC;
-        }
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .title {
-          font-size: 16px;
-          font-weight: bold;
-          margin-top: 10px;
-        }
+      a {
+        font-weight: bold;
+        color: var(--settings-active);
+      }
 
-        #version {
-          margin: 5px 0 15px 0;
-        }
+      .title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
 
-        .description {
-          margin-top: 3px;
-        }
+      #version {
+        margin: 5px 0 15px 0;
+      }
+
+      .description {
+        margin-top: 3px;
+      }
     </style>
   </head>
 

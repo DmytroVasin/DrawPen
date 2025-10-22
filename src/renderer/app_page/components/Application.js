@@ -325,7 +325,13 @@ const Application = (settings) => {
     };
   }, [handleKeyDown, handleKeyUp]);
 
+  const firstLaunch = useRef(true);
   useEffect(() => {
+    if (firstLaunch.current) {
+      firstLaunch.current = false;
+      return;
+    }
+
     const debouncedUpdateSettings = debounce(() => {
       invokeSetSettings({
         show_whiteboard: showWhiteboard,

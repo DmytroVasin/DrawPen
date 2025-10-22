@@ -80,6 +80,14 @@ module.exports = {
                 js: path.join(rootDir, 'src/renderer/about_page/preload.js'),
               },
             },
+            {
+              name: 'settings_window',
+              html: path.join(rootDir, 'src/renderer/settings_page/index.html'),
+              js: path.join(rootDir, 'src/renderer/settings_page/index.js'),
+              preload: {
+                js: path.join(rootDir, 'src/renderer/settings_page/preload.js'),
+              },
+            },
           ]
         },
         devServer: {
