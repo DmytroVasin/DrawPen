@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.28] - 2025-10-22
+- Add fallback for transparent background in the main window
+
 ## [0.0.27] - 2025-10-11
 ### Features:
 - Press Shift Detection (Works with Line, Arrow, Rectangle, Circle)
