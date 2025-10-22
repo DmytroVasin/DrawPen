@@ -3,6 +3,11 @@ import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import path from 'path';
 
+import electronSquirrelStartup from 'electron-squirrel-startup';
+if (electronSquirrelStartup) {
+  app.quit();
+}
+
 const schema = {
   show_whiteboard: {
     type: 'boolean',
@@ -297,6 +302,7 @@ app.on('ready', () => {
   registerGlobalShortcats()
 
   updateElectronApp()
+  setApplicationName()
 })
 
 app.on('will-quit', () => {
@@ -460,4 +466,10 @@ function showWindowOnActiveScreen() {
   store.reset('tool_bar_x')
   store.reset('tool_bar_y')
   mainWindow.reload()
+}
+
+function setApplicationName() {
+  if (process.platform === 'win32') {
+    app.setAppUserModelId('com.squirrel.DrawPen.DrawPen');
+  }
 }

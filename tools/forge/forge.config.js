@@ -39,7 +39,11 @@ module.exports = {
       config: {
         setupIcon: path.join(rootDir, 'assets/build/icon.ico'),
         iconUrl: 'https://raw.githubusercontent.com/DmytroVasin/DrawPen/main/assets/build/icon.ico',
-        loadingGif: path.join(rootDir, 'assets/build/loading.gif')
+        loadingGif: path.join(rootDir, 'assets/build/loading.gif'),
+        name: 'DrawPen',
+        shortcutName: 'DrawPen',
+        setupExe: 'DrawPen.Setup.exe',
+        noMsi: true
       }
     },
     {
