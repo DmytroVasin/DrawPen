@@ -3,27 +3,22 @@
   --gray-50:  #F3F3F3;
   --gray-75:  #E9E9E9;
   --gray-100: #E9EBEC;
-  --gray-150: #E0E0E0;
   --gray-200: #DADEE0;
   --gray-225: #DEE2E3;
   --gray-250: #F0F0F0;
   --gray-300: #CCCECF;
-  --gray-400: #B1B1B1;
   --gray-500: #9F9F9F;
   --gray-600: #6C757D;
-  --gray-700: #686868;
-  --gray-900: #373737;
-  --black:    #000000;
+  --gray-700: #2E3439;
 
   --blue-500: #1D76DC;
 
   --shadow-ambient: rgba(0, 0, 0, 0.1);
 
-  --space-sm: 6px;
+  --space-sm: 4px;
   --space-lg: 10px;
 
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  --font-primary: 'Inter', Arial, Helvetica, sans-serif;
 }
 
 html, body {
@@ -31,7 +26,7 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  font-family: var(--font-sans);
+  font-family: var(--font-primary);
   font-size: 10px;
   background-color: var(--gray-200);
   color: var(--gray-700);
@@ -55,7 +50,8 @@ html, body {
         margin-bottom: var(--space-lg);
 
         .settings-title {
-          font-size: 14px;
+          font-size: 13px;
+          font-weight: 500;
         }
       }
 
@@ -81,16 +77,26 @@ html, body {
               border-bottom: none;
             }
 
+            .settings-item-hint {
+              display: flex;
+              margin: 4px 10px 0 0;
+
+              svg {
+                width: 16px;
+                height: 16px;
+              }
+            }
+
             .settings-item-info {
               flex: 1;
 
               .settings-item-title {
                 font-size: 13px;
+                font-weight: 500;
                 color: var(--gray-700);
               }
 
               .settings-item-description {
-                font-size: 10px;
                 margin: 3px 0 0 0;
                 color: var(--gray-600);
               }
@@ -136,13 +142,13 @@ html, body {
               }
 
               .button {
-                padding: 5px 12px;
+                padding: 6px 16px;
                 border: 1px solid var(--gray-300);
                 border-radius: 4px;
                 background-color: var(--gray-25);
                 color: var(--gray-500);
+                font-family: var(--font-primary);
                 font-size: 10px;
-                font-family: var(--font-mono);
                 cursor: pointer;
                 transition: transform 0.3s ease;
 
@@ -157,12 +163,13 @@ html, body {
               }
 
               .icon {
-                width: 14px;
-                height: 14px;
+                width: 16px;
+                height: 16px;
                 cursor: pointer;
+                color: var(--gray-500);
 
                 &:hover {
-                  color: var(--black);
+                  color: var(--gray-700);
                 }
               }
 
@@ -172,7 +179,7 @@ html, body {
 
                 .record-block {
                   cursor: pointer;
-                  padding: 5px;
+                  padding: 4px;
                   border-radius: 5px;
                   color: var(--gray-500);
                   transition: background-color 0.3s ease;
@@ -181,20 +188,30 @@ html, body {
                     background-color: var(--gray-225);
                   }
 
+                  &.recording {
+                    color: var(--gray-500);
+
+                    .hotkey-pill {
+                      .key {
+                        color: var(--blue-500);
+                        border-color: var(--blue-500);
+                        animation: slideUp 0.3s ease;
+                      }
+                    }
+                  }
+
                   .placeholder {
-                    padding: 2px 5px;
-                    font-family: var(--font-mono);
+                    padding: 5px;
                   }
 
                   .hotkey-pill {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
-                    color: var(--black);
 
                     .key {
-                      width: 20px;
-                      height: 20px;
+                      width: 22px;
+                      height: 22px;
                       display: flex;
                       align-items: center;
                       font-size: 10px;
@@ -202,11 +219,6 @@ html, body {
                       border: 1px solid var(--gray-300);
                       background-color: var(--gray-25);
                       border-radius: 4px;
-                    }
-                  }
-                  &.recording {
-                    .key {
-                      animation: slideUp 0.3s ease;
                     }
                   }
                 }
@@ -228,7 +240,6 @@ html, body {
   }
 }
 
-
 @keyframes slideUp {
   0% {
     transform: translateY(6px);
@@ -241,4 +252,34 @@ html, body {
   100% {
     transform: translateY(0);
   }
+}
+
+// https://fonts.google.com/specimen/Inter
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }

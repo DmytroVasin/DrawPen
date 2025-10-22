@@ -1,5 +1,30 @@
 # Change Log
 
+
+// Провертіть клавіши на Linux / Windows
+// Проверіть второй запуск додатку
+
+
+### Feateres:
+- Додаток тепер автоматіческі створює іконки в Windows
+- Додаток може додавати Auto-launch
+- Додав Settings Page (можливість вмикати/вимикати/змінювати HotKeys, Auto-launch)
+
+### Bug Fixes:
+- Fix app stuck on Tray mode key activation
+- Убрал Акселератори трея для Linux
+- Fix second App launch issue
+
+### Improvments:
+- Стартовать Draw Screen на старте пріложенія
+- Упростіл Меню Трея
+- Предотвратіл стіраніе данних прі закритіі додатка
+
+
+
+
+
+
 ## [0.0.27] - 2025-10-11
 ### Features:
 - Press Shift Detection (Works with Line, Arrow, Rectangle, Circle)

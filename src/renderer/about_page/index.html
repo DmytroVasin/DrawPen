@@ -4,9 +4,10 @@
     <title>About</title>
     <style>
       :root {
-        --settings-bg: #DADEE0;
-        --settings-active: #1D76DC;
-        --settings-font: Arial, Helvetica, sans-serif;
+        --gray-200: #DADEE0;
+        --gray-300: #CCCECF;
+        --blue-500: #1D76DC;
+        --font-primary: 'Inter', Arial, Helvetica, sans-serif;
       }
 
       body {
@@ -14,9 +15,9 @@
         margin: 0;
         justify-content: center;
         height: 100vh;
-        font-family: var(--settings-font);
+        font-family: var(--font-primary);
         font-size: 10px;
-        background-color: var(--settings-bg);
+        background-color: var(--gray-200);
       }
 
       .container {
@@ -28,7 +29,7 @@
 
       a {
         font-weight: bold;
-        color: var(--settings-active);
+        color: var(--blue-500);
       }
 
       .title {
@@ -44,6 +45,41 @@
       .description {
         margin-top: 3px;
       }
+
+      .with-border {
+        padding-top: 5px;
+        border-top: 1px solid var(--gray-300);
+      }
+
+      /* https://fonts.google.com/specimen/Inter */
+      @font-face {
+        font-family: 'Inter';
+        src: url('../../assets/Inter_18pt-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('../../assets/Inter_18pt-Medium.ttf') format('truetype');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('../../assets/Inter_18pt-SemiBold.ttf') format('truetype');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('../../assets/Inter_18pt-Bold.ttf') format('truetype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
     </style>
   </head>
 
@@ -52,7 +88,7 @@
         <img src="../assets/icon.png" width='80' alt='drawpen'>
         <span class="title">DrawPen</span>
         <span id="version">Version ...</span>
-        <span class="description">Source code available on <a href="https://github.com/DmytroVasin/DrawPen" target="_blank">GitHub</a></span>
+        <span class="description with-border">Source code available on <a href="https://github.com/DmytroVasin/DrawPen" target="_blank">GitHub</a></span>
         <span class="description"><a href="https://www.linkedin.com/in/dmytro-vasin/" target="_blank">Dmytro Vasin</a></span>
     </div>
   </body>

@@ -1,15 +1,23 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme } from 'electron';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
-import path, { normalize } from 'path';
+import path from 'path';
 
-const KEY_SHOW_HIDE_APP = 'CmdOrCtrl+Shift+A'
-const KEY_SHOW_HIDE_TOOLBAR = 'CmdOrCtrl+T'
-const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+W'
-const KEY_CLEAR_DESK = 'CmdOrCtrl+K'
-const KEY_SETTINGS = 'CmdOrCtrl+,'
-const KEY_Q = 'CmdOrCtrl+Q'
-const KEY_NULL = '[NULL]'
+const isDevelopment = process.env.NODE_ENV === 'development'
+const isMac = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
+const isWin = process.platform === 'win32'
+
+const KEY_SHOW_HIDE_APP        = 'CmdOrCtrl+Shift+A'
+const KEY_SHOW_HIDE_TOOLBAR    = 'CmdOrCtrl+T'
+const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+E'
+const KEY_CLEAR_DESK           = 'CmdOrCtrl+K'
+const KEY_SETTINGS             = 'CmdOrCtrl+,'
+const KEY_Q                    = 'CmdOrCtrl+Q'
+const KEY_NULL                 = '[NULL]'
+
+let lastShortcutTime = 0;
+const throttleDelay = 250;
 
 const schema = {
   show_whiteboard: {
@@ -61,11 +69,11 @@ const schema = {
   },
   key_binding_show_hide_whiteboard: {
     type: 'string',
-    // default: KEY_SHOW_HIDE_WHITEBOARD
+    default: KEY_SHOW_HIDE_WHITEBOARD
   },
   key_binding_clear_desk: {
     type: 'string',
-    // default: KEY_CLEAR_DESK
+    default: KEY_CLEAR_DESK
   },
 };
 
@@ -81,14 +89,7 @@ let mainWindow
 let aboutWindow
 let settingsWindow
 
-let foregroundMode = false
-
-if (process.env.NODE_ENV === 'development') {
-  foregroundMode = true
-}
-
-let showWhiteboard = store.get('show_whiteboard')
-let showToolbar = store.get('show_tool_bar')
+let foregroundMode = true
 
 const iconSrc = {
   DEFAULT: path.resolve(__dirname, '../renderer/assets/trayIcon.png'),
@@ -98,77 +99,84 @@ const iconSrc = {
 }
 
 function getTrayIconPath() {
-   if (process.platform === 'darwin') return iconSrc.darwin
-   if (process.platform === 'linux')  return iconSrc.linux
-   if (process.platform === 'win32')  return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
+   if (isMac) return iconSrc.darwin
+   if (isLinux)  return iconSrc.linux
+   if (isWin)  return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
 
    return iconSrc.DEFAULT
 }
 
 function updateContextMenu() {
+  if (!tray) return;
+
+  const show_tool_bar   = store.get('show_tool_bar')
+  const show_whiteboard = store.get('show_whiteboard')
+
   const key_show_hide_app        = store.get('key_binding_show_hide_app')
   const key_show_hide_toolbar    = store.get('key_binding_show_hide_toolbar')
   const key_show_hide_whiteboard = store.get('key_binding_show_hide_whiteboard')
   const key_clear_desk           = store.get('key_binding_clear_desk')
 
+  const accelForTray = (accel) => {
+    if (!accel) return undefined;
+    if (accel === KEY_NULL) return undefined;
+
+    if (isLinux) return undefined; // Disable tray menu accelerators on Linux
+
+    return accel
+  };
+
+  const withAccelHint = (label, accel) => {
+    if (!accel) return label;
+    if (accel === KEY_NULL) return label;
+
+    if (isLinux) {
+      return `${label} (${normalizeAcceleratorForUI(accel)})`;
+    }
+
+    return label;
+  }
+
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: foregroundMode ? 'Hide DrawPen' : 'Show DrawPen',
-      accelerator: key_show_hide_app,
-      click: () => {
-        toggleWindow();
-      }
+      label: withAccelHint((foregroundMode ? 'Hide DrawPen' : 'Show DrawPen'), key_show_hide_app),
+      accelerator: accelForTray(key_show_hide_app),
+      click: toggleDrawWindow
     },
     {
-      label: showToolbar ? 'Hide Toolbar' : 'Show Toolbar',
-      accelerator: key_show_hide_toolbar,
-      click: () => {
-        toggleToolbar()
-      }
+      label: withAccelHint((show_tool_bar ? 'Hide Toolbar' : 'Show Toolbar'), key_show_hide_toolbar),
+      accelerator: accelForTray(key_show_hide_toolbar),
+      click: toggleToolbar
     },
     {
-      label: showWhiteboard ? 'Hide Whiteboard' : 'Show Whiteboard',
-      accelerator: key_show_hide_whiteboard,
-      click: () => {
-        toggleWhiteboard()
-      }
+      label: withAccelHint((show_whiteboard ? 'Hide Whiteboard' : 'Show Whiteboard'), key_show_hide_whiteboard),
+      accelerator: accelForTray(key_show_hide_whiteboard),
+      click: toggleWhiteboard
     },
-    { type: 'separator' },
     {
-      label: 'Clear desk',
-      accelerator: key_clear_desk,
-      click: () => {
-        resetScreen()
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Settings',
-      accelerator: KEY_SETTINGS,
-      click: () => {
-        createSettingsWindow()
-      }
+      label: withAccelHint('Clear desk', key_clear_desk),
+      accelerator: accelForTray(key_clear_desk),
+      click: resetScreen
     },
     { type: 'separator' },
     {
       label: 'Reset to original',
-      click: () => {
-        resetApp();
-      }
+      click: resetApp
+    },
+    {
+      label: withAccelHint('Settings', KEY_SETTINGS),
+      accelerator: accelForTray(KEY_SETTINGS),
+      click: showSettingsWindow
     },
     { type: 'separator' },
     {
       label: 'About DrawPen',
-      click: () => {
-        createAboutWindow();
-      }
+      click: showAboutWindow
     },
     {
-      label: 'Quit',
-      accelerator: KEY_Q,
-      click: () => {
-        app.quit()
-      }
+      label: withAccelHint('Quit', KEY_Q),
+      accelerator: accelForTray(KEY_Q),
+      click: quitApp
     }
   ]);
 
@@ -177,6 +185,8 @@ function updateContextMenu() {
 
 function registerTrayIconUpdate() {
   nativeTheme.on('updated', () => {
+    if (!tray) return;
+
     tray.setImage(getTrayIconPath())
   })
 }
@@ -202,7 +212,7 @@ function createMainWindow() {
   let isResizable = false
   let hasDevTools = false
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     width = 500
     height = 500
     isResizable = true
@@ -222,6 +232,7 @@ function createMainWindow() {
     frame: false,
     alwaysOnTop: true,
     skipTaskbar: true,
+    autoHideMenuBar: true,
     webPreferences: {
       devTools: hasDevTools,
       nodeIntegration: false,
@@ -233,21 +244,15 @@ function createMainWindow() {
 
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
+  mainWindow.on('close', function () {
+    rawLog('Main window: on close')
+
+    foregroundMode = false
+    updateContextMenu()
+  })
+
   mainWindow.on('closed', function () {
-    console.log('Main window lost focus, hiding...222')
-    mainWindow = null;
-
-    hideDrawWindow();
-  })
-
-  mainWindow.on('focus', () => {
-    registerShortcuts('local');
-  })
-
-  // NOTE: the same as hide
-  mainWindow.on('blur', () => {
-    console.log('Main window lost focus, hiding...')
-    unRegisterShortcuts('local');
+    mainWindow = null
   })
 
   mainWindow.webContents.on('did-finish-load', () => {
@@ -264,26 +269,28 @@ function createMainWindow() {
   });
 }
 
+function showAboutWindow() {
+  withThrottle(() => {
+    hideDrawWindow()
+
+    if (aboutWindow) {
+      aboutWindow.focus();
+      return;
+    }
+
+    createAboutWindow();
+  });
+}
+
 function createAboutWindow() {
-  hideDrawWindow()
-
-  if (aboutWindow) {
-    aboutWindow.focus();
-    return;
-  }
-
-  const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-  const { x, y } = currentDisplay.workArea;
   let hasDevTools = false
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     hasDevTools = true
   }
 
   aboutWindow = new BrowserWindow({
     show: false,
-    x: x,
-    y: y,
     width: 250,
     height: 250,
     resizable: false,
@@ -299,12 +306,10 @@ function createAboutWindow() {
 
   aboutWindow.loadURL(ABOUT_WINDOW_WEBPACK_ENTRY)
 
-  // Prevent the window from being minimized to the dock
   aboutWindow.on('minimize', (event) => {
     event.preventDefault()
   })
 
-  // Clear the reference when the window is closed
   aboutWindow.on('closed', () => {
     aboutWindow = null
   })
@@ -327,26 +332,30 @@ function createAboutWindow() {
   });
 }
 
+function showSettingsWindow() {
+  withThrottle(() => {
+    hideDrawWindow()
+
+    if (settingsWindow) {
+      settingsWindow.focus();
+      return;
+    }
+
+    createSettingsWindow();
+  });
+}
+
 function createSettingsWindow() {
-  hideDrawWindow()
+  rawLog('Creating settings window...')
 
-  if (settingsWindow) {
-    settingsWindow.focus();
-    return;
-  }
-
-  const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-  const { x, y } = currentDisplay.workArea;
   let hasDevTools = false
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     hasDevTools = true
   }
 
   settingsWindow = new BrowserWindow({
     show: false,
-    x: x,
-    y: y,
     width: 600,
     height: 500,
     resizable: false,
@@ -362,12 +371,10 @@ function createSettingsWindow() {
 
   settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY)
 
-  // Prevent the window from being minimized to the dock
   settingsWindow.on('minimize', (event) => {
     event.preventDefault()
   })
 
-  // Clear the reference when the window is closed
   settingsWindow.on('closed', () => {
     settingsWindow = null
   })
@@ -384,8 +391,18 @@ function createSettingsWindow() {
   });
 }
 
+// Must be before "app.whenReady()"
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+  process.exit(0); // return is forbidden in this context
+}
+
+app.on('second-instance', () => {
+  showDrawWindow();
+});
+
 app.commandLine.appendSwitch('disable-pinch');
-app.on('ready', () => {
+app.whenReady().then(() => {
   hideDock()
   createMainWindow()
 
@@ -393,25 +410,33 @@ app.on('ready', () => {
   updateContextMenu()
   registerTrayIconUpdate()
 
-  registerShortcuts('global');
+  registerGlobalShortcuts()
 
-  updateElectronApp()
+  updateApp()
 })
 
 app.on('will-quit', () => {
-  unRegisterShortcuts('all');
+  rawLog('Will quit app... (Unregister all shortcuts)')
+
+  unRegisterGlobalShortcuts()
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  rawLog('All windows closed.')
+
+  // Empty handler to prevent app from quitting
 })
 
 function hideDock() {
-  if (process.platform === 'darwin') {
+  if (isMac) {
     app.dock.hide();
   }
+}
+
+function updateApp() {
+  if (isLinux) return
+
+  updateElectronApp()
 }
 
 ipcMain.handle('get_app_version', () => {
@@ -429,14 +454,24 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
     active_monitor_id: store.get('active_monitor_id'),
+
+    key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
+    key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
+    key_binding_clear_desk:           normalizeAcceleratorForUI(store.get('key_binding_clear_desk')),
+    key_binding_open_settings:        normalizeAcceleratorForUI(KEY_SETTINGS),
   };
 });
 
 ipcMain.handle('set_settings', (_event, newSettings) => {
-  const mergedSettings = { ...store.store, ...newSettings }
+  const needUpdateMenu = shouldUpdateMenu(newSettings) // Roundtrip request updates store value
 
-  console.log('New store: ', mergedSettings)
-  store.set(mergedSettings)
+  store.set({ ...store.store, ...newSettings })
+  rawLog('Updated store (set settings): ', store.store)
+
+  if (needUpdateMenu) {
+    rawLog('Update Menu (settings changed)...')
+    updateContextMenu()
+  }
 
   return null
 });
@@ -447,36 +482,42 @@ ipcMain.handle('hide_app', () => {
   return null
 });
 
-ipcMain.handle('reset_to_originals', () => {
-  console.log('ACTION: reset_to_originals');
+ipcMain.handle('open_settings', () => {
+  showSettingsWindow()
 
+  return null
+});
+
+ipcMain.handle('reset_to_originals', () => {
   resetApp();
+
   return null
 });
 
 ipcMain.handle('get_configuration', () => {
-  console.log('ACTION: get_configuration');
+  rawLog('Getting configuration...')
+
   return {
     launch_on_login:                          store.get('launch_on_login'),
 
-    key_binding_show_hide_app:                normalizeAccelerator(store.get('key_binding_show_hide_app')),
-    key_binding_show_hide_app_default:        normalizeAccelerator(schema.key_binding_show_hide_app.default),
+    key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
+    key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
 
-    key_binding_show_hide_toolbar:            normalizeAccelerator(store.get('key_binding_show_hide_toolbar')),
-    key_binding_show_hide_toolbar_default:    normalizeAccelerator(schema.key_binding_show_hide_toolbar.default),
+    key_binding_show_hide_toolbar:            normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
+    key_binding_show_hide_toolbar_default:    normalizeAcceleratorForUI(schema.key_binding_show_hide_toolbar.default),
 
-    key_binding_show_hide_whiteboard:         normalizeAccelerator(store.get('key_binding_show_hide_whiteboard')),
-    key_binding_show_hide_whiteboard_default: normalizeAccelerator(schema.key_binding_show_hide_whiteboard.default),
+    key_binding_show_hide_whiteboard:         normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
+    key_binding_show_hide_whiteboard_default: normalizeAcceleratorForUI(schema.key_binding_show_hide_whiteboard.default),
 
-    key_binding_clear_desk:                   normalizeAccelerator(store.get('key_binding_clear_desk')),
-    key_binding_clear_desk_default:           normalizeAccelerator(schema.key_binding_clear_desk.default),
+    key_binding_clear_desk:                   normalizeAcceleratorForUI(store.get('key_binding_clear_desk')),
+    key_binding_clear_desk_default:           normalizeAcceleratorForUI(schema.key_binding_clear_desk.default),
   };
 });
 
 ipcMain.handle('can_register_shortcut', async (_event, value) => {
-  console.log('ACTION: can_register_shortcut', value);
+  rawLog('Checking shortcut registration:', value)
 
-  const accelerator = deNormalizeAccelerator(value)
+  const accelerator = deNormalizeAcceleratorFromUI(value)
 
   const shortcutsInUse = [
     store.get('key_binding_show_hide_app'),
@@ -486,7 +527,6 @@ ipcMain.handle('can_register_shortcut', async (_event, value) => {
   ].filter(s => s && s !== KEY_NULL)
 
   if (shortcutsInUse.includes(accelerator)) {
-    console.log('Conflict inside app:', accelerator);
     return false;
   }
 
@@ -507,10 +547,10 @@ ipcMain.handle('can_register_shortcut', async (_event, value) => {
 });
 
 ipcMain.handle('set_shortcut', (_event, key, value) => {
-  console.log('ACTION: set_shortcut', key, value);
-  const accelerator = deNormalizeAccelerator(value)
+  rawLog('Setting shortcut:', key, value)
+  const accelerator = deNormalizeAcceleratorFromUI(value)
 
-  unRegisterShortcuts('global');
+  unRegisterGlobalShortcuts()
 
   if (accelerator) {
     store.set(key, accelerator)
@@ -518,142 +558,154 @@ ipcMain.handle('set_shortcut', (_event, key, value) => {
     store.delete(key)
   }
 
-  registerShortcuts('global');
+  registerGlobalShortcuts();
   updateContextMenu()
 
-  console.log('Updated store: ', store.store)
+  if (mainWindow) {
+    mainWindow.reload()
+  }
+
+  rawLog('Updated store (shortcut): ', store.store)
   return null
 });
 
 ipcMain.handle('set_launch_on_login', (_event, value) => {
-  console.log('ACTION: set_launch_on_login');
+  rawLog('Setting launch on login:', value)
+
   app.setLoginItemSettings({ openAtLogin: value });
 
   store.set('launch_on_login', value)
 
-  console.log('Updated store: ', store.store)
+  rawLog('Updated store: ', store.store)
   return null;
 });
 
-function registerShortcuts(mode) { // global, local, all
-  const keyApp        = store.get('key_binding_show_hide_app');
-  const keyToolbar    = store.get('key_binding_show_hide_toolbar');
-  const keyWhiteboard = store.get('key_binding_show_hide_whiteboard');
-  const keyClearDesk  = store.get('key_binding_clear_desk');
+function registerGlobalShortcuts() {
+  rawLog('REGISTER global shortcuts...')
 
-  if (mode === 'global' || mode === 'all') {
-    if (keyApp && keyApp !== KEY_NULL) {
-      globalShortcut.register(keyApp, toggleWindow);
-    }
-  }
-
-  if (mode === 'local' || mode === 'all') {
-    if (keyToolbar && keyToolbar !== KEY_NULL) {
-      globalShortcut.register(keyToolbar, toggleToolbar);
-    }
-
-    if (keyWhiteboard && keyWhiteboard !== KEY_NULL) {
-      globalShortcut.register(keyWhiteboard, toggleWhiteboard);
-    }
-
-    if (keyClearDesk && keyClearDesk !== KEY_NULL) {
-      globalShortcut.register(keyClearDesk, resetScreen);
-    }
-
-    if (KEY_SETTINGS) {
-      globalShortcut.register(KEY_SETTINGS, () => createSettingsWindow());
-    }
-
-    if (KEY_Q) {
-      globalShortcut.register(KEY_Q, () => app.quit());
-    }
-  }
+  const keyApp = store.get('key_binding_show_hide_app')
+  safeRegisterGlobalShortcut(keyApp, toggleDrawWindow)
 }
 
-function unRegisterShortcuts(mode) { // global, local, all
-  const shortcuts = [];
+function unRegisterGlobalShortcuts() {
+  rawLog('UNREGISTER global shortcuts...')
 
-  const globalShortcuts = [store.get('key_binding_show_hide_app')];
-  const localShortcuts = [
-    store.get('key_binding_show_hide_toolbar'),
-    store.get('key_binding_show_hide_whiteboard'),
-    store.get('key_binding_clear_desk'),
-    KEY_SETTINGS,
-    KEY_Q,
-  ];
-
-  if (mode === 'global' || mode === 'all') {
-    shortcuts.push(...globalShortcuts);
-  }
-
-  if (mode === 'local' || mode === 'all') {
-    shortcuts.push(...localShortcuts);
-  }
-
-  shortcuts
-    .filter(s => s && s !== KEY_NULL)
-    .forEach(accelerator => globalShortcut.unregister(accelerator));
+  globalShortcut.unregisterAll();
 }
 
-function resetScreen() {
-  mainWindow.webContents.send('reset_screen');
+function withThrottle(callback) {
+  rawLog('withThrottle called...')
+
+  const now = Date.now();
+  if (now < lastShortcutTime + throttleDelay) return;
+  lastShortcutTime = now;
+
+  callback();
 }
 
-function toggleWindow() {
-  if (foregroundMode) {
-    hideDrawWindow()
-  } else {
-    showDrawWindow()
-  }
+function toggleDrawWindow() {
+  withThrottle(() => {
+    rawLog('Toggling draw window...')
+
+    if (foregroundMode) {
+      hideDrawWindow()
+    } else {
+      showDrawWindow()
+    }
+  });
 }
 
 function showDrawWindow() {
-  console.log('showDrawWindow....')
+  rawLog('Showing draw window...')
 
   if (!mainWindow) {
-    console.log('showDrawWindow.... CREATE WINDWO')
+    rawLog('Main window not found, creating...')
     createMainWindow()
   }
 
   showWindowOnActiveScreen()
 
   foregroundMode = true
-  updateContextMenu() // Need to rerender the context menu
+  updateContextMenu()
 }
 
 function hideDrawWindow() {
-  console.log('Hiding draw window...')
+  if (!mainWindow) return
+  if (!mainWindow.isVisible()) return
 
-  if (mainWindow) {
-    resetScreen()
+  rawLog('Hiding draw window...')
 
-    mainWindow.hide()
-  }
-
+  mainWindow.hide()
   foregroundMode = false
-  updateContextMenu() // Need to rerender the context menu
+  updateContextMenu()
 }
 
 function toggleToolbar() {
-  if (!foregroundMode) {
-    showDrawWindow()
-  }
+  withThrottle(() => {
+    rawLog('Toggling toolbar...')
 
-  showToolbar = !showToolbar
-
-  mainWindow.webContents.send('toggle_toolbar')
-  updateContextMenu() // Need to rerender the context menu
+    if (mainWindow) {
+      mainWindow.webContents.send('toggle_toolbar')
+      // Roundtrip request updates store value
+    } else {
+      store.set('show_tool_bar', !store.get('show_tool_bar'));
+      updateContextMenu()
+    }
+  });
 }
 
 function toggleWhiteboard() {
-  if (!foregroundMode) {
+  withThrottle(() => {
+    rawLog('Toggling whiteboard...')
+
+    if (mainWindow) {
+      mainWindow.webContents.send('toggle_whiteboard')
+      // Roundtrip request updates store value
+    } else {
+      store.set('show_whiteboard', !store.get('show_whiteboard'));
+      updateContextMenu()
+    }
+  });
+}
+
+function resetApp() {
+  withThrottle(() => {
+    rawLog('Resetting app to original settings...')
+
+    unRegisterGlobalShortcuts()
+
+    store.clear()
+
+    registerGlobalShortcuts()
+
+    if (app.getLoginItemSettings().openAtLogin) {
+      app.setLoginItemSettings({ openAtLogin: false });
+    }
+
     showDrawWindow()
-  }
 
-  showWhiteboard = !showWhiteboard
+    if (settingsWindow) {
+      settingsWindow.reload()
+    }
+  })
+}
 
-  mainWindow.webContents.send('toggle_whiteboard')
-  updateContextMenu() // Need to rerender the context menu
+function resetScreen() {
+  withThrottle(() => {
+    rawLog('Resetting screen...')
+
+    if (mainWindow) {
+      mainWindow.webContents.send('reset_screen');
+    }
+  });
+}
+
+function quitApp() {
+  withThrottle(() => {
+    rawLog('Quitting app...')
+
+    app.quit();
+  });
 }
 
 function showWindowOnActiveScreen() {
@@ -666,7 +718,7 @@ function showWindowOnActiveScreen() {
 
   mainWindow.setBounds(currentDisplay.workArea)
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment) {
     mainWindow.setBounds({
       width: 500,
       height: 500
@@ -679,36 +731,56 @@ function showWindowOnActiveScreen() {
   mainWindow.reload()
 }
 
-function normalizeAccelerator(value) {
+function normalizeAcceleratorForUI(value) {
   if (!value) return value;
 
-  const target = process.platform === 'darwin' ? 'Meta' : 'Control';
+  const target = (isMac) ? 'Meta' : 'Control';
   return value.replace('CmdOrCtrl', target);
 }
 
-function deNormalizeAccelerator(value) {
+function deNormalizeAcceleratorFromUI(value) {
   if (!value) return value;
 
-  const source = process.platform === 'darwin' ? 'Meta' : 'Control';
-  return value.replace(source, 'CmdOrCtrl');
+  const target = (isMac) ? 'Meta' : 'Control';
+  return value.replace(target, 'CmdOrCtrl');
 }
 
-function resetApp() {
-  unRegisterShortcuts('all');
-
-  store.clear()
-
-  registerShortcuts('all');
-
-  if (app.getLoginItemSettings().openAtLogin) {
-    app.setLoginItemSettings({ openAtLogin: false });
+function shouldUpdateMenu(newSettings) {
+  function valueChanged(key) {
+    return (key in store.store) &&
+           (key in newSettings) &&
+           store.store[key] !== newSettings[key]
   }
 
-  if (mainWindow) {
-    mainWindow.reload()
+  if (valueChanged('show_whiteboard') || valueChanged('show_tool_bar')) {
+    return true;
   }
 
-  if (settingsWindow) {
-    settingsWindow.reload()
+  return false;
+}
+
+function safeRegisterGlobalShortcut(accelerator, callback) {
+  if (!accelerator || accelerator === KEY_NULL) {
+    return
   }
+
+  try {
+    if (globalShortcut.isRegistered(accelerator)) {
+      rawLog('Global shortcut already registered:', accelerator);
+      return
+    }
+
+    const success = globalShortcut.register(accelerator, callback);
+    if (!success) {
+      rawLog('Failed to register global shortcut:', accelerator);
+    }
+  } catch (error) {
+    rawLog('Error registering global shortcut:', accelerator, error);
+  }
+}
+
+function rawLog(message, ...args) {
+  if (!isDevelopment) { return }
+
+  console.log(message, ...args);
 }
