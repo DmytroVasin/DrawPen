@@ -185,6 +185,7 @@ function createMainWindow() {
     width: width,
     height: height,
     transparent: true,
+    backgroundColor: '#00000000', // 8-symbol ARGB
     resizable: isResizable,
     hasShadow: false,
     frame: false,
