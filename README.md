@@ -33,8 +33,8 @@ Or install via **package managers**:
 brew install --cask drawpen
 
 # Windows (Scoop)
-scoop install drawpen
-# ⚠️ Scoop PR is pending — may not work until merged
+scoop bucket add extras
+scoop install extras/drawpen
 ```
 
 ### Keybindings
