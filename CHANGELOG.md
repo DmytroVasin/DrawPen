@@ -1,5 +1,21 @@
 # Change Log
 
+## [0.0.29] - 2025-11-02
+### Features:
+- App now automatically creates icons (Windows)
+- Added Auto-launch support (macOS, Windows)
+- Added Settings Page (ability to enable/disable/change HotKeys and Auto-launch)
+
+### Bug Fixes:
+- Fixed app freeze when activating via Tray shortcut
+- Removed Tray accelerators for Linux
+- Fixed issue with second app launch
+
+### Improvements:
+- Launch Draw Screen on application startup
+- Simplified Tray Menu
+- Prevented data loss on application hide/show
+
 ## [0.0.28] - 2025-10-22
 - Add fallback for transparent background in the main window
 
