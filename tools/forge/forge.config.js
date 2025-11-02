@@ -39,7 +39,11 @@ module.exports = {
       config: {
         setupIcon: path.join(rootDir, 'assets/build/icon.ico'),
         iconUrl: 'https://raw.githubusercontent.com/DmytroVasin/DrawPen/main/assets/build/icon.ico',
-        loadingGif: path.join(rootDir, 'assets/build/loading.gif')
+        loadingGif: path.join(rootDir, 'assets/build/loading.gif'),
+        name: 'DrawPen',
+        shortcutName: 'DrawPen',
+        setupExe: 'DrawPen.Setup.exe',
+        noMsi: true
       }
     },
     {
@@ -78,6 +82,14 @@ module.exports = {
               js: path.join(rootDir, 'src/renderer/about_page/index.js'),
               preload: {
                 js: path.join(rootDir, 'src/renderer/about_page/preload.js'),
+              },
+            },
+            {
+              name: 'settings_window',
+              html: path.join(rootDir, 'src/renderer/settings_page/index.html'),
+              js: path.join(rootDir, 'src/renderer/settings_page/index.js'),
+              preload: {
+                js: path.join(rootDir, 'src/renderer/settings_page/preload.js'),
               },
             },
           ]

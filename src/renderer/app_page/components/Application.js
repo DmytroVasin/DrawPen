@@ -65,6 +65,12 @@ const Application = (settings) => {
   const initialShowWhiteboard = settings.show_whiteboard
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
+
+  const key_show_hide_toolbar     = settings.key_binding_show_hide_toolbar
+  const key_show_hide_whiteboard  = settings.key_binding_show_hide_whiteboard
+  const key_clear_desk            = settings.key_binding_clear_desk
+  const key_binding_open_settings = settings.key_binding_open_settings
+
   let initialFigures = []
 
   if (process.env.NODE_ENV === 'development') {
@@ -305,6 +311,24 @@ const Application = (settings) => {
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
     }
+
+    // Dynamic keyboard shortcuts
+    if (eventMatches(event, key_show_hide_toolbar)) {
+      event.preventDefault();
+      handleToggleToolbar();
+    }
+    if (eventMatches(event, key_show_hide_whiteboard)) {
+      event.preventDefault();
+      handleToggleWhiteboard();
+    }
+    if (eventMatches(event, key_clear_desk)) {
+      event.preventDefault();
+      handleReset();
+    }
+    if (eventMatches(event, key_binding_open_settings)) {
+      event.preventDefault();
+      invokeOpenSettings();
+    }
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
 
   const handleKeyUp = useCallback((event) => {
@@ -314,6 +338,43 @@ const Application = (settings) => {
       setIsShiftPressed(false);
     }
   }, []);
+
+  const parseAccelerator = (shortcut) => {
+    if (!shortcut) return null
+    if (shortcut === '[NULL]') return null
+
+    const keyParts = shortcut.split('+')
+    const mainKey = keyParts[keyParts.length - 1]
+
+    return {
+      wantMeta: keyParts.includes('Meta'),
+      wantCtrl: keyParts.includes('Control'),
+      wantAlt: keyParts.includes('Alt'),
+      wantShift: keyParts.includes('Shift'),
+      mainKey: mainKey,
+    };
+  }
+
+  const eventMatches = (event, shortcut) => {
+    const eventKey = (event.key || '').toUpperCase()
+    const ctrlKey = event.ctrlKey
+    const metaKey = event.metaKey
+    const shiftKey = event.shiftKey
+    const eventRepeat = event.repeat
+
+    if (eventRepeat) return false;
+
+    const accelOptions = parseAccelerator(shortcut);
+    if (!accelOptions) return false;
+
+    return (
+      (accelOptions.mainKey === eventKey) &&
+      (accelOptions.wantMeta === metaKey) &&
+      (accelOptions.wantCtrl === ctrlKey) &&
+      (accelOptions.wantShift === shiftKey) &&
+      (accelOptions.wantAlt === event.altKey)
+    )
+  };
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -325,7 +386,13 @@ const Application = (settings) => {
     };
   }, [handleKeyDown, handleKeyUp]);
 
+  const firstLaunch = useRef(true);
   useEffect(() => {
+    if (firstLaunch.current) {
+      firstLaunch.current = false;
+      return;
+    }
+
     const debouncedUpdateSettings = debounce(() => {
       invokeSetSettings({
         show_whiteboard: showWhiteboard,
@@ -803,6 +870,12 @@ const Application = (settings) => {
 
   const handleCloseToolBar = () => {
     invokeHideApp();
+  }
+
+  const invokeOpenSettings = () => {
+    console.log('Renderer -> Main: Invoke Open Settings');
+
+    window.electronAPI.invokeOpenSettings();
   }
 
   const invokeHideApp = () => {
