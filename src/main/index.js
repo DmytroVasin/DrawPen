@@ -2,6 +2,11 @@ import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain,
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import path from 'path';
+import electronSquirrelStartup from 'electron-squirrel-startup';
+
+if (electronSquirrelStartup) {
+  app.quit();
+}
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const isMac = process.platform === 'darwin'
@@ -413,6 +418,7 @@ app.whenReady().then(() => {
   registerGlobalShortcuts()
 
   updateApp()
+  setApplicationName()
 })
 
 app.on('will-quit', () => {
@@ -776,6 +782,12 @@ function safeRegisterGlobalShortcut(accelerator, callback) {
     }
   } catch (error) {
     rawLog('Error registering global shortcut:', accelerator, error);
+  }
+}
+
+function setApplicationName() {
+  if (isWin) {
+    app.setAppUserModelId('com.squirrel.DrawPen.DrawPen');
   }
 }
 
