@@ -68,7 +68,6 @@ const Settings = (config) => {
 
     switch (key) {
       case 'key_binding_show_hide_app':
-        // set init
         setShowHideApp({ ...showHideApp, accelerator: showHideApp.init });
         break;
       case 'key_binding_show_hide_toolbar':

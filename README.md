@@ -53,7 +53,8 @@ scoop install drawpen
 | Show/Hide ToolBar                       | <kbd>CMD/CTRL + T</kbd> | |
 | Show/Hide Whiteboard                    | <kbd>CMD/CTRL + E</kbd> | |
 | Clear Desk                              | <kbd>CMD/CTRL + K</kbd> | |
-| Reset to original                       | | Resets all app settings <br /> (chosen colors, toolbar position, etc.)  |
+| Settings Page                           | <kbd>CMD/CTRL + ,</kbd> | |
+| Reset to original                       | | Resets all app settings <br /> (keys, colors, toolbar position, etc.)  |
 
 ### Contributing
 
