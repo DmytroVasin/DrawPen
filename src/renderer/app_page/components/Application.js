@@ -39,6 +39,7 @@ import {
   widthList,
   minObjectDistance,
   pastCooldownMs,
+  escDoubleTapMs,
 } from './constants.js'
 
 const Icons = {
@@ -111,7 +112,8 @@ const Application = (settings) => {
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
   }, []);
 
-  const lastPasteAtRef = useRef(null);
+  const lastPasteAtRef = useRef(0);
+  const lastEscapeAtRef = useRef(0);
 
   const handleKeyDown = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
@@ -269,9 +271,21 @@ const Application = (settings) => {
         }
         break;
       case 'escape':
+        if (eventRepeat) break;
+
         if (activeFigureInfo) {
           setActiveFigureInfo(null);
+          break;
         }
+
+        const now = Date.now();
+        if (now - lastEscapeAtRef.current < escDoubleTapMs) {
+          lastEscapeAtRef.current = 0;
+          invokeHideApp();
+        } else {
+          lastEscapeAtRef.current = now;
+        }
+
         break;
       case '1':
         handleChangeTool('pen');
