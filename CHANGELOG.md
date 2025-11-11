@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.30] - 2025-11-11
+- Double tap on ESC should hide an app
+
 ## [0.0.29] - 2025-11-02
 ### Features:
 - App now automatically creates icons (Windows)
