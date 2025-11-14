@@ -237,6 +237,7 @@ function createMainWindow() {
     frame: false,
     alwaysOnTop: true,
     skipTaskbar: true,
+    opacity: 0.9999999, // Fix transparency rendering artifacts
     autoHideMenuBar: true,
     webPreferences: {
       devTools: hasDevTools,
