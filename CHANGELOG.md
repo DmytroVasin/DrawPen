@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.31] - 2025-11-15
+- Fix transparency rendering artifacts
+
 ## [0.0.30] - 2025-11-11
 - Double tap on ESC should hide an app
 
