@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   canRegisterShortcut: (accelerator) => ipcRenderer.invoke('can_register_shortcut', accelerator),
   setLaunchOnLogin: (value) => ipcRenderer.invoke('set_launch_on_login', value),
   resetToOriginals: () => ipcRenderer.invoke('reset_to_originals'),
+  setShowDrawingBorder: (value) => ipcRenderer.invoke('set_show_drawing_border', value),
 
   isMac: platform === 'darwin',
 });

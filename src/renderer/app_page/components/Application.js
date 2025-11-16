@@ -64,6 +64,7 @@ const Application = (settings) => {
   const initialActiveWidth = settings.tool_bar_active_weight_index
   const initialShowToolbar = settings.show_tool_bar
   const initialShowWhiteboard = settings.show_whiteboard
+  const initialShowDrawingBorder = settings.show_drawing_border
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
 
@@ -984,7 +985,11 @@ const Application = (settings) => {
 
   return (
     <div id="root_wrapper" className={manipulation} onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
-      <div id="zone_borders"></div>
+
+      {
+        initialShowDrawingBorder &&
+        <div id="zone_borders"></div>
+      }
 
       {
         showWhiteboard &&

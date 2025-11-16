@@ -60,6 +60,10 @@ const schema = {
   active_monitor_id: {
     type: 'number',
   },
+  show_drawing_border: {
+    type: 'boolean',
+    default: true
+  },
   launch_on_login: {
     type: 'boolean',
     default: false
@@ -363,7 +367,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     show: false,
     width: 600,
-    height: 500,
+    height: 650,
     resizable: false,
     minimizable: false,
     autoHideMenuBar: true,
@@ -454,6 +458,7 @@ ipcMain.handle('get_settings', () => {
   return {
     show_whiteboard: store.get('show_whiteboard'),
     show_tool_bar: store.get('show_tool_bar'),
+    show_drawing_border: store.get('show_drawing_border'),
     tool_bar_x: store.get('tool_bar_x'),
     tool_bar_y: store.get('tool_bar_y'),
     tool_bar_active_tool: store.get('tool_bar_active_tool'),
@@ -505,6 +510,7 @@ ipcMain.handle('get_configuration', () => {
   rawLog('Getting configuration...')
 
   return {
+    show_drawing_border:                      store.get('show_drawing_border'),
     launch_on_login:                          store.get('launch_on_login'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
@@ -582,6 +588,19 @@ ipcMain.handle('set_launch_on_login', (_event, value) => {
   app.setLoginItemSettings({ openAtLogin: value });
 
   store.set('launch_on_login', value)
+
+  rawLog('Updated store: ', store.store)
+  return null;
+});
+
+ipcMain.handle('set_show_drawing_border', (_event, value) => {
+  rawLog('Setting drawing border:', value)
+
+  store.set('show_drawing_border', value)
+
+  if (mainWindow) {
+    mainWindow.reload()
+  }
 
   rawLog('Updated store: ', store.store)
   return null;
