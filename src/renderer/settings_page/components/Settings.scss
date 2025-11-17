@@ -31,6 +31,10 @@ html, body {
   background-color: var(--gray-200);
   color: var(--gray-700);
 
+  :focus {
+    outline: none;
+  }
+
   #root {
     height: 100%;
     display: flex;
@@ -147,7 +151,7 @@ html, body {
                 background-color: var(--gray-25);
                 color: var(--gray-500);
                 font-family: var(--font-primary);
-                font-size: 10px;
+                font-size: 12px;
                 cursor: pointer;
                 transition: transform 0.3s ease;
 
@@ -158,6 +162,42 @@ html, body {
                 &:active {
                   background-color: var(--gray-225);
                   transform: translateY(1px);
+                }
+              }
+
+              .selectbar-container {
+                position: relative;
+
+                .selectbar {
+                  padding: 6px 16px;
+                  border: 1px solid var(--gray-300);
+                  border-radius: 4px;
+                  background-color: var(--gray-25);
+                  color: var(--gray-500);
+                  font-family: var(--font-primary);
+                  font-size: 12px;
+                  cursor: pointer;
+
+                  appearance: none;
+                  padding-right: 24px;
+
+                  &:hover {
+                    background-color: var(--gray-100);
+                  }
+                }
+
+                .selectbar-arrow {
+                  display: flex;
+                  position: absolute;
+                  top: calc(50% - 6px);
+                  right: 6px;
+                  pointer-events: none;
+
+                  .icon {
+                    width: 12px;
+                    height: 12px;
+                    color: var(--gray-500);
+                  }
                 }
               }
 
@@ -201,6 +241,7 @@ html, body {
 
                   .placeholder {
                     padding: 5px;
+                    font-size: 12px;
                   }
 
                   .hotkey-pill {
@@ -213,7 +254,7 @@ html, body {
                       height: 22px;
                       display: flex;
                       align-items: center;
-                      font-size: 10px;
+                      font-size: 12px;
                       justify-content: center;
                       border: 1px solid var(--gray-300);
                       background-color: var(--gray-25);

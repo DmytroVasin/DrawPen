@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import './Settings.scss';
 import ShortcutRecorder from './ShortcutRecorder';
-import { IoRefreshCircleOutline, IoCloseCircleOutline, IoGlobeOutline } from "react-icons/io5";
+import {
+  IoRefreshCircleOutline,
+  IoCloseCircleOutline,
+  IoGlobeOutline,
+  IoChevronDown,
+} from "react-icons/io5";
 
 const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
   const canReset  = !!shortcut.init && shortcut.init !== shortcut.accelerator;
@@ -30,6 +35,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
 
 const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
+  const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
@@ -116,6 +122,13 @@ const Settings = (config) => {
     window.electronAPI.setLaunchOnLogin(nextState);
   };
 
+  const selectAppIconColor = (event) => {
+    const iconColor = event.target.value;
+    setAppIconColor(iconColor);
+
+    window.electronAPI.setAppIconColor(iconColor);
+  }
+
   return (
     <div className="settings-container">
       <div className="settings-header">
@@ -191,11 +204,25 @@ const Settings = (config) => {
 
           <div className="settings-item">
             <div className="settings-item-info">
-              <div className="settings-item-title">Reset to defaults</div>
+              <div className="settings-item-title">Icon Color</div>
             </div>
 
             <div className="settings-item-control">
-              <button className="button" onClick={resetToOriginals}>Reset All</button>
+              <div className="selectbar-container">
+                <select
+                  className="selectbar"
+                  value={appIconColor}
+                  onChange={selectAppIconColor}
+                >
+                  <option value="default">Default</option>
+                  <option value="white">White</option>
+                  <option value="black">Black</option>
+                </select>
+
+                <div className="selectbar-arrow">
+                  <IoChevronDown className="icon" />
+                </div>
+              </div>
             </div>
 
           </div>

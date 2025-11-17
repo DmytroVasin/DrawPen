@@ -64,6 +64,10 @@ const schema = {
     type: 'boolean',
     default: true
   },
+  app_icon_color: {
+    type: 'string',
+    default: 'default'
+  },
   launch_on_login: {
     type: 'boolean',
     default: false
@@ -101,18 +105,25 @@ let settingsWindow
 let foregroundMode = true
 
 const iconSrc = {
-  DEFAULT: path.resolve(__dirname, '../renderer/assets/trayIcon.png'),
-  DEFAULT_WHITE: path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
-  darwin: path.resolve(__dirname, '../renderer/assets/trayIconTemplate@2x.png'),
-  linux: path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
+  WHITE:           path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
+  BLACK:           path.resolve(__dirname, '../renderer/assets/trayIconBlack.png'),
+  DARWIN_TEMPLATE: path.resolve(__dirname, '../renderer/assets/trayIconTemplate@2x.png'),
 }
 
 function getTrayIconPath() {
-   if (isMac) return iconSrc.darwin
-   if (isLinux)  return iconSrc.linux
-   if (isWin)  return nativeTheme.shouldUseDarkColors ? iconSrc.DEFAULT_WHITE : iconSrc.DEFAULT
+  if (isMac) return iconSrc.DARWIN_TEMPLATE
 
-   return iconSrc.DEFAULT
+  const appIconColor = store.get('app_icon_color')
+
+  if (appIconColor === 'white') return iconSrc.WHITE
+  if (appIconColor === 'black') return iconSrc.BLACK
+
+  if (isWin && nativeTheme.shouldUseDarkColors) return iconSrc.WHITE
+  if (isWin) return iconSrc.BLACK
+
+  if (isLinux) return iconSrc.WHITE
+
+  return iconSrc.BLACK
 }
 
 function updateContextMenu() {
@@ -511,6 +522,7 @@ ipcMain.handle('get_configuration', () => {
 
   return {
     show_drawing_border:                      store.get('show_drawing_border'),
+    app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
@@ -603,6 +615,16 @@ ipcMain.handle('set_show_drawing_border', (_event, value) => {
   }
 
   rawLog('Updated store: ', store.store)
+  return null;
+});
+
+ipcMain.handle('set_app_icon_color', (_event, value) => {
+  rawLog('Setting app icon color:', value)
+
+  store.set('app_icon_color', value)
+  rawLog('Updated store: ', store.store)
+
+  tray.setImage(getTrayIconPath())
   return null;
 });
 
@@ -707,6 +729,8 @@ function resetApp() {
     if (app.getLoginItemSettings().openAtLogin) {
       app.setLoginItemSettings({ openAtLogin: false });
     }
+
+    tray.setImage(getTrayIconPath())
 
     showDrawWindow()
 
