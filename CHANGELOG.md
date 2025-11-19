@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.32] - 2025-11-19
+- Ability to pick Icon color (For Windows Tray)
+- Show/Hide Drawing Border
+- Start as hidden on boot launch (Windows, macOS)
+
 ## [0.0.31] - 2025-11-15
 - Fix transparency rendering artifacts
 
