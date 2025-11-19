@@ -424,6 +424,8 @@ app.on('second-instance', () => {
 
 app.commandLine.appendSwitch('disable-pinch');
 app.whenReady().then(() => {
+  preCheck()
+
   hideDock()
   createMainWindow()
 
@@ -448,6 +450,12 @@ app.on('window-all-closed', () => {
 
   // Empty handler to prevent app from quitting
 })
+
+function preCheck() {
+  if (safeWasOpenedAtLogin()) {
+    foregroundMode = false
+  }
+}
 
 function hideDock() {
   if (isMac) {
@@ -597,7 +605,7 @@ ipcMain.handle('set_shortcut', (_event, key, value) => {
 ipcMain.handle('set_launch_on_login', (_event, value) => {
   rawLog('Setting launch on login:', value)
 
-  app.setLoginItemSettings({ openAtLogin: value });
+  safeSetLoginItemSettings({ openAtLogin: value });
 
   store.set('launch_on_login', value)
 
@@ -726,8 +734,8 @@ function resetApp() {
 
     registerGlobalShortcuts()
 
-    if (app.getLoginItemSettings().openAtLogin) {
-      app.setLoginItemSettings({ openAtLogin: false });
+    if (safeIsOpenAtLogin()) {
+      safeSetLoginItemSettings({ openAtLogin: false });
     }
 
     tray.setImage(getTrayIconPath())
@@ -833,6 +841,34 @@ function setApplicationName() {
   if (isWin) {
     app.setAppUserModelId('com.squirrel.DrawPen.DrawPen');
   }
+}
+
+function safeWasOpenedAtLogin() {
+  if (isLinux) return false; // Linux не підтримує login items
+
+  try {
+    return !!app.getLoginItemSettings().wasOpenedAtLogin;
+  } catch (error) {
+    return false;
+  }
+}
+
+function safeIsOpenAtLogin() {
+  if (isLinux) return false;
+
+  try {
+    return !!app.getLoginItemSettings().openAtLogin
+  } catch (error) {
+    return false
+  }
+}
+
+function safeSetLoginItemSettings(settings) {
+  if (isLinux) return;
+
+  try {
+    app.setLoginItemSettings(settings)
+  } catch (error) {}
 }
 
 function rawLog(message, ...args) {
