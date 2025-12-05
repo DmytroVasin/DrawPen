@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.33] - 2025-12-05
+- Added White color
+- Added Thin thickness
+- Disabled smoothing for Pen tool
+
 ## [0.0.32] - 2025-11-19
 - Ability to pick Icon color (For Windows Tray)
 - Show/Hide Drawing Border
