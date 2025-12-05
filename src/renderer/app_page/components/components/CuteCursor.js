@@ -25,6 +25,10 @@ const CuteCursor = ({
       strokeWidth: "20"
     };
 
+    if (colorList[activeColorIndex].name === "color_white") {
+      iconProps.stroke = '#777';
+    }
+
     if (colorList[activeColorIndex].name === "color_rainbow") {
       iconProps = {
         size: iconSize,
