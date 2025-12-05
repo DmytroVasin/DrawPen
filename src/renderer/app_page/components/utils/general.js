@@ -96,31 +96,6 @@ export const pointToSegmentDistance = (px, py, pointA, pointB) => {
   }
 }
 
-// Remove points that are too close to each other
-export const filterClosePoints = (points) => {
-  if (points.length <= 1) { return points }
-
-  const minDistance = 2;
-  const result = [points[0]]
-  let basePoint = result[0]
-
-  for (let i = 1; i < points.length - 1; i++) {
-    const [x1, y1] = basePoint;
-    const [x2, y2] = points[i];
-    const distance = Math.hypot(x2 - x1, y2 - y1);
-
-    if (distance > minDistance) {
-      result.push(points[i])
-      basePoint = points[i]
-    }
-  }
-
-  const lastPoint = points[points.length - 1];
-  result.push(lastPoint);
-
-  return result
-}
-
 export const getMouseCoordinates = (event) => {
   return {
     x: event.nativeEvent.pageX,

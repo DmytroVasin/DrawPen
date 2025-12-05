@@ -8,7 +8,6 @@ import CuteCursor from './components/CuteCursor.js';
 import RippleEffect from './components/RippleEffect.js';
 import TextEditor from './components/TextEditor.js';
 import {
-  filterClosePoints,
   getMouseCoordinates,
   distanceBetweenPoints,
   calculateCanvasTextWidth,
@@ -819,10 +818,6 @@ const Application = (settings) => {
 
       if (activeTool === 'pen') {
         const currentFigure = allFigures.at(-1);
-
-        if (currentFigure.colorIndex !== 0) { // Not Rainbow
-          currentFigure.points = [...filterClosePoints(currentFigure.points)];
-        }
 
         setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
         setRedoStackFigures([]);
