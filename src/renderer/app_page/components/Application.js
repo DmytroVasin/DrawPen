@@ -98,6 +98,7 @@ const Application = (settings) => {
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
+  const [showCursorIcon, setShowCursorIcon] = useState(true);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [rippleEffects, setRippleEffects] = useState([]);
@@ -323,6 +324,9 @@ const Application = (settings) => {
         break;
       case '8':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
+        break;
+      case '0':
+        setShowCursorIcon((prev) => !prev);
         break;
     }
 
@@ -1006,13 +1010,16 @@ const Application = (settings) => {
           />
       }
 
-      <CuteCursor
-        mouseCoordinates={mouseCoordinates}
-        activeColorIndex={activeColorIndex}
-        activeWidthIndex={activeWidthIndex}
-        activeTool={activeTool}
-        Icons={Icons}
-      />
+      {
+        showCursorIcon &&
+          <CuteCursor
+            mouseCoordinates={mouseCoordinates}
+            activeColorIndex={activeColorIndex}
+            activeWidthIndex={activeWidthIndex}
+            activeTool={activeTool}
+            Icons={Icons}
+          />
+      }
 
       <DrawDesk
         allFigures={allFigures}
