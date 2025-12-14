@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.34] - 2025-12-14
+### Features:
+- Added color switching via X key
+- Added option to disable Cute Cursor
+
+### Bug Fixes:
+- Fixed settings switching without requiring a reload
+
 ## [0.0.33] - 2025-12-05
 - Added White color
 - Added Thin thickness
