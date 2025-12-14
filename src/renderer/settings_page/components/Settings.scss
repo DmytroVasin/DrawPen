@@ -19,6 +19,13 @@
   --space-lg: 10px;
 
   --font-primary: 'Inter', Arial, Helvetica, sans-serif;
+
+  --color-picker-blue:   #1971C2; // ~ equals to colorList
+  --color-picker-red:    #E03131;
+  --color-picker-green:  #2F9E44;
+  --color-picker-orange: #F08C00;
+  --color-picker-black:  #1E1E1E;
+  --color-picker-white:  #FFFFFF;
 }
 
 html, body {
@@ -210,6 +217,14 @@ html, body {
                 &:hover {
                   color: var(--gray-700);
                 }
+
+                &.icon--disabled {
+                  cursor: default;
+
+                  &:hover {
+                    color: var(--gray-500);
+                  }
+                }
               }
 
               .shortcut-recorder {
@@ -270,6 +285,47 @@ html, body {
                   height: 1px;
                   border: 0;
                   padding: 0;
+                }
+              }
+
+              .color-swatches {
+                display: flex;
+                gap: 4px;
+                align-items: center;
+
+                .color-plate {
+                  cursor: pointer;
+
+                  position: relative;
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                  border: none;
+
+                  &::before {
+                    position: absolute;
+                    content: "";
+                    top: 50%;
+                    left: 50%;
+                    width: 16px;
+                    height: 16px;
+                    background: inherit;
+                    border-radius: 50%;
+                    border: 2px solid #FFFFFF;
+                    transform: translate(-50%, -50%);
+                  }
+
+                  &.color_white {
+                    &::before { border-color: #D9D9D9; }
+                  }
+
+                  &.color_rainbow { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
+                  &.color_blue { background-color: var(--color-picker-blue); }
+                  &.color_red { background-color: var(--color-picker-red); }
+                  &.color_green { background-color: var(--color-picker-green); }
+                  &.color_orange { background-color: var(--color-picker-orange); }
+                  &.color_black { background-color: var(--color-picker-black); }
+                  &.color_white { background-color: var(--color-picker-white); }
                 }
               }
             }

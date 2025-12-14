@@ -11,7 +11,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setLaunchOnLogin: (value) => ipcRenderer.invoke('set_launch_on_login', value),
   resetToOriginals: () => ipcRenderer.invoke('reset_to_originals'),
   setShowDrawingBorder: (value) => ipcRenderer.invoke('set_show_drawing_border', value),
+  setShowCuteCursor: (value) => ipcRenderer.invoke('set_show_cute_cursor', value),
   setAppIconColor: (value) => ipcRenderer.invoke('set_app_icon_color', value),
+  setSwapColors: (value) => ipcRenderer.invoke('set_swap_colors', value),
 
   isMac: platform === 'darwin',
 });

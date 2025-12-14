@@ -64,6 +64,10 @@ const schema = {
     type: 'boolean',
     default: true
   },
+  show_cute_cursor: {
+    type: 'boolean',
+    default: true
+  },
   app_icon_color: {
     type: 'string',
     default: 'default'
@@ -87,6 +91,10 @@ const schema = {
   key_binding_clear_desk: {
     type: 'string',
     default: KEY_CLEAR_DESK
+  },
+  swap_colors_indexes: {
+    type: 'array',
+    default: [1, 2]
   },
 };
 
@@ -378,7 +386,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     show: false,
     width: 600,
-    height: 650,
+    height: 760,
     resizable: false,
     minimizable: false,
     autoHideMenuBar: true,
@@ -478,6 +486,7 @@ ipcMain.handle('get_settings', () => {
     show_whiteboard: store.get('show_whiteboard'),
     show_tool_bar: store.get('show_tool_bar'),
     show_drawing_border: store.get('show_drawing_border'),
+    show_cute_cursor: store.get('show_cute_cursor'),
     tool_bar_x: store.get('tool_bar_x'),
     tool_bar_y: store.get('tool_bar_y'),
     tool_bar_active_tool: store.get('tool_bar_active_tool'),
@@ -485,6 +494,7 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
     active_monitor_id: store.get('active_monitor_id'),
+    swap_colors_indexes: store.get('swap_colors_indexes'),
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
@@ -530,6 +540,9 @@ ipcMain.handle('get_configuration', () => {
 
   return {
     show_drawing_border:                      store.get('show_drawing_border'),
+    show_cute_cursor:                         store.get('show_cute_cursor'),
+    swap_colors_indexes:                      store.get('swap_colors_indexes'),
+
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
 
@@ -618,9 +631,29 @@ ipcMain.handle('set_show_drawing_border', (_event, value) => {
 
   store.set('show_drawing_border', value)
 
-  if (mainWindow) {
-    mainWindow.reload()
-  }
+  refreshSettingsInRenderer();
+
+  rawLog('Updated store: ', store.store)
+  return null;
+});
+
+ipcMain.handle('set_show_cute_cursor', (_event, value) => {
+  rawLog('Setting cute cursor:', value)
+
+  store.set('show_cute_cursor', value)
+
+  refreshSettingsInRenderer();
+
+  rawLog('Updated store: ', store.store)
+  return null;
+});
+
+ipcMain.handle('set_swap_colors', (_event, value) => {
+  rawLog('Setting swap colors:', value)
+
+  store.set('swap_colors_indexes', value)
+
+  refreshSettingsInRenderer();
 
   rawLog('Updated store: ', store.store)
   return null;
@@ -635,6 +668,16 @@ ipcMain.handle('set_app_icon_color', (_event, value) => {
   tray.setImage(getTrayIconPath())
   return null;
 });
+
+function refreshSettingsInRenderer() {
+  if (mainWindow) {
+    mainWindow.webContents.send('refresh_settings', {
+      show_drawing_border: store.get('show_drawing_border'),
+      show_cute_cursor:    store.get('show_cute_cursor'),
+      swap_colors_indexes: store.get('swap_colors_indexes'),
+    })
+  }
+}
 
 function registerGlobalShortcuts() {
   rawLog('REGISTER global shortcuts...')

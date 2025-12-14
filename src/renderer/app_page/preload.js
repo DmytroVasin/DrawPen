@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onResetScreen: (callback) => ipcRenderer.on('reset_screen', callback),
   onToggleToolbar: (callback) => ipcRenderer.on('toggle_toolbar', callback),
   onToggleWhiteboard: (callback) => ipcRenderer.on('toggle_whiteboard', callback),
+  onRefreshSettings: (callback) => ipcRenderer.on('refresh_settings', callback),
 });

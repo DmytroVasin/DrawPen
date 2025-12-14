@@ -64,8 +64,10 @@ const Application = (settings) => {
   const initialShowToolbar = settings.show_tool_bar
   const initialShowWhiteboard = settings.show_whiteboard
   const initialShowDrawingBorder = settings.show_drawing_border
+  const initialShowCuteCursor = settings.show_cute_cursor
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
+  const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
 
   const key_show_hide_toolbar     = settings.key_binding_show_hide_toolbar
   const key_show_hide_whiteboard  = settings.key_binding_show_hide_whiteboard
@@ -105,11 +107,16 @@ const Application = (settings) => {
   const [redoStackFigures, setRedoStackFigures] = useState([]);
   const [clipboardFigure, setClipboardFigure] = useState(null);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const [showDrawingBorder, setShowDrawingBorder] = useState(initialShowDrawingBorder);
+  const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
+  const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
+  const [secondaryColorIndex, setSecondaryColorIndex] = useState(initialSecondaryColorIndex);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
+    window.electronAPI.onRefreshSettings(handleRefreshSettings);
   }, []);
 
   const lastPasteAtRef = useRef(0);
@@ -324,6 +331,20 @@ const Application = (settings) => {
       case '8':
         handleChangeWidth((activeWidthIndex + 1) % widthList.length);
         break;
+      case 'x':
+        if (['eraser', 'laser'].includes(activeTool)) {
+          break;
+        }
+
+        if (activeColorIndex !== mainColorIndex) {
+          handleChangeColor(mainColorIndex);
+          break;
+        }
+
+        if (activeColorIndex !== secondaryColorIndex) {
+          handleChangeColor(secondaryColorIndex);
+          break;
+        }
     }
 
     // Dynamic keyboard shortcuts
@@ -343,7 +364,7 @@ const Application = (settings) => {
       event.preventDefault();
       invokeOpenSettings();
     }
-  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates]);
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
@@ -921,6 +942,15 @@ const Application = (settings) => {
     setShowWhiteboard((prevShowWhiteboard) => !prevShowWhiteboard);
   };
 
+  const handleRefreshSettings = (_, newSettings) => {
+    console.log('Main -> Renderer: Refresh Settings');
+
+    setShowDrawingBorder(newSettings.show_drawing_border);
+    setShowCuteCursor(newSettings.show_cute_cursor);
+    setMainColorIndex(newSettings.swap_colors_indexes[0]);
+    setSecondaryColorIndex(newSettings.swap_colors_indexes[1]);
+  };
+
   const invokeSetSettings = (settings) => {
     console.log('Renderer -> Main: Invoke Set Settings');
 
@@ -982,7 +1012,7 @@ const Application = (settings) => {
     <div id="root_wrapper" className={manipulation} onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
 
       {
-        initialShowDrawingBorder &&
+        showDrawingBorder &&
         <div id="zone_borders"></div>
       }
 
@@ -1006,13 +1036,16 @@ const Application = (settings) => {
           />
       }
 
-      <CuteCursor
-        mouseCoordinates={mouseCoordinates}
-        activeColorIndex={activeColorIndex}
-        activeWidthIndex={activeWidthIndex}
-        activeTool={activeTool}
-        Icons={Icons}
-      />
+      {
+        showCuteCursor &&
+          <CuteCursor
+            mouseCoordinates={mouseCoordinates}
+            activeColorIndex={activeColorIndex}
+            activeWidthIndex={activeWidthIndex}
+            activeTool={activeTool}
+            Icons={Icons}
+          />
+      }
 
       <DrawDesk
         allFigures={allFigures}
