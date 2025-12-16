@@ -156,7 +156,7 @@ const ToolBar = ({
               </button>
             </li>
             <li className={activeTool === "highlighter" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("highlighter")} title="Text">
+              <button onClick={() => handleChangeTool("highlighter")} title="Highlighter">
                 <Icons.FaHighlighter />
               </button>
             </li>
