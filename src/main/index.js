@@ -1,6 +1,7 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme } from 'electron';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer } from 'electron';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
+import fs from 'fs';
 import path from 'path';
 import electronSquirrelStartup from 'electron-squirrel-startup';
 
@@ -18,6 +19,7 @@ const KEY_SHOW_HIDE_TOOLBAR    = 'CmdOrCtrl+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+E'
 const KEY_CLEAR_DESK           = 'CmdOrCtrl+K'
 const KEY_SETTINGS             = 'CmdOrCtrl+,'
+const KEY_MAKE_SCREENSHOT      = 'CmdOrCtrl+Shift+P'
 const KEY_Q                    = 'CmdOrCtrl+Q'
 const KEY_NULL                 = '[NULL]'
 
@@ -195,6 +197,12 @@ function updateContextMenu() {
       label: withAccelHint('Settings', KEY_SETTINGS),
       accelerator: accelForTray(KEY_SETTINGS),
       click: showSettingsWindow
+    },
+    { type: 'separator' },
+    {
+      label: 'Capture Screen (Beta)',
+      accelerator: accelForTray(KEY_MAKE_SCREENSHOT),
+      click: makeScreenshot
     },
     { type: 'separator' },
     {
@@ -500,6 +508,7 @@ ipcMain.handle('get_settings', () => {
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
     key_binding_clear_desk:           normalizeAcceleratorForUI(store.get('key_binding_clear_desk')),
     key_binding_open_settings:        normalizeAcceleratorForUI(KEY_SETTINGS),
+    key_binding_make_screenshot:      normalizeAcceleratorForUI(KEY_MAKE_SCREENSHOT),
   };
 });
 
@@ -527,6 +536,39 @@ ipcMain.handle('open_settings', () => {
   showSettingsWindow()
 
   return null
+});
+
+ipcMain.handle('make_screenshot', () => {
+  makeScreenshot()
+
+  return null
+});
+
+ipcMain.handle('open_notification', (_event, info) => {
+  if (info.action === 'open_screenshot') {
+    const desktop = app.getPath('desktop')
+    const filePath = path.join(desktop, info.data)
+
+    hideDrawWindow()
+
+    if (fs.existsSync(filePath)) {
+      shell.showItemInFolder(filePath)
+    } else {
+      shell.openPath(desktop)
+    }
+
+    return null
+  }
+
+  if (info.action === 'open_security_preferences') {
+    hideDrawWindow()
+
+    if (isMac) {
+      shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture');
+    }
+
+    return null
+  }
 });
 
 ipcMain.handle('reset_to_originals', () => {
@@ -807,6 +849,119 @@ function quitApp() {
 
     app.quit();
   });
+}
+
+function screenshotTimecode4(date) {
+  let value = date.getHours() * 3600 +
+              date.getMinutes() * 60 +
+              date.getSeconds(); // 0..86399
+
+  let code = '';
+  for (let i = 0; i < 4; i++) {
+    code = String.fromCharCode(97 + (value % 26)) + code;
+    value = Math.floor(value / 26);
+  }
+
+  return code;
+}
+
+function screenshotFilename(withUniqSuffix = false) {
+  const date = new Date()
+
+  const yyyy = date.getFullYear();
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dd = (date.getDate()).toString().padStart(2, '0');
+
+  const code = screenshotTimecode4(date);
+  const suffix = withUniqSuffix ? `-${Date.now()}` : '';
+
+  return `DRWPN-${yyyy}${mm}${dd}-${code}${suffix}.png`;
+}
+
+async function makeScreenshot() {
+  if (!mainWindow) return
+
+  if (!foregroundMode) {
+    showDrawWindow()
+  }
+
+  try {
+    rawLog('Exporting as PNG...')
+
+    if (isMac) {
+      const status = systemPreferences.getMediaAccessStatus('screen');
+      if (status !== 'granted') {
+        // NOTE: Adds an app to Screen & System Audio Recording list
+        try {
+          await desktopCapturer.getSources({
+            types: ['screen'],
+            thumbnailSize: { width: 1, height: 1 },
+          });
+        } catch (_) {}
+
+        throw new Error('Screen Recording permission is not granted.');
+      }
+    }
+
+    const activeMonitor = getActiveMonitor()
+
+    const thumbnailSize = {
+      width: Math.round(activeMonitor.size.width * (activeMonitor.scaleFactor || 1)),
+      height: Math.round(activeMonitor.size.height * (activeMonitor.scaleFactor || 1)),
+    };
+
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize,
+    });
+
+    if (sources.length === 0) {
+      throw new Error('No screen sources available for capture.')
+    }
+
+    const source =
+      sources.find(s => String(s.display_id ?? s.displayId ?? '') === String(activeMonitor.id)) ||
+      sources.find(source => {
+        const { width, height } = source.thumbnail.getSize()
+        return width === thumbnailSize.width && height === thumbnailSize.height
+      }) ||
+      sources[0];
+
+    const image = source.thumbnail;
+
+    if (!image || image.isEmpty()) {
+      throw new Error('Could not capture the screen.')
+    }
+
+    let savePath = path.join(app.getPath('desktop'), screenshotFilename());
+    if (fs.existsSync(savePath)) {
+      savePath = path.join(app.getPath('desktop'), screenshotFilename(true));
+    }
+
+    await fs.promises.writeFile(savePath, image.toPNG());
+
+    sendNotification({
+      title: `Click to open ${isMac ? 'in Finder' : 'folder'}`,
+      body: savePath,
+      button_label: 'Open',
+      button_action: 'open_screenshot',
+      button_data: path.basename(savePath),
+    });
+  } catch (error) {
+    sendNotification({
+      title: 'Image export failed',
+      body: error.message,
+      button_label: isMac ? 'Settings' : null,
+      button_action: isMac ? 'open_security_preferences' : null,
+      button_data: null,
+    });
+  }
+}
+
+function sendNotification(data) {
+  if (mainWindow) {
+    mainWindow.webContents.send('show_notification', data);
+  }
 }
 
 function showWindowOnActiveScreen() {

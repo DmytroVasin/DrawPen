@@ -1,4 +1,20 @@
 :root {
+  --gray-25:  #FFFFFF;
+  --gray-50:  #F3F3F3;
+  --gray-75:  #E9E9E9;
+  --gray-100: #E9EBEC;
+  --gray-200: #DADEE0;
+  --gray-225: #DEE2E3;
+  --gray-250: #F0F0F0;
+  --gray-300: #CCCECF;
+  --gray-500: #9F9F9F;
+  --gray-600: #6C757D;
+  --gray-700: #2E3439;
+
+  --font-primary: 'Inter', Arial, Helvetica, sans-serif;
+
+  --shadow-ambient: rgba(0, 0, 0, 0.1);
+
   --toolbar-width: calc(8*36px + 10px + 20px + 30px);
   --toolbar-height: 44px;
 
@@ -15,7 +31,7 @@
 
 html, body {
   height: 100%;
-  width:100%;
+  width: 100%;
   margin: 0;
   overflow: hidden;
   background: transparent;
@@ -91,4 +107,34 @@ body {
   src: url('../../../assets/Excalifont-Regular.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
+}
+
+// https://fonts.google.com/specimen/Inter
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../assets/Inter_18pt-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }

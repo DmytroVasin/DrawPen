@@ -6,6 +6,7 @@ import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
 import CuteCursor from './components/CuteCursor.js';
 import RippleEffect from './components/RippleEffect.js';
+import Toast from './components/Toast.js';
 import TextEditor from './components/TextEditor.js';
 import {
   getMouseCoordinates,
@@ -69,10 +70,11 @@ const Application = (settings) => {
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
 
-  const key_show_hide_toolbar     = settings.key_binding_show_hide_toolbar
-  const key_show_hide_whiteboard  = settings.key_binding_show_hide_whiteboard
-  const key_clear_desk            = settings.key_binding_clear_desk
-  const key_binding_open_settings = settings.key_binding_open_settings
+  const key_show_hide_toolbar       = settings.key_binding_show_hide_toolbar
+  const key_show_hide_whiteboard    = settings.key_binding_show_hide_whiteboard
+  const key_clear_desk              = settings.key_binding_clear_desk
+  const key_binding_open_settings   = settings.key_binding_open_settings
+  const key_binding_make_screenshot = settings.key_binding_make_screenshot
 
   let initialFigures = []
 
@@ -111,12 +113,14 @@ const Application = (settings) => {
   const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
   const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
   const [secondaryColorIndex, setSecondaryColorIndex] = useState(initialSecondaryColorIndex);
+  const [toastInfo, setToastInfo] = useState(null);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onRefreshSettings(handleRefreshSettings);
+    window.electronAPI.onShowNotification(handleShowNotification);
   }, []);
 
   const lastPasteAtRef = useRef(0);
@@ -363,6 +367,10 @@ const Application = (settings) => {
     if (eventMatches(event, key_binding_open_settings)) {
       event.preventDefault();
       invokeOpenSettings();
+    }
+    if (eventMatches(event, key_binding_make_screenshot)) {
+      event.preventDefault();
+      invokeMakeScreenshot();
     }
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
@@ -909,6 +917,18 @@ const Application = (settings) => {
     window.electronAPI.invokeOpenSettings();
   }
 
+  const invokeMakeScreenshot = () => {
+    console.log('Renderer -> Main: Invoke Make Screenshot');
+
+    window.electronAPI.invokeMakeScreenshot();
+  }
+
+  const invokeOpenNotification = (info) => {
+    console.log('Renderer -> Main: Invoke Open Notification');
+
+    window.electronAPI.invokeOpenNotification(info);
+  }
+
   const invokeHideApp = () => {
     console.log('Renderer -> Main: Invoke Hide App');
 
@@ -951,10 +971,31 @@ const Application = (settings) => {
     setSecondaryColorIndex(newSettings.swap_colors_indexes[1]);
   };
 
+  const handleShowNotification = (_, data) => {
+    console.log('Main -> Renderer: Show Notification');
+
+    setToastInfo({
+      title: data.title,
+      body: data.body,
+      button_label: data.button_label,
+      button_action: data.button_action,
+      button_data: data.button_data
+    });
+  };
+
   const invokeSetSettings = (settings) => {
     console.log('Renderer -> Main: Invoke Set Settings');
 
     window.electronAPI.invokeSetSettings(settings);
+  };
+
+  const handleToastClicked = () => {
+    invokeOpenNotification({
+      action: toastInfo.button_action,
+      data: toastInfo.button_data,
+    });
+
+    setToastInfo(null);
   };
 
   const handleTextEditorBlur = (text) => {
@@ -1014,6 +1055,14 @@ const Application = (settings) => {
       {
         showDrawingBorder &&
         <div id="zone_borders"></div>
+      }
+
+      {
+        toastInfo &&
+          <Toast
+            info={toastInfo}
+            handleToastClicked={handleToastClicked}
+          />
       }
 
       {
