@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.0.35] - 2025-12-25
+### Features:
+- Added Capture Screen tool (Beta)
+- Enable smoothing for Pen tool (based on pen width)
+
+### Bug Fixes:
+- Disable touch gestures on canvas to fix stylus drag
+
 ## [0.0.34] - 2025-12-14
 ### Features:
 - Added color switching via X key
