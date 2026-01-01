@@ -98,6 +98,14 @@ const schema = {
     type: 'array',
     default: [1, 2]
   },
+  drawing_monitor: {
+    type: 'object',
+    default: {
+      mode: 'auto',
+      display_id: null,
+      label: null,
+    }
+  },
 };
 
 // app.getPath('userData') + '/config.json'
@@ -105,7 +113,13 @@ const store = new Store({
   schema
 });
 
-console.log('Current store: ', store.store)
+if (isDevelopment) {
+  rawLog('Initial store: ', store.store)
+
+  store.onDidAnyChange((newStore, _oldStore) => {
+    rawLog('Updated store: ', newStore)
+  })
+}
 
 let tray
 let mainWindow
@@ -227,40 +241,17 @@ function registerTrayIconUpdate() {
   })
 }
 
-function getActiveMonitor() {
-  const activeMonitorId = store.get('active_monitor_id')
-
-  const matchedMonitor = screen.getAllDisplays().find(display => display.id === activeMonitorId)
-  if (matchedMonitor) {
-    return matchedMonitor
-  }
-
-  const primaryDisplay = screen.getPrimaryDisplay()
-  store.set('active_monitor_id', primaryDisplay.id)
-
-  return primaryDisplay
-}
-
 function createMainWindow() {
-  const mainDisplay = getActiveMonitor()
-
-  let { width, height } = mainDisplay.workAreaSize
   let isResizable = false
   let hasDevTools = false
 
   if (isDevelopment) {
-    width = 500
-    height = 500
     isResizable = true
     hasDevTools = true
   }
 
   mainWindow = new BrowserWindow({
     show: false,
-    x: 0,
-    y: 0,
-    width: width,
-    height: height,
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
     resizable: isResizable,
@@ -294,7 +285,7 @@ function createMainWindow() {
 
   mainWindow.webContents.on('did-finish-load', () => {
     if (foregroundMode) {
-      showWindowOnActiveScreen();
+      showWindowOnScreen();
     }
   })
 
@@ -394,7 +385,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     show: false,
     width: 600,
-    height: 760,
+    height: 820,
     resizable: false,
     minimizable: false,
     autoHideMenuBar: true,
@@ -501,7 +492,6 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_color_index: store.get('tool_bar_active_color_index'),
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
-    active_monitor_id: store.get('active_monitor_id'),
     swap_colors_indexes: store.get('swap_colors_indexes'),
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
@@ -516,7 +506,6 @@ ipcMain.handle('set_settings', (_event, newSettings) => {
   const needUpdateMenu = shouldUpdateMenu(newSettings) // Roundtrip request updates store value
 
   store.set({ ...store.store, ...newSettings })
-  rawLog('Updated store (set settings): ', store.store)
 
   if (needUpdateMenu) {
     rawLog('Update Menu (settings changed)...')
@@ -585,6 +574,8 @@ ipcMain.handle('get_configuration', () => {
     show_cute_cursor:                         store.get('show_cute_cursor'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
 
+    displays:                                 getAllDisplaysInfo(),
+    drawing_monitor:                          store.get('drawing_monitor'),
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
 
@@ -653,7 +644,6 @@ ipcMain.handle('set_shortcut', (_event, key, value) => {
     mainWindow.reload()
   }
 
-  rawLog('Updated store (shortcut): ', store.store)
   return null
 });
 
@@ -664,7 +654,6 @@ ipcMain.handle('set_launch_on_login', (_event, value) => {
 
   store.set('launch_on_login', value)
 
-  rawLog('Updated store: ', store.store)
   return null;
 });
 
@@ -675,7 +664,6 @@ ipcMain.handle('set_show_drawing_border', (_event, value) => {
 
   refreshSettingsInRenderer();
 
-  rawLog('Updated store: ', store.store)
   return null;
 });
 
@@ -686,7 +674,6 @@ ipcMain.handle('set_show_cute_cursor', (_event, value) => {
 
   refreshSettingsInRenderer();
 
-  rawLog('Updated store: ', store.store)
   return null;
 });
 
@@ -697,7 +684,6 @@ ipcMain.handle('set_swap_colors', (_event, value) => {
 
   refreshSettingsInRenderer();
 
-  rawLog('Updated store: ', store.store)
   return null;
 });
 
@@ -705,10 +691,17 @@ ipcMain.handle('set_app_icon_color', (_event, value) => {
   rawLog('Setting app icon color:', value)
 
   store.set('app_icon_color', value)
-  rawLog('Updated store: ', store.store)
 
   tray.setImage(getTrayIconPath())
   return null;
+});
+
+ipcMain.handle('set_drawing_monitor', (_event, value) => {
+  rawLog('Setting drawing monitor:', value)
+
+  store.set('drawing_monitor', value)
+
+  return null
 });
 
 function refreshSettingsInRenderer() {
@@ -764,7 +757,7 @@ function showDrawWindow() {
     createMainWindow()
   }
 
-  showWindowOnActiveScreen()
+  showWindowOnScreen()
 
   foregroundMode = true
   updateContextMenu()
@@ -772,7 +765,6 @@ function showDrawWindow() {
 
 function hideDrawWindow() {
   if (!mainWindow) return
-  if (!mainWindow.isVisible()) return
 
   rawLog('Hiding draw window...')
 
@@ -903,7 +895,7 @@ async function makeScreenshot() {
       }
     }
 
-    const activeMonitor = getActiveMonitor()
+    const activeMonitor = getActiveDisplay()
 
     const thumbnailSize = {
       width: Math.round(activeMonitor.size.width * (activeMonitor.scaleFactor || 1)),
@@ -964,13 +956,8 @@ function sendNotification(data) {
   }
 }
 
-function showWindowOnActiveScreen() {
-  const currentDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-
-  if (store.get('active_monitor_id') === currentDisplay.id) {
-    mainWindow.show()
-    return
-  }
+function showWindowOnScreen() {
+  const currentDisplay = getDrawingDisplay()
 
   mainWindow.setBounds(currentDisplay.workArea)
 
@@ -981,10 +968,55 @@ function showWindowOnActiveScreen() {
     })
   }
 
+  if (store.get('active_monitor_id') === currentDisplay.id) {
+    mainWindow.show()
+    return
+  }
+
   store.set('active_monitor_id', currentDisplay.id)
   store.reset('tool_bar_x')
   store.reset('tool_bar_y')
   mainWindow.reload()
+  mainWindow.show()
+}
+
+function getActiveDisplay() {
+  const activeMonitorId = store.get('active_monitor_id')
+
+  const matchedMonitor = screen.getAllDisplays().find(display => display.id === activeMonitorId)
+  if (matchedMonitor) {
+    return matchedMonitor
+  }
+
+  return getDrawingDisplay()
+}
+
+function getDrawingDisplay() {
+  const drawingMonitor = store.get('drawing_monitor')
+
+  if (drawingMonitor.mode === 'fixed') {
+    const fixedDisplay = screen.getAllDisplays().find(display => String(display.id) === drawingMonitor.display_id)
+
+    if (fixedDisplay) {
+      return fixedDisplay
+    }
+  }
+
+  return screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+}
+
+function getAllDisplaysInfo() {
+  const allDisplays = screen.getAllDisplays()
+
+  return allDisplays.map(display => {
+    const displayName = display.label || `Display ${display.id}`
+    const resolution = `${display.size.width}x${display.size.height}`
+
+    return {
+      id: String(display.id),
+      label: `${displayName} (${resolution})`,
+    }
+  })
 }
 
 function normalizeAcceleratorForUI(value) {

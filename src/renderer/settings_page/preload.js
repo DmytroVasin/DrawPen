@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setShowCuteCursor: (value) => ipcRenderer.invoke('set_show_cute_cursor', value),
   setAppIconColor: (value) => ipcRenderer.invoke('set_app_icon_color', value),
   setSwapColors: (value) => ipcRenderer.invoke('set_swap_colors', value),
+  setDrawingMonitor: (value) => ipcRenderer.invoke('set_drawing_monitor', value),
 
   isMac: platform === 'darwin',
 });

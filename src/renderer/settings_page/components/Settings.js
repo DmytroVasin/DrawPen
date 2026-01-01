@@ -49,6 +49,9 @@ const Settings = (config) => {
 
   const [mainColor, setMainColor]           = useState(config.swap_colors_indexes[0]);
   const [secondaryColor, setSecondaryColor] = useState(config.swap_colors_indexes[1]);
+  const [drawingMonitor, setDrawingMonitor] = useState(config.drawing_monitor);
+
+  const displays = config.displays || [];
 
   const resetToOriginals = () => {
     window.electronAPI.resetToOriginals();
@@ -155,6 +158,27 @@ const Settings = (config) => {
     setSecondaryColor(nextColor);
 
     window.electronAPI.setSwapColors([mainColor, nextColor]);
+  }
+
+  const selectDrawingMonitor = (event) => {
+    const value = event.target.value;
+    let newMonitor = {
+      mode: 'auto' ,
+      display_id: null,
+      label: null
+    };
+
+    const display = displays.find(display => display.id === value);
+    if (display) {
+      newMonitor = {
+        mode: 'fixed',
+        display_id: value,
+        label: display.label
+      };
+    }
+
+    setDrawingMonitor(newMonitor);
+    window.electronAPI.setDrawingMonitor(newMonitor);
   }
 
   return (
@@ -298,6 +322,43 @@ const Settings = (config) => {
 
       <div className="settings-content">
         <div className="settings-section">
+
+          <div className="settings-item">
+            <div className="settings-item-info">
+              <div className="settings-item-title">Lock drawing monitor</div>
+            </div>
+
+            <div className="settings-item-control">
+              <div className="selectbar-container">
+                <select
+                  className="selectbar"
+                  value={drawingMonitor.display_id || 'auto'}
+                  onChange={selectDrawingMonitor}
+                >
+                  <option value="auto">Auto</option>
+                  {
+                    displays.map(display => (
+                      <option key={display.id} value={display.id}>{display.label}</option>
+                    ))
+                  }
+
+                  {
+                    drawingMonitor.mode === 'fixed' &&
+                    !displays.find(display => display.id === drawingMonitor.display_id) &&
+                      (
+                        <option disabled value={drawingMonitor.display_id}>
+                          {drawingMonitor.label} (disconnected)
+                        </option>
+                      )
+                  }
+                </select>
+
+                <div className="selectbar-arrow">
+                  <IoChevronDown className="icon" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="settings-item">
             <div className="settings-item-info">
