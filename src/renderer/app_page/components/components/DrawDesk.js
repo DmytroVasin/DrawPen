@@ -116,25 +116,29 @@ const DrawDesk = ({
     })
   };
 
-  const onMouseDown = (event) => {
-    if(event.button === 2) return;
+  const onPointerDown = (event) => {
+    event.preventDefault(); // NOTE: Required for Text figure
+
+    if(event.pointerType === 'mouse' && event.button === 2) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
 
     const coordinates = getMouseCoordinates(event)
-
     handleMouseDown(coordinates);
-
-    event.preventDefault();
-    // event.stopPropagation();
   }
 
-  const onMouseMove = (event) => {
+  const onPointerMove = (event) => {
     const coordinates = getMouseCoordinates(event)
 
     handleMouseMove(coordinates);
   }
 
-  const onMouseUp = (event) => {
+  const onPointerUp = (event) => {
     const coordinates = getMouseCoordinates(event)
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
 
     handleMouseUp(coordinates);
   }
@@ -150,9 +154,10 @@ const DrawDesk = ({
       id="canvas"
       ref={canvasRef}
       style={{ cursor: cursorType }}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       onDoubleClick={onDoubleClick}
     />
   );

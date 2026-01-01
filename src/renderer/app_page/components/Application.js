@@ -1055,7 +1055,7 @@ const Application = (settings) => {
   const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
 
   return (
-    <div id="root_wrapper" className={manipulation} onMouseMove={handleMousePosition} onContextMenu={handleContextMenu}>
+    <div id="root_wrapper" className={manipulation} onPointerMove={handleMousePosition} onContextMenu={handleContextMenu}>
 
       {
         showDrawingBorder &&
