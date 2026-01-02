@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.36] - 2026-01-02
+### Features:
+- Settings to Lock drawing monitor
+- Changed Mouse Events to Pointer Events (Touch stylus support)
+- Activate app via left click on Win/Linux
+
 ## [0.0.35] - 2025-12-25
 ### Features:
 - Added Capture Screen tool (Beta)
