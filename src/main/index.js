@@ -233,12 +233,18 @@ function updateContextMenu() {
   tray.setContextMenu(contextMenu);
 }
 
-function registerTrayIconUpdate() {
+function registerTrayActions() {
   nativeTheme.on('updated', () => {
     if (!tray) return;
 
     tray.setImage(getTrayIconPath())
   })
+
+  if (isWin || isLinux) {
+    tray.on('click', () => {
+      toggleDrawWindow()
+    })
+  }
 }
 
 function createMainWindow() {
@@ -438,7 +444,7 @@ app.whenReady().then(() => {
 
   tray = new Tray(getTrayIconPath())
   updateContextMenu()
-  registerTrayIconUpdate()
+  registerTrayActions()
 
   registerGlobalShortcuts()
 
