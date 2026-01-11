@@ -9,7 +9,7 @@ if (electronSquirrelStartup) {
   app.quit();
 }
 
-const isDevelopment = process.env.NODE_ENV === 'development'
+const isDevelopment = process.env.DRAWPEN_DEV === '1'
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWin = process.platform === 'win32'
@@ -252,11 +252,11 @@ function createMainWindow() {
   let hasDevTools = false
 
   if (isDevelopment) {
-    isResizable = true
-    hasDevTools = true
+    isResizable = true;
+    hasDevTools = true;
   }
 
-  mainWindow = new BrowserWindow({
+  const mainWindowOptions = {
     show: false,
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
@@ -271,8 +271,17 @@ function createMainWindow() {
       devTools: hasDevTools,
       nodeIntegration: false,
       preload: APP_WINDOW_PRELOAD_WEBPACK_ENTRY,
-    }
-  })
+    },
+  };
+
+  if (isDevelopment) {
+    mainWindowOptions.x = 0;
+    mainWindowOptions.y = 0;
+    mainWindowOptions.width = 500;
+    mainWindowOptions.height = 500;
+  }
+
+  mainWindow = new BrowserWindow(mainWindowOptions)
 
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
 
@@ -505,6 +514,8 @@ ipcMain.handle('get_settings', () => {
     key_binding_clear_desk:           normalizeAcceleratorForUI(store.get('key_binding_clear_desk')),
     key_binding_open_settings:        normalizeAcceleratorForUI(KEY_SETTINGS),
     key_binding_make_screenshot:      normalizeAcceleratorForUI(KEY_MAKE_SCREENSHOT),
+
+    is_development: isDevelopment,
   };
 });
 
@@ -965,13 +976,8 @@ function sendNotification(data) {
 function showWindowOnScreen() {
   const currentDisplay = getDrawingDisplay()
 
-  mainWindow.setBounds(currentDisplay.workArea)
-
-  if (isDevelopment) {
-    mainWindow.setBounds({
-      width: 500,
-      height: 500
-    })
+  if (!isDevelopment) {
+    mainWindow.setBounds(currentDisplay.workArea)
   }
 
   if (store.get('active_monitor_id') === currentDisplay.id) {
