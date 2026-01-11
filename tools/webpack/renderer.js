@@ -24,7 +24,7 @@ const rules = [
 ]
 
 function inDev() {
-  return process.env.NODE_ENV == 'development';
+  return process.env.DRAWPEN_DEV === '1';
 }
 
 const copyPlugins = [

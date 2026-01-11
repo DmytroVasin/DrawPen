@@ -16,7 +16,7 @@
   "license": "MIT",
   "main": ".webpack/main",
   "scripts": {
-    "start": "NODE_ENV=development electron-forge start",
+    "start": "DRAWPEN_DEV=1 electron-forge start",
     "package_no_sign": "electron-forge package -- --no-sign",
     "package": "electron-forge package",
     "make": "electron-forge make",

@@ -79,7 +79,7 @@ const Application = (settings) => {
 
   let initialFigures = []
 
-  if (process.env.NODE_ENV === 'development') {
+  if (settings.is_development) {
     initialFigures = [
       { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
       { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
