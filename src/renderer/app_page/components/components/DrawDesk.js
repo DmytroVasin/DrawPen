@@ -3,16 +3,13 @@ import './DrawDesk.scss';
 import React, { useEffect, useRef } from 'react';
 import { getMouseCoordinates } from '../utils/general.js';
 import {
+  drawFigure,
+  drawFigureActive,
+
   drawPen,
   drawHighlighter,
-  drawLine,
-  drawLineActive,
   drawArrow,
   drawArrowActive,
-  drawOval,
-  drawOvalActive,
-  drawRectangle,
-  drawRectangleActive,
   drawLaser,
   drawEraserTail,
   drawText,
@@ -51,6 +48,13 @@ const DrawDesk = ({
     draw(allFigures, allLaserFigures, allEraserFigures, activeFigureInfo)
   }, [allFigures, allLaserFigures, allEraserFigures, activeFigureInfo]);
 
+  const isFigureActiveAndStatic = (figure) => {
+    return activeFigureInfo &&
+           figure.id === activeFigureInfo.id &&
+           !activeFigureInfo.dragging &&
+           !activeFigureInfo.resizing;
+  }
+
   const draw = (allFigures, allLaserFigures, allEraserFigures, activeFigureInfo) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -67,39 +71,23 @@ const DrawDesk = ({
       if (figure.type === 'arrow') {
         drawArrow(ctx, figure, updateRainbowColorDeg)
 
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
+        if (isFigureActiveAndStatic(figure)) {
           drawArrowActive(ctx, figure)
         }
       }
 
-      if (figure.type === 'line') {
-        drawLine(ctx, figure, updateRainbowColorDeg)
+      if (['rectangle', 'oval', 'line'].includes(figure.type)) {
+        drawFigure(ctx, figure, updateRainbowColorDeg)
 
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawLineActive(ctx, figure)
-        }
-      }
-
-      if (figure.type === 'rectangle') {
-        drawRectangle(ctx, figure, updateRainbowColorDeg)
-
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawRectangleActive(ctx, figure)
-        }
-      }
-
-      if (figure.type === 'oval') {
-        drawOval(ctx, figure, updateRainbowColorDeg)
-
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawOvalActive(ctx, figure)
+        if (isFigureActiveAndStatic(figure)) {
+          drawFigureActive(ctx, figure)
         }
       }
 
       if (figure.type === 'text') {
         let isActive = false;
 
-        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
+        if (isFigureActiveAndStatic(figure)) {
           isActive = true;
         }
 
