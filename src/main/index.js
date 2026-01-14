@@ -248,16 +248,27 @@ function registerTrayActions() {
 }
 
 function createMainWindow() {
+  const currentDisplay = getDrawingDisplay()
+
+  store.set('active_monitor_id', currentDisplay.id)
+
+  let { x, y, width, height } = currentDisplay.workArea
   let isResizable = false
   let hasDevTools = false
 
   if (isDevelopment) {
+    width = 500
+    height = 500
     isResizable = true
     hasDevTools = true
   }
 
   mainWindow = new BrowserWindow({
     show: false,
+    x: x,
+    y: y,
+    width: width,
+    height: height,
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
     resizable: isResizable,
@@ -965,6 +976,11 @@ function sendNotification(data) {
 function showWindowOnScreen() {
   const currentDisplay = getDrawingDisplay()
 
+  if (store.get('active_monitor_id') === currentDisplay.id) {
+    mainWindow.show()
+    return
+  }
+
   mainWindow.setBounds(currentDisplay.workArea)
 
   if (isDevelopment) {
@@ -972,11 +988,6 @@ function showWindowOnScreen() {
       width: 500,
       height: 500
     })
-  }
-
-  if (store.get('active_monitor_id') === currentDisplay.id) {
-    mainWindow.show()
-    return
   }
 
   store.set('active_monitor_id', currentDisplay.id)
