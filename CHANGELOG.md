@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.37] - 2026-01-14
+### Bug Fixes:
+- Fix bug with Canvas initial dimensions
+
 ## [0.0.36] - 2026-01-02
 ### Features:
 - Settings to Lock drawing monitor
