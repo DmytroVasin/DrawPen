@@ -29,9 +29,14 @@ const DrawDesk = ({
   handleMouseUp,
   handleDoubleClick,
   updateRainbowColorDeg,
+  activeTool,
+  handleChangeTool,
 }) => {
   // console.log('DrawDesk render');
   const canvasRef = useRef(null);
+  const prevToolRef = useRef(null);
+  const simulateKeyDown = useRef(false);
+
   const dpr = window.devicePixelRatio || 1;
 
   useEffect(() => {
@@ -116,10 +121,24 @@ const DrawDesk = ({
     })
   };
 
+  const isPenEraser = (event) => {
+    return (event.pointerType === 'pen' && event.button === 5) ||
+           (event.pointerType === 'mouse' && event.button === 1);
+  }
+
   const onPointerDown = (event) => {
     event.preventDefault(); // NOTE: Required for Text figure
 
     if(event.pointerType === 'mouse' && event.button === 2) return;
+
+    if (isPenEraser(event) && activeTool !== 'eraser') {
+      // Hard Trick! Rethink!
+      prevToolRef.current = activeTool;
+      simulateKeyDown.current = true;
+
+      handleChangeTool('eraser');
+      return
+    }
 
     event.currentTarget.setPointerCapture(event.pointerId);
 
@@ -128,19 +147,36 @@ const DrawDesk = ({
   }
 
   const onPointerMove = (event) => {
+    if (simulateKeyDown.current && activeTool === 'eraser') {
+      simulateKeyDown.current = false;
+
+      event.currentTarget.setPointerCapture(event.pointerId);
+
+      const coordinates = getMouseCoordinates(event)
+      handleMouseDown(coordinates);
+
+      return;
+    }
+
     const coordinates = getMouseCoordinates(event)
 
     handleMouseMove(coordinates);
   }
 
   const onPointerUp = (event) => {
-    const coordinates = getMouseCoordinates(event)
-
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
+    const coordinates = getMouseCoordinates(event)
     handleMouseUp(coordinates);
+
+    if (prevToolRef.current) {
+      handleChangeTool(prevToolRef.current);
+
+      prevToolRef.current = null;
+      simulateKeyDown.current = false;
+    }
   }
 
   const onDoubleClick = (event) => {

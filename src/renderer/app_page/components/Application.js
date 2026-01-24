@@ -481,6 +481,10 @@ const Application = (settings) => {
       return;
     }
 
+    if (activeTool === 'eraser') {
+      return;
+    }
+
     const debouncedUpdateSettings = debounce(() => {
       invokeSetSettings({
         show_whiteboard: showWhiteboard,
@@ -1156,6 +1160,8 @@ const Application = (settings) => {
         handleMouseUp={handleMouseUp}
         handleDoubleClick={handleDoubleClick}
         updateRainbowColorDeg={updateRainbowColorDeg}
+        activeTool={activeTool}
+        handleChangeTool={handleChangeTool}
       />
 
       {
