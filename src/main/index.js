@@ -1,6 +1,7 @@
 import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer } from 'electron';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
+import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import electronSquirrelStartup from 'electron-squirrel-startup';
@@ -27,6 +28,10 @@ let lastShortcutTime = 0;
 const throttleDelay = 250;
 
 const schema = {
+  user_id: {
+    type: 'string',
+    default: randomUUID()
+  },
   show_whiteboard: {
     type: 'boolean',
     default: false
@@ -824,7 +829,13 @@ function resetApp() {
 
     unRegisterGlobalShortcuts()
 
+    const preservedUserId = store.get('user_id')
+
     store.clear()
+
+    if (preservedUserId) {
+      store.set('user_id', preservedUserId)
+    }
 
     registerGlobalShortcuts()
 
