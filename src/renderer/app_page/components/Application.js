@@ -337,6 +337,10 @@ const Application = (settings) => {
 
         break;
       }
+      case 'e': {
+        handleChangeTool('eraser');
+        break;
+      }
       case 'x': {
         if (['eraser', 'laser'].includes(activeTool)) {
           break;
@@ -697,7 +701,7 @@ const Application = (settings) => {
     if (activeTool === 'laser') {
       let laserFigure = {
         id: Date.now(),
-        type: activeTool,
+        type: 'laser',
         widthIndex: activeWidthIndex,
         points: [[x, y]],
       };
@@ -711,7 +715,7 @@ const Application = (settings) => {
     if (activeTool === 'eraser') {
       let eraserFigure = {
         id: Date.now(),
-        type: activeTool,
+        type: 'eraser',
         widthIndex: activeWidthIndex,
         points: [[x, y]],
       };
