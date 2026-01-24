@@ -129,9 +129,12 @@ const Application = (settings) => {
 
   const handleKeyDown = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
+    const eventCode = (event.code || '').toLowerCase();
     const ctrlOrMeta = event.ctrlKey || event.metaKey;
     const shiftKey = event.shiftKey;
     const eventRepeat = event.repeat;
+
+    const direction = shiftKey ? -1 : 1;
 
     if (textEditorContainer) {
       return
@@ -145,8 +148,36 @@ const Application = (settings) => {
       return
     }
 
+    // Dynamic keyboard shortcuts
+    if (eventMatches(event, key_show_hide_toolbar)) {
+      event.preventDefault();
+      handleToggleToolbar();
+      return
+    }
+    if (eventMatches(event, key_show_hide_whiteboard)) {
+      event.preventDefault();
+      handleToggleWhiteboard();
+      return
+    }
+    if (eventMatches(event, key_clear_desk)) {
+      event.preventDefault();
+      handleReset();
+      return
+    }
+    if (eventMatches(event, key_binding_open_settings)) {
+      event.preventDefault();
+      invokeOpenSettings();
+      return
+    }
+    if (eventMatches(event, key_binding_make_screenshot)) {
+      event.preventDefault();
+      invokeMakeScreenshot();
+      return
+    }
+
+    // Static keyboard shortcuts
     switch (eventKey) {
-      case 'v':
+      case 'v': {
         if (ctrlOrMeta) {
           if (clipboardFigure) {
             const now = Date.now();
@@ -170,7 +201,8 @@ const Application = (settings) => {
         }
 
         break;
-      case 'c':
+      }
+      case 'c': {
         if (ctrlOrMeta) {
           if (activeFigureInfo) {
             const activeFigure = findActiveFigure();
@@ -183,7 +215,8 @@ const Application = (settings) => {
         }
 
         break;
-      case 'z':
+      }
+      case 'z': {
         if (ctrlOrMeta) {
           if (activeFigureInfo) {
             setActiveFigureInfo(null);
@@ -231,10 +264,11 @@ const Application = (settings) => {
           }
         }
         break;
+      }
       case 'arrowleft':
       case 'arrowright':
       case 'arrowup':
-      case 'arrowdown':
+      case 'arrowdown': {
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
 
@@ -258,8 +292,9 @@ const Application = (settings) => {
           setAllFigures([...allFigures]);
         }
         break;
+      }
       case 'delete':
-      case 'backspace':
+      case 'backspace': {
         if (activeFigureInfo) {
           const figureToRemove = allFigures.find(figure => figure.id === activeFigureInfo.id);
           const newActiveFigures = allFigures.filter(figure => figure.id !== activeFigureInfo.id)
@@ -271,7 +306,8 @@ const Application = (settings) => {
           setRedoStackFigures([]);
         }
         break;
-      case 'enter':
+      }
+      case 'enter': {
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
 
@@ -282,7 +318,8 @@ const Application = (settings) => {
           }
         }
         break;
-      case 'escape':
+      }
+      case 'escape': {
         if (eventRepeat) break;
 
         if (activeFigureInfo) {
@@ -299,44 +336,8 @@ const Application = (settings) => {
         }
 
         break;
-      case '1':
-        handleChangeTool('pen');
-        break;
-      case '2':
-        let nextShape = toolbarLastActiveFigure;
-
-        if (activeTool === toolbarLastActiveFigure) {
-          const activeShapeIndex = shapeList.indexOf(activeTool);
-          const nextShapeIndex = (activeShapeIndex + 1) % shapeList.length;
-
-          nextShape = shapeList[nextShapeIndex];
-        }
-
-        handleChangeTool(nextShape);
-        break;
-      case '3':
-        handleChangeTool('text');
-        break;
-      case '4':
-        handleChangeTool('highlighter');
-        break;
-      case '5':
-        handleChangeTool('laser');
-        break;
-      case '6':
-        handleChangeTool('eraser');
-        break;
-      case '7':
-        if (['eraser', 'laser'].includes(activeTool)) {
-          break;
-        }
-
-        handleChangeColor((activeColorIndex + 1) % colorList.length);
-        break;
-      case '8':
-        handleChangeWidth((activeWidthIndex + 1) % widthList.length);
-        break;
-      case 'x':
+      }
+      case 'x': {
         if (['eraser', 'laser'].includes(activeTool)) {
           break;
         }
@@ -350,28 +351,60 @@ const Application = (settings) => {
           handleChangeColor(secondaryColorIndex);
           break;
         }
+
+        break;
+      }
     }
 
-    // Dynamic keyboard shortcuts
-    if (eventMatches(event, key_show_hide_toolbar)) {
-      event.preventDefault();
-      handleToggleToolbar();
-    }
-    if (eventMatches(event, key_show_hide_whiteboard)) {
-      event.preventDefault();
-      handleToggleWhiteboard();
-    }
-    if (eventMatches(event, key_clear_desk)) {
-      event.preventDefault();
-      handleReset();
-    }
-    if (eventMatches(event, key_binding_open_settings)) {
-      event.preventDefault();
-      invokeOpenSettings();
-    }
-    if (eventMatches(event, key_binding_make_screenshot)) {
-      event.preventDefault();
-      invokeMakeScreenshot();
+    switch (eventCode) {
+      case 'digit1': {
+        handleChangeTool('pen');
+        break;
+      }
+      case 'digit2': {
+        let nextShape = toolbarLastActiveFigure;
+
+        if (activeTool === toolbarLastActiveFigure) {
+          const activeShapeIndex = shapeList.indexOf(activeTool);
+          const nextShapeIndex = (activeShapeIndex + direction + shapeList.length) % shapeList.length;
+
+          nextShape = shapeList[nextShapeIndex];
+        }
+
+        handleChangeTool(nextShape);
+        break;
+      }
+      case 'digit3': {
+        handleChangeTool('text');
+        break;
+      }
+      case 'digit4': {
+        handleChangeTool('highlighter');
+        break;
+      }
+      case 'digit5': {
+        handleChangeTool('laser');
+        break;
+      }
+      case 'digit6': {
+        handleChangeTool('eraser');
+        break;
+      }
+      case 'digit7': {
+        if (['eraser', 'laser'].includes(activeTool)) {
+          break;
+        }
+        const nextColorIndex = (activeColorIndex + direction + colorList.length) % colorList.length;
+
+        handleChangeColor(nextColorIndex);
+        break;
+      }
+      case 'digit8': {
+        const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
+
+        handleChangeWidth(nextWidthIndex);
+        break;
+      }
     }
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
@@ -388,7 +421,11 @@ const Application = (settings) => {
     if (shortcut === '[NULL]') return null
 
     const keyParts = shortcut.split('+')
-    const mainKey = keyParts[keyParts.length - 1]
+    let mainKey = keyParts[keyParts.length - 1].toUpperCase();
+
+    if (mainKey.length === 1 && mainKey >= '0' && mainKey <= '9') {
+      mainKey = `DIGIT${mainKey}`;
+    }
 
     return {
       wantMeta: keyParts.includes('Meta'),
@@ -401,6 +438,7 @@ const Application = (settings) => {
 
   const eventMatches = (event, shortcut) => {
     const eventKey = (event.key || '').toUpperCase()
+    const eventCode = (event.code || '').toUpperCase()
     const ctrlKey = event.ctrlKey
     const metaKey = event.metaKey
     const shiftKey = event.shiftKey
@@ -411,8 +449,10 @@ const Application = (settings) => {
     const accelOptions = parseAccelerator(shortcut);
     if (!accelOptions) return false;
 
+    const pressedKey = eventCode.startsWith('DIGIT') ? eventCode : eventKey;
+
     return (
-      (accelOptions.mainKey === eventKey) &&
+      (accelOptions.mainKey === pressedKey) &&
       (accelOptions.wantMeta === metaKey) &&
       (accelOptions.wantCtrl === ctrlKey) &&
       (accelOptions.wantShift === shiftKey) &&
