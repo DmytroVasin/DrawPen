@@ -1,8 +1,16 @@
+import { getStroke } from "perfect-freehand";
 import { LazyBrush } from "lazy-brush";
 import { widthList, SNAP_ANGLE } from '../constants.js'
 
+export function getPerfectPath2D(points, strokeOptions) {
+  const stroke = getStroke(points, strokeOptions);
+
+  const pathData = getSvgPathFromStroke(stroke);
+  return new Path2D(pathData);
+}
+
 // https://github.com/steveruizok/perfect-freehand/tree/main
-export const getSvgPathFromStroke = (stroke) => {
+const getSvgPathFromStroke = (stroke) => {
   if (!stroke.length) return ''
 
   const d = stroke.reduce(
@@ -222,4 +230,170 @@ export function applyAspectRatioLock(startX, startY, x, y, ratio) {
   }
 
   return { x: adjustedX, y: y }; // Інакше тримаємо Y курсора на горизонтальній грані, підганяємо X за ratio.
+}
+
+export function calcPointsOval([[x1, y1], [x2, y2]]) {
+  const centerX = (x1 + x2) / 2
+  const centerY = (y1 + y2) / 2
+
+  const radiusX = Math.abs(x2 - x1) / 2
+  const radiusY = Math.abs(y2 - y1) / 2
+
+  const STEP = 10 // 10° degrees
+  const POINTS = 36 + 1 // 36 points + closing point
+
+  const calcPoint = (deg) => {
+    const angle = (deg * Math.PI) / 180
+
+    return {
+      x: centerX + radiusX * Math.cos(angle),
+      y: centerY + radiusY * Math.sin(angle),
+    }
+  }
+
+  const points = Array.from({ length: POINTS }, (_, i) => {
+    return calcPoint(i * STEP)
+  })
+
+  return withOvalOverlap(points)
+}
+
+function withOvalOverlap(points) {
+  const overlapStart = [
+    points[points.length - 3],
+    points[points.length - 2],
+  ]
+
+  const overlapTail = [
+    points[1],
+    points[2],
+  ]
+
+  return [...overlapStart, ...points, ...overlapTail]
+}
+
+export function applyPressureOval(points, date) {
+  const pressureArray = [
+    0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+    0.9, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3,
+    0.2, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8,
+    0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2,
+  ]
+
+  const pointsWithPressure = points.map((point, i) => {
+    const pressure = pressureArray[(date + i) % pressureArray.length]
+
+    return { ...point, pressure: pressure }
+  })
+
+  // Overlap points to ensure smooth connection
+  pointsWithPressure[0].pressure = 0.1
+  pointsWithPressure[1].pressure = 0.1
+  pointsWithPressure[pointsWithPressure.length - 1].pressure = 0.1
+  pointsWithPressure[pointsWithPressure.length - 2].pressure = 0.1
+
+  return pointsWithPressure
+}
+
+const calcInset = (side) => {
+  const maxInset = 30
+  const percent = 0.10
+  const eps = 0.001
+
+  const desired = Math.min(maxInset, side * percent) // дизайн
+  const safeMax = Math.max(0, side / 2 - eps)        // геометрія
+  return Math.min(desired, safeMax)
+}
+
+export function calcPointsRect([[x1, y1], [x2, y2]]) {
+  const left   = Math.min(x1, x2)
+  const right  = Math.max(x1, x2)
+  const top    = Math.min(y1, y2)
+  const bottom = Math.max(y1, y2)
+
+  const insetW = calcInset(right - left)
+  const insetH = calcInset(bottom - top)
+
+  const cx = (left + right) / 2
+  const cy = (top + bottom) / 2
+
+  const points = [
+    { x: left + insetW,  y: top             }, // верхня грань
+    { x: cx,             y: top             },
+    { x: right - insetW, y: top             },
+    { x: right,          y: top + insetH    }, // права грань
+    { x: right,          y: cy              },
+    { x: right,          y: bottom - insetH },
+    { x: right - insetW, y: bottom          }, // нижня грань
+    { x: cx,             y: bottom          },
+    { x: left + insetW,  y: bottom          },
+    { x: left,           y: bottom - insetH }, // ліва грань
+    { x: left,           y: cy              },
+    { x: left,           y: top + insetH    },
+    { x: left + insetW,  y: top             }, // closing point
+  ]
+
+  return withRectOverlap(points)
+}
+
+function withRectOverlap(points) {
+  const overlapStart = [
+    points[points.length - 3],
+    points[points.length - 2],
+  ]
+
+  const overlapTail = [
+    points[1],
+  ]
+
+  return [...overlapStart, ...points, ...overlapTail]
+}
+
+export function applyPressureRect(points, date) {
+  const pressureArray = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
+
+  const pointsWithPressure = points.map((point, i) => {
+    const pressure = pressureArray[(date + i) % pressureArray.length]
+
+    return { ...point, pressure: pressure }
+  })
+
+  // Overlap points to ensure smooth connection
+  pointsWithPressure[0].pressure = 0.1
+  pointsWithPressure[1].pressure = 0.1
+  pointsWithPressure[pointsWithPressure.length - 1].pressure = 0.1
+
+  return pointsWithPressure
+}
+
+export function calcPointsLine([[x1, y1], [x2, y2]]) {
+  const SEGMENTS = 6
+  const POINTS = SEGMENTS + 1
+
+  const dx = x2 - x1
+  const dy = y2 - y1
+
+  const points = Array.from({ length: POINTS }, (_, i) => {
+    const t = i / SEGMENTS
+
+    return {
+      x: x1 + dx * t,
+      y: y1 + dy * t,
+    }
+  })
+
+  return points
+}
+
+export function applyPressureLine(points, date) {
+  const pressureArray = [0.9, 0.7, 0.5, 0.3, 0.2, 0.4, 0.6]
+
+  const reverse = (date % 2) === 1
+  const pressurePattern = reverse ? [...pressureArray].reverse() : pressureArray
+
+  const pointsWithPressure = points.map((point, i) => {
+    return { ...point, pressure: pressurePattern[i] }
+  })
+
+  return [...pointsWithPressure]
 }

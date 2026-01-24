@@ -3,6 +3,7 @@ import {
   segmentsIntersect,
   applySoftSnap,
   applyAspectRatioLock,
+  calcPointsRect,
 } from './general.js';
 
 import { dotMargin, figureMinScale } from '../constants.js'
@@ -18,7 +19,7 @@ const withinRadius = (x, y) => {
 }
 
 const isOnCurve = (x, y, points) => {
-  const threshold = 10
+  const tolerance = 10
 
   for (let i = 0; i < points.length - 1; i++) {
     const pointA = points[i];
@@ -26,7 +27,7 @@ const isOnCurve = (x, y, points) => {
 
     const distance = pointToSegmentDistance(x, y, pointA, pointB);
 
-    if (distance <= threshold) {
+    if (distance <= tolerance) {
       return true;
     }
   }
@@ -81,33 +82,9 @@ const isOnOval = (x, y, figure) => {
 const isOnRectangle = (x, y, figure) => {
   const { points } = figure
 
-  const tolerance = 5;
-  const [startX, startY] = points[0];
-  const [endX, endY] = points[1];
+  const cuvedRectPoints = calcPointsRect(points).map(p => [p.x, p.y])
 
-  const minX = Math.min(startX, endX);
-  const maxX = Math.max(startX, endX);
-  const minY = Math.min(startY, endY);
-  const maxY = Math.max(startY, endY);
-
-  const distLeft   = Math.abs(x - minX);
-  const distRight  = Math.abs(x - maxX);
-  const distTop    = Math.abs(y - minY);
-  const distBottom = Math.abs(y - maxY);
-
-  const withinHorizontalBounds = x >= minX && x <= maxX;
-  const withinVerticalBounds = y >= minY && y <= maxY;
-
-  const closeToTopEdge    = distTop <= tolerance && withinHorizontalBounds;
-  const closeToBottomEdge = distBottom <= tolerance && withinHorizontalBounds;
-  const closeToLeftEdge   = distLeft <= tolerance && withinVerticalBounds;
-  const closeToRightEdge  = distRight <= tolerance && withinVerticalBounds;
-
-  if (closeToTopEdge || closeToBottomEdge || closeToLeftEdge || closeToRightEdge) { // TODO: Rethink formula!
-    return true;
-  }
-
-  return false
+  return isOnCurve(x, y, cuvedRectPoints)
 }
 
 const isOverText = (x, y, figure) => {

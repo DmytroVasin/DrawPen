@@ -15,6 +15,9 @@ import {
   calculateCanvasTextWidth,
   applySoftSnap,
   applyAspectRatioLock,
+  calcPointsOval,
+  calcPointsRect,
+  calcPointsLine,
 } from './utils/general.js';
 import {
   isOnFigure,
@@ -81,12 +84,68 @@ const Application = (settings) => {
 
   if (process.env.NODE_ENV === 'development') {
     initialFigures = [
-      { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      // { id: Date.now(), type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: Date.now(), type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      // { id: Date.now(), type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: Date.now(), type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: Date.now(), type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
+
+
+    const ovalOptions = {
+      id: Date.now() + 1,
+      type: 'oval',
+      colorIndex: 2,
+      widthIndex: 1,
+      points: [[150, 100], [700, 400]],
+      rainbowColorDeg: (Math.random() * 360)
+    }
+
+    const rectOptions = {
+      id: Date.now() + 2,
+      type: 'rectangle',
+      colorIndex: 3,
+      widthIndex: 2,
+      points: [[150, 100], [700, 400]],
+      rainbowColorDeg: (Math.random() * 360)
+    }
+
+    const lineOptions = {
+      id: Date.now() + 3,
+      type: 'line',
+      colorIndex: 4,
+      widthIndex: 2,
+      points: [[150, 100], [700, 400]],
+      rainbowColorDeg: (Math.random() * 360)
+    }
+
+    const arrowOptions = {
+      id: Date.now() + 4,
+      type: 'arrow',
+      colorIndex: 4,
+      widthIndex: 3,
+      points: [[150, 100], [700, 400]],
+      rainbowColorDeg: (Math.random() * 360)
+    }
+
+    const pointsOval  = calcPointsOval(ovalOptions.points);
+    const pointsRect  = calcPointsRect(rectOptions.points);
+    const pointsLine  = calcPointsLine(lineOptions.points);
+
+    // initialFigures.push(ovalOptions);
+    // initialFigures.push(rectOptions);
+    // initialFigures.push(lineOptions);
+    initialFigures.push(arrowOptions);
+
+    // [...pointsRect].map((point, index) => {
+    //   initialFigures.push({
+    //     id: index + 1,
+    //     type: 'pen',
+    //     colorIndex: 6,
+    //     widthIndex: 2,
+    //     points: [[point.x, point.y], [point.x, point.y]],
+    //   });
+    // });
   }
 
   const [rainbowColorDeg, updateRainbowColorDeg] = useState(initialColorDeg);

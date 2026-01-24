@@ -1,5 +1,14 @@
-import { getStroke } from 'perfect-freehand';
-import { getSvgPathFromStroke, getLazyPoints, distanceBetweenPoints } from '../../utils/general.js';
+import {
+  getPerfectPath2D,
+  getLazyPoints,
+  distanceBetweenPoints,
+  calcPointsOval,
+  calcPointsRect,
+  calcPointsLine,
+  applyPressureOval,
+  applyPressureRect,
+  applyPressureLine,
+} from '../../utils/general.js';
 import {
   colorList,
   widthList,
@@ -70,13 +79,16 @@ export const hslTextGradientStops = (pointA, pointB, colorDeg) => {
 }
 
 const activeColorAndWidth = (figure) => {
-  const { colorIndex } = figure;
+  const { colorIndex, widthIndex } = figure;
+
+  const activeWidthMap = [1, 1.3, 1.6, 2];
+  const width = activeWidthMap[widthIndex];
 
   if (colorList[colorIndex].name === 'color_white') {
-    return ['#6CC3E2', 2]
+    return ['#6CC3E2', width]
   }
 
-  return ['#FFF', 2]
+  return ['#FFF', width]
 }
 
 const detectColorAndWidth = (ctx, figure, updateRainbowColorDeg) => {
@@ -147,7 +159,10 @@ export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
     penColor = erasedFigureColorWithOpacity
   }
 
-  drawPerfectPen(ctx, points, penColor, { size: widthInfo.pen_width })
+  const path2DData = getPerfectPath2D(points, { size: widthInfo.pen_width });
+
+  ctx.fillStyle = penColor;
+  ctx.fill(path2DData);
 }
 
 const drawLazyPen = (ctx, figure, width, updateRainbowColorDeg) => {
@@ -198,15 +213,6 @@ const drawLazyPen = (ctx, figure, width, updateRainbowColorDeg) => {
   updateRainbowColorDeg(colorDeg)
 }
 
-const drawPerfectPen = (ctx, points, color, options) => {
-  const myStroke = getStroke(points, options);
-  const pathData = getSvgPathFromStroke(myStroke);
-  const path2DData = new Path2D(pathData);
-
-  ctx.fillStyle = color;
-  ctx.fill(path2DData);
-}
-
 export const drawHighlighter = (ctx, figure) => {
   const { points, colorIndex, widthIndex } = figure;
 
@@ -218,7 +224,14 @@ export const drawHighlighter = (ctx, figure) => {
     highlighterColor = erasedFigureColorWithOpacity
   }
 
-  drawPerfectPen(ctx, points, highlighterColor, { size: widthInfo.highlighter_width, simulatePressure: false, thinning: 0.0 });
+  const path2DData = getPerfectPath2D(points, {
+    size: widthInfo.highlighter_width,
+    simulatePressure: false,
+    thinning: 0.0
+  });
+
+  ctx.fillStyle = highlighterColor;
+  ctx.fill(path2DData);
 }
 
 const getArrowParams = (pointA, pointB, widthIndex) => {
@@ -275,24 +288,16 @@ const getArrowParams = (pointA, pointB, widthIndex) => {
 }
 
 export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB], colorIndex, widthIndex, rainbowColorDeg, erased } = figure;
+  const { points: [pointA, pointB], widthIndex } = figure;
   const { figurePoints, tailPoints } = getArrowParams(pointA, pointB, widthIndex);
+  const [color, _width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
 
-  let fillStyle = colorList[colorIndex].color
   let shadowColor = '#222';
   let shadowBlur = 4;
   let shadowOffsetX = 1;
   let shadowOffsetY = 2;
 
-  if (colorList[colorIndex].name === 'color_rainbow') {
-    fillStyle = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
-  }
-
-  if (erased) {
-    fillStyle = erasedFigureColorWithOpacity;
-  }
-
-  ctx.fillStyle = fillStyle;
+  ctx.fillStyle = color;
   ctx.shadowColor = shadowColor;
   ctx.shadowBlur = shadowBlur;
   ctx.shadowOffsetX = shadowOffsetX;
@@ -319,159 +324,34 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 }
 
 export const drawArrowActive = (ctx, figure) => {
-  const [pointA, pointB] = figure.points
-
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
-}
-
-export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB] } = figure
-  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
-
-  drawLineSkeleton(ctx, pointA, pointB, color, width)
-}
-
-export const drawLineActive = (ctx, figure) => {
-  const [pointA, pointB] = figure.points
-  const [color, width] = activeColorAndWidth(figure)
-
-  drawLineSkeleton(ctx, pointA, pointB, color, width)
-
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
-}
-
-const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineCap = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(endX, endY);
-  ctx.stroke();
-};
-
-export const drawOval = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB] } = figure
-  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
-
-  drawOvalSkeleton(ctx, pointA, pointB, color, width)
-}
-
-export const drawOvalActive = (ctx, figure) => {
-  const [pointA, pointB] = figure.points
-  const [color, width] = activeColorAndWidth(figure)
-
-  drawOvalSkeleton(ctx, pointA, pointB, color, width)
-
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
-  drawDot(ctx, [startX, endY])
-  drawDot(ctx, [endX, startY])
-}
-
-const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineJoin = 'round';
-
-  let radiusX = Math.abs(endX - startX) / 2;
-  let radiusY = Math.abs(endY - startY) / 2;
-  let centerX = Math.min(startX, endX) + radiusX;
-  let centerY = Math.min(startY, endY) + radiusY;
-
-  ctx.beginPath();
-  ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
-  ctx.stroke();
-}
-
-export const drawRectangle = (ctx, figure, updateRainbowColorDeg) => {
-  const { points: [pointA, pointB] } = figure
-  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
-
-  drawRectangleSkeleton(ctx, pointA, pointB, color, width)
-}
-
-export const drawRectangleActive = (ctx, figure) => {
-  const [pointA, pointB] = figure.points
-  const [color, width] = activeColorAndWidth(figure)
-
-  drawRectangleSkeleton(ctx, pointA, pointB, color, width)
-
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
-  drawDot(ctx, [startX, endY])
-  drawDot(ctx, [endX, startY])
-}
-
-const drawRectangleSkeleton = (ctx, pointA, pointB, color, width) => {
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-
-  let length = Math.abs(endX - startX);
-  let height = Math.abs(endY - startY);
-  let x = Math.min(startX, endX);
-  let y = Math.min(startY, endY);
-
-  let radius = 0;
-  if (length > 20 && height > 20) radius = 10; // TODO: Adjust to be smooth
-
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + length - radius, y);
-  ctx.arc(x + length - radius, y + radius, radius, Math.PI * 1.5, Math.PI * 2);
-  ctx.lineTo(x + length, y + height - radius);
-  ctx.arc(x + length - radius, y + height - radius, radius, 0, Math.PI * 0.5);
-  ctx.lineTo(x + radius, y + height);
-  ctx.arc(x + radius, y + height - radius, radius, Math.PI * 0.5, Math.PI);
-  ctx.lineTo(x, y + radius);
-  ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
-  ctx.closePath();
-  ctx.stroke();
+  drawDotsForFigure(ctx, figure)
 }
 
 export const drawLaser = (ctx, figure) => {
   const { points, widthIndex } = figure
   const [innerWidth, otherWidth] = widthList[widthIndex].laser_width;
 
-  ctx.shadowBlur = 10;
-  ctx.shadowColor = '#FF2D21';
-  ctx.fillStyle = '#EA3323CC';
-  const myStroke1 = getStroke(points, {
+  const path2DDataOther = getPerfectPath2D(points, {
     size: otherWidth,
     simulatePressure: false,
     start: { taper: true, cap: true },
   });
-  const pathData1 = getSvgPathFromStroke(myStroke1);
-  ctx.fill(new Path2D(pathData1));
 
-  ctx.fillStyle = '#FFF';
-  const myStroke2 = getStroke(points, {
+  const path2DDataInner = getPerfectPath2D(points, {
     size: innerWidth,
     simulatePressure: false,
     start: { taper: true, cap: true },
   });
-  const pathData2 = getSvgPathFromStroke(myStroke2);
-  ctx.fill(new Path2D(pathData2));
+
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = '#FF2D21';
+  ctx.fillStyle = '#EA3323CC';
+
+  ctx.fill(path2DDataOther);
+
+  ctx.fillStyle = '#FFF';
+
+  ctx.fill(path2DDataInner);
 
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent'; // Reset shadows
@@ -481,15 +361,16 @@ export const drawEraserTail = (ctx, figure) => {
   const { points, widthIndex } = figure
   const width = widthList[widthIndex].figure_size
 
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = eraserTailColor;
-  const myStroke1 = getStroke(points, {
+  const path2DData = getPerfectPath2D(points, {
     size: width,
     simulatePressure: false,
     start: { taper: true, cap: true },
   });
-  const pathData1 = getSvgPathFromStroke(myStroke1);
-  ctx.fill(new Path2D(pathData1));
+
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = eraserTailColor;
+
+  ctx.fill(path2DData);
 
   ctx.shadowBlur = 0;
 }
@@ -512,6 +393,7 @@ export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
     const endYwithMargin = endY + dotMargin
 
     drawSelectionBox(ctx, startXwithMargin, startYwithMargin, endXwithMargin, endYwithMargin)
+
     drawDot(ctx, [startXwithMargin, startYwithMargin])
     drawDot(ctx, [endXwithMargin,   endYwithMargin])
     drawDot(ctx, [startXwithMargin, endYwithMargin])
@@ -549,4 +431,78 @@ const drawSelectionBox = (ctx, startX, startY, endX, endY) => {
   ctx.strokeStyle = "#6CC3E2";
   ctx.lineWidth = 1;
   ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+}
+
+const calcPointsByType = (figure) => {
+  const { type, points } = figure;
+
+  switch (type) {
+    case 'oval':
+      return calcPointsOval(points);
+    case 'rectangle':
+      return calcPointsRect(points);
+    case 'line':
+      return calcPointsLine(points);
+    default:
+      throw new Error(`Unknown figure type: ${type}`);
+  }
+}
+
+const applyPressure = (points, figure) => {
+  const { type, id } = figure;
+
+  switch (type) {
+    case 'oval':
+      return applyPressureOval(points, id);
+    case 'rectangle':
+      return applyPressureRect(points, id);
+    case 'line':
+      return applyPressureLine(points, id);
+    default:
+      throw new Error(`Unknown figure type for pressure application: ${type}`);
+  }
+}
+
+export const drawFigure = (ctx, figure, updateRainbowColorDeg) => {
+  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
+
+  const points = calcPointsByType(figure);
+  const pointsWithPressure = applyPressure(points, figure);
+
+  drawFigureSkeleton(ctx, pointsWithPressure, color, width)
+}
+
+export const drawFigureActive = (ctx, figure) => {
+  const [color, width] = activeColorAndWidth(figure)
+
+  const points = calcPointsByType(figure);
+
+  drawFigureSkeleton(ctx, points, color, width)
+  drawDotsForFigure(ctx, figure)
+}
+
+const drawFigureSkeleton = (ctx, figurePoints, color, width) => {
+  const path2DData = getPerfectPath2D(figurePoints, {
+    size: width,
+    simulatePressure: false,
+    streamline: 0.0,
+  });
+
+  ctx.fillStyle = color;
+  ctx.fill(path2DData);
+}
+
+const drawDotsForFigure = (ctx, figure) => {
+  const [pointA, pointB] = figure.points
+
+  drawDot(ctx, pointA)
+  drawDot(ctx, pointB)
+
+  if (['rectangle', 'oval'].includes(figure.type)) {
+    const [startX, startY] = pointA;
+    const [endX, endY] = pointB;
+
+    drawDot(ctx, [startX, endY])
+    drawDot(ctx, [endX, startY])
+  }
 }
