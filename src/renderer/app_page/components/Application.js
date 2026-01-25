@@ -645,7 +645,7 @@ const Application = (settings) => {
 
     setCursorType('crosshair');
   };
-  const setMouseCursorThrottle = throttle(setMouseCursor, 50);
+  const setMouseCursorThrottle = throttle(setMouseCursor, 100);
 
   const eraseFiguresOnIntersection = (eraserFigure) => {
     setAllFigures(prevFigures => {

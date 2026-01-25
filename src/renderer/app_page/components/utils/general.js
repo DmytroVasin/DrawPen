@@ -231,3 +231,57 @@ export function applyAspectRatioLock(startX, startY, x, y, ratio) {
 
   return { x: adjustedX, y: y }; // Інакше тримаємо Y курсора на горизонтальній грані, підганяємо X за ratio.
 }
+
+export const calcPointsArrow = (points, widthIndex) => {
+  const minArrowLength = 20;
+  const minTailSize = 1;
+  const arrowSetup = [
+    { max_scale_length: 100, d1_y: 1, d2_y: 5,  d3_y: 15, d2_x: 13, d3_x: 15 },
+    { max_scale_length: 200, d1_y: 2, d2_y: 7,  d3_y: 21, d2_x: 18, d3_x: 20 },
+    { max_scale_length: 300, d1_y: 3, d2_y: 12, d3_y: 36, d2_x: 38, d3_x: 40 },
+    { max_scale_length: 400, d1_y: 4, d2_y: 17, d3_y: 51, d2_x: 58, d3_x: 60 },
+  ]
+
+  const arrow = arrowSetup[widthIndex]
+
+  // ---
+
+  const [pointA, pointB] = points;
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+  let length = Math.sqrt(diffX ** 2 + diffY ** 2);
+
+  const cos = diffX / length;
+  const sin = diffY / length;
+
+  length = Math.max(length, minArrowLength);
+  let scaleFactor = Math.min(length / arrow.max_scale_length, 1)
+
+  // ---
+
+  const d1 = [0,                                      Math.max(arrow.d1_y * scaleFactor, minTailSize)]
+  const d2 = [length - arrow.d2_x * scaleFactor,      arrow.d2_y * scaleFactor]
+  const d3 = [length - arrow.d3_x * scaleFactor,      arrow.d3_y * scaleFactor]
+  const d4 = [length,                                 0]
+  const d5 = [d3[0],                                  d3[1] * -1]
+  const d6 = [d2[0],                                  d2[1] * -1]
+  const d7 = [d1[0],                                  d1[1] * -1]
+
+  const t1 = [ -2 * d1[1],                            d7[1]]
+  const t2 = [ -2 * d1[1],                            d1[1]]
+
+  function transformPoint([x, y]) {
+    return [
+      startX + x * cos - y * sin,
+      startY + x * sin + y * cos
+    ];
+  }
+
+  const figurePoints = [d1, d2, d3, d4, d5, d6, d7].map(transformPoint)
+  const tailPoints = [t1, t2].map(transformPoint)
+
+  return { figurePoints, tailPoints }
+}
