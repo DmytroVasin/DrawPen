@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.0.38] - 2026-01-25
+### Features:
+- Enable Eraser on Stylus eraser press or Mouse wheel
+- Added new Hot Key - 'e' for Eraser
+- Add processing of "Shift + NUM" for Shape/Color/Width change
+
+### Bug Fixes:
+- Improved arrow detection
+
 ## [0.0.37] - 2026-01-14
 ### Bug Fixes:
 - Fix bug with Canvas initial dimensions
