@@ -18,7 +18,7 @@ const withinRadius = (x, y) => {
 }
 
 const isOnCurve = (x, y, points) => {
-  const threshold = 10
+  const tolerance = 10
 
   for (let i = 0; i < points.length - 1; i++) {
     const pointA = points[i];
@@ -26,7 +26,7 @@ const isOnCurve = (x, y, points) => {
 
     const distance = pointToSegmentDistance(x, y, pointA, pointB);
 
-    if (distance <= threshold) {
+    if (distance <= tolerance) {
       return true;
     }
   }

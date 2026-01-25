@@ -1,8 +1,16 @@
+import { getStroke } from "perfect-freehand";
 import { LazyBrush } from "lazy-brush";
 import { widthList, SNAP_ANGLE } from '../constants.js'
 
+export function getPerfectPath2D(points, strokeOptions) {
+  const stroke = getStroke(points, strokeOptions);
+
+  const pathData = getSvgPathFromStroke(stroke);
+  return new Path2D(pathData);
+}
+
 // https://github.com/steveruizok/perfect-freehand/tree/main
-export const getSvgPathFromStroke = (stroke) => {
+const getSvgPathFromStroke = (stroke) => {
   if (!stroke.length) return ''
 
   const d = stroke.reduce(
