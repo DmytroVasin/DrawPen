@@ -406,8 +406,8 @@ function createSettingsWindow() {
 
   settingsWindow = new BrowserWindow({
     show: false,
-    width: 600,
-    height: 820,
+    width: 800,
+    height: 500,
     resizable: false,
     minimizable: false,
     autoHideMenuBar: true,
@@ -592,6 +592,7 @@ ipcMain.handle('get_configuration', () => {
   rawLog('Getting configuration...')
 
   return {
+    app_version:                              app.getVersion(),
     show_drawing_border:                      store.get('show_drawing_border'),
     show_cute_cursor:                         store.get('show_cute_cursor'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
