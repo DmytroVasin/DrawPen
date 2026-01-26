@@ -103,6 +103,10 @@ const schema = {
     type: 'array',
     default: [1, 2]
   },
+  starts_hidden: {
+    type: 'boolean',
+    default: false
+  },
   drawing_monitor: {
     type: 'object',
     default: {
@@ -483,7 +487,10 @@ app.on('window-all-closed', () => {
 function preCheck() {
   if (safeWasOpenedAtLogin()) {
     foregroundMode = false
+    return
   }
+
+  foregroundMode = !store.get('starts_hidden')
 }
 
 function hideDock() {
@@ -601,6 +608,7 @@ ipcMain.handle('get_configuration', () => {
     drawing_monitor:                          store.get('drawing_monitor'),
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
+    starts_hidden:                            store.get('starts_hidden'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -676,6 +684,14 @@ ipcMain.handle('set_launch_on_login', (_event, value) => {
   safeSetLoginItemSettings({ openAtLogin: value });
 
   store.set('launch_on_login', value)
+
+  return null;
+});
+
+ipcMain.handle('set_starts_hidden', (_event, value) => {
+  rawLog('Setting starts hidden:', value)
+
+  store.set('starts_hidden', value)
 
   return null;
 });

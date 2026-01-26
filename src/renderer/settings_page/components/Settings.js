@@ -44,6 +44,7 @@ const Settings = (config) => {
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
+  const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
   const [showHideToolbar, setShowHideToolbar]       = useState({ accelerator: config.key_binding_show_hide_toolbar,    init: config.key_binding_show_hide_toolbar_default });
@@ -143,6 +144,13 @@ const Settings = (config) => {
     setLaunchOnLogin(nextState);
 
     window.electronAPI.setLaunchOnLogin(nextState);
+  };
+
+  const toggleStartsHidden = () => {
+    const nextState = !startsHidden;
+    setStartsHidden(nextState);
+
+    window.electronAPI.setStartsHidden(nextState);
   };
 
   const selectAppIconColor = (event) => {
@@ -406,6 +414,19 @@ const Settings = (config) => {
                         <IoChevronDown className="icon" />
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Starts hidden on launch</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div
+                      className={`toggle ${startsHidden ? 'active' : ''}`}
+                      onClick={toggleStartsHidden}
+                    ></div>
                   </div>
                 </div>
 
