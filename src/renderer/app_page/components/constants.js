@@ -1,4 +1,8 @@
 export const laserTime = 2000;
+export const laserTimeMin = 300;
+export const laserTimeMax = 5000;
+export const laserTimeStep = 100;
+
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
 export const minObjectDistance = 5; // Minimum length of drawn object

@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import './Settings.scss';
 import ShortcutRecorder from './ShortcutRecorder';
-import { colorList } from "../../app_page/components/constants.js";
+import {
+  colorList,
+  laserTimeMin,
+  laserTimeMax,
+  laserTimeStep,
+} from "../../app_page/components/constants.js";
 
 import {
   IoRefreshCircleOutline,
@@ -13,6 +18,8 @@ import {
 } from "react-icons/io5";
 import { HiSwitchHorizontal } from "react-icons/hi";
 import { FaRegKeyboard } from "react-icons/fa6";
+import { FaPlus, FaMinus } from "react-icons/fa";
+
 
 const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
   const canReset  = !!shortcut.init && shortcut.init !== shortcut.accelerator;
@@ -161,12 +168,14 @@ const Settings = (config) => {
     window.electronAPI.setAppIconColor(iconColor);
   }
 
-  const selectLaserTime = (event) => {
-    const laserTime = Number(event.target.value)
+  const applyLaserTime = (value) => {
+    const newLaserTime = Math.min(laserTimeMax, Math.max(laserTimeMin, Number(value)))
 
-    setLaserTime(laserTime)
+    if (newLaserTime === laserTime) return
 
-    window.electronAPI.setLaserTime(laserTime)
+    setLaserTime(newLaserTime)
+
+    window.electronAPI.setLaserTime(newLaserTime)
   }
 
   const nextMainColor = () => {
@@ -378,23 +387,17 @@ const Settings = (config) => {
                 <div className="settings-item">
                   <div className="settings-item-info">
                     <div className="settings-item-title">Laser Duration</div>
+                    <div className="settings-item-description">Adjust the duration in milliseconds</div>
                   </div>
 
                   <div className="settings-item-control">
-                    <div className="selectbar-container">
-                      <select
-                        className="selectbar"
-                        value={laserTime}
-                        onChange={selectLaserTime}
-                      >
-                        <option value="500">500 ms</option>
-                        <option value="1000">1 s</option>
-                        <option value="1500">1.5 s</option>
-                        <option value="2000">2 s</option>
-                      </select>
-
-                      <div className="selectbar-arrow">
-                        <IoChevronDown className="icon" />
+                    <div className="stepper-container">
+                      <div className="stepper-button" onClick={() => applyLaserTime(laserTime - laserTimeStep)}>
+                        <FaMinus className="stepper-button--icon" />
+                      </div>
+                      <div className="stepper-value">{laserTime}</div>
+                      <div className="stepper-button" onClick={() => applyLaserTime(laserTime + laserTimeStep)}>
+                        <FaPlus className="stepper-button--icon" />
                       </div>
                     </div>
                   </div>

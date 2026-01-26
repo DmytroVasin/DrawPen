@@ -281,6 +281,49 @@ html, body {
                   }
                 }
 
+                .stepper-container {
+                  user-select: none;
+
+                  display: flex;
+                  height: 27px;
+                  background-color: var(--gray-25);
+                  border: 1px solid var(--gray-300);
+                  border-radius: 4px;
+                  overflow: hidden;
+
+                  .stepper-button {
+                    cursor: pointer;
+
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 30px;
+                    background-color: var(--gray-50);
+
+                    &:active {
+                      background-color: var(--gray-100);
+                    }
+
+                    .stepper-button--icon {
+                      width: 10px;
+                      height: 10px;
+                      color: var(--gray-500);
+                    }
+                  }
+
+                  .stepper-value {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 45px;
+                    color: var(--gray-500);
+                    font-weight: 600;
+
+                    border-left: 1px solid var(--gray-300);
+                    border-right: 1px solid var(--gray-300);
+                  }
+                }
+
                 .icon {
                   width: 16px;
                   height: 16px;

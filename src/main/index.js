@@ -123,7 +123,7 @@ const schema = {
   },
 };
 
-// app.getPath('userData') + '/config.json'
+// rawLog('[STORE PATH]:', app.getPath('userData') + '/config.json');
 const store = new Store({
   schema
 });
@@ -742,8 +742,8 @@ ipcMain.handle('set_laser_time', (_event, value) => {
 
   store.set('laser_time', value)
 
-  if (mainWindow) { // To update laser time function
-    mainWindow.reload()
+  if (mainWindow) {
+    mainWindow.reload() // Updates laser time function
   }
 
   return null;
