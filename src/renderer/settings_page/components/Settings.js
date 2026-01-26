@@ -43,6 +43,7 @@ const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
+  const [laserTime, setLaserTime] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
 
@@ -158,6 +159,14 @@ const Settings = (config) => {
     setAppIconColor(iconColor);
 
     window.electronAPI.setAppIconColor(iconColor);
+  }
+
+  const selectLaserTime = (event) => {
+    const laserTime = Number(event.target.value)
+
+    setLaserTime(laserTime)
+
+    window.electronAPI.setLaserTime(laserTime)
   }
 
   const nextMainColor = () => {
@@ -364,8 +373,33 @@ const Settings = (config) => {
                       </div>
                     </div>
                   </div>
-
                 </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Laser Duration</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={laserTime}
+                        onChange={selectLaserTime}
+                      >
+                        <option value="500">500 ms</option>
+                        <option value="1000">1 s</option>
+                        <option value="1500">1.5 s</option>
+                        <option value="2000">2 s</option>
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>

@@ -99,6 +99,10 @@ const schema = {
     type: 'string',
     default: KEY_CLEAR_DESK
   },
+  laser_time: {
+    type: 'number',
+    default: 2000
+  },
   swap_colors_indexes: {
     type: 'array',
     default: [1, 2]
@@ -522,6 +526,7 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
     swap_colors_indexes: store.get('swap_colors_indexes'),
+    laser_time: store.get('laser_time'),
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
@@ -600,9 +605,11 @@ ipcMain.handle('get_configuration', () => {
 
   return {
     app_version:                              app.getVersion(),
+
     show_drawing_border:                      store.get('show_drawing_border'),
     show_cute_cursor:                         store.get('show_cute_cursor'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
+    laser_time:                               store.get('laser_time'),
 
     displays:                                 getAllDisplaysInfo(),
     drawing_monitor:                          store.get('drawing_monitor'),
@@ -722,6 +729,18 @@ ipcMain.handle('set_swap_colors', (_event, value) => {
   store.set('swap_colors_indexes', value)
 
   refreshSettingsInRenderer();
+
+  return null;
+});
+
+ipcMain.handle('set_laser_time', (_event, value) => {
+  rawLog('Setting laser time:', value)
+
+  store.set('laser_time', value)
+
+  if (mainWindow) { // To update laser time function
+    mainWindow.reload()
+  }
 
   return null;
 });

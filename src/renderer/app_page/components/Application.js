@@ -70,6 +70,7 @@ const Application = (settings) => {
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
+  const initialLaserTime = settings.laser_time || laserTime
 
   const key_show_hide_toolbar       = settings.key_binding_show_hide_toolbar
   const key_show_hide_whiteboard    = settings.key_binding_show_hide_whiteboard
@@ -538,7 +539,7 @@ const Application = (settings) => {
       const updatedLaserFigures = clearTail(id, allLasersFiguresByRef.current);
 
       setLaserFigure([...updatedLaserFigures])
-    }, laserTime)
+    }, initialLaserTime)
   }
 
   const scheduleClearEraserTail = (id) => {
