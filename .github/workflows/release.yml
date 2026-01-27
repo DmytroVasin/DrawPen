@@ -52,6 +52,7 @@ jobs:
 
       - name: Run Publish
         env:
+          PUBLIC_POSTHOG_KEY: ${{ secrets.PUBLIC_POSTHOG_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
@@ -83,8 +84,9 @@ jobs:
       # sudo apt install libx11-dev libxtst-dev libwayland-dev libxkbcommon-dev
       - run: npm install
 
-      - name: publish
+      - name: Run Publish
         env:
+          PUBLIC_POSTHOG_KEY: ${{ secrets.PUBLIC_POSTHOG_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run publish
 
@@ -113,7 +115,8 @@ jobs:
 
       - run: npm install
 
-      - name: publish
+      - name: Run Publish
         env:
+          PUBLIC_POSTHOG_KEY: ${{ secrets.PUBLIC_POSTHOG_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run publish
