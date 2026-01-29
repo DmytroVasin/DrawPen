@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.0.39] - 2026-01-29
+### Features:
+- Updated Settings panel
+- New option: Start hidden on launch
+- New option: Set laser duration
+
 ## [0.0.38] - 2026-01-25
 ### Features:
 - Enable Eraser on Stylus eraser press or Mouse wheel
