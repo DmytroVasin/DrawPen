@@ -362,32 +362,8 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
-                    <div className="settings-item-title">Icon Color</div>
-                  </div>
-
-                  <div className="settings-item-control">
-                    <div className="selectbar-container">
-                      <select
-                        className="selectbar"
-                        value={appIconColor}
-                        onChange={selectAppIconColor}
-                      >
-                        <option value="default">Default</option>
-                        <option value="white">White</option>
-                        <option value="black">Black</option>
-                      </select>
-
-                      <div className="selectbar-arrow">
-                        <IoChevronDown className="icon" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="settings-item">
-                  <div className="settings-item-info">
                     <div className="settings-item-title">Laser Duration</div>
-                    <div className="settings-item-description">Adjust the duration in milliseconds</div>
+                    <div className="settings-item-description">Adjust how long the laser remains on screen</div>
                   </div>
 
                   <div className="settings-item-control">
@@ -395,7 +371,7 @@ const Settings = (config) => {
                       <div className="stepper-button" onClick={() => applyLaserTime(laserTime - laserTimeStep)}>
                         <FaMinus className="stepper-button--icon" />
                       </div>
-                      <div className="stepper-value">{laserTime}</div>
+                      <div className="stepper-value">{laserTime / 1000}s</div>
                       <div className="stepper-button" onClick={() => applyLaserTime(laserTime + laserTimeStep)}>
                         <FaPlus className="stepper-button--icon" />
                       </div>
@@ -416,6 +392,30 @@ const Settings = (config) => {
 
             <div className="settings-content">
               <div className="settings-section">
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">App Icon Color</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={appIconColor}
+                        onChange={selectAppIconColor}
+                      >
+                        <option value="default">Default</option>
+                        <option value="white">White</option>
+                        <option value="black">Black</option>
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="settings-item">
                   <div className="settings-item-info">
