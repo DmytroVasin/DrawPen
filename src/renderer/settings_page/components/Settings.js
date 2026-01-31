@@ -15,6 +15,7 @@ import {
   IoCloseCircleOutline,
   IoGlobeOutline,
   IoChevronDown,
+  IoChevronForward,
   IoColorPaletteOutline,
   IoApps,
 } from "react-icons/io5";
@@ -52,8 +53,8 @@ const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
-  const [fadeMode, setFadeMode] = useState(config.fade_mode || 'persist');
-  const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms ?? 5000);
+  const [fadeMode, setFadeMode] = useState(config.fade_mode);
+  const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms ?? 5000); // TODO: REMOVE!
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
@@ -178,13 +179,14 @@ const Settings = (config) => {
     if (newLaserTimeMs === laserTimeMs) return
 
     setLaserTimeMs(newLaserTimeMs)
-    window.electronAPI.setLaserTime(newLaserTimeMs)
+    window.electronAPI.setLaserTimeMs(newLaserTimeMs)
   }
 
-  const selectFadeMode = (event) => {
-    const mode = event.target.value;
-    setFadeMode(mode);
-    window.electronAPI.setFadeMode(mode);
+  const toggleFadeMode = () => {
+    const nextState = !fadeMode;
+    setFadeMode(nextState);
+
+    window.electronAPI.setFadeMode(nextState);
   }
 
   const applyFadeDisappearAfter = (value) => {
@@ -380,34 +382,29 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
-                    <div className="settings-item-title">Fade / Persist Mode</div>
-                    <div className="settings-item-description">Control whether annotations fade out after a duration or persist on the screen</div>
+                    <div className="settings-item-title">Auto-fade annotations</div>
+                    <div className="settings-item-description">Automatically remove drawings after a short time</div>
                   </div>
 
                   <div className="settings-item-control">
-                    <div className="selectbar-container">
-                      <select
-                        className="selectbar"
-                        value={fadeMode}
-                        onChange={selectFadeMode}
-                      >
-                        <option value="persist">Persist</option>
-                        <option value="fade">Fade</option>
-                      </select>
-
-                      <div className="selectbar-arrow">
-                        <IoChevronDown className="icon" />
-                      </div>
-                    </div>
+                    <div
+                      className={`toggle ${fadeMode ? 'active' : ''}`}
+                      onClick={toggleFadeMode}
+                    ></div>
                   </div>
                 </div>
 
-                {fadeMode === 'fade' && (
+                {fadeMode && (
                   <div className="settings-item--nested">
                     <div className="settings-item">
+
+                      <div className="settings-item--forward">
+                        <IoChevronForward className="icon" />
+                      </div>
+
                       <div className="settings-item-info">
-                        <div className="settings-item-title">Disappear after</div>
-                        <div className="settings-item-description">Total time before annotations are fully removed</div>
+                        <div className="settings-item-title">Fade-out delay</div>
+                        <div className="settings-item-description">Press SPACE to switch colors</div>
                       </div>
 
                       <div className="settings-item-control">

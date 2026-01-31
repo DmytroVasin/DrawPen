@@ -13,10 +13,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resetToOriginals: () => ipcRenderer.invoke('reset_to_originals'),
   setShowDrawingBorder: (value) => ipcRenderer.invoke('set_show_drawing_border', value),
   setShowCuteCursor: (value) => ipcRenderer.invoke('set_show_cute_cursor', value),
-  setLaserTime: (value) => ipcRenderer.invoke('set_laser_time', value),
+  setLaserTimeMs: (value) => ipcRenderer.invoke('set_laser_time', value),
   setAppIconColor: (value) => ipcRenderer.invoke('set_app_icon_color', value),
   setSwapColors: (value) => ipcRenderer.invoke('set_swap_colors', value),
   setDrawingMonitor: (value) => ipcRenderer.invoke('set_drawing_monitor', value),
+  setFadeMode: (value) => ipcRenderer.invoke('set_fade_mode', value),
+  setFadeDisappearAfterMs: (value) => ipcRenderer.invoke('set_fade_disappear_after_ms', value),
 
   isMac: platform === 'darwin',
 });

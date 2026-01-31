@@ -2,6 +2,7 @@ export const timeStep = 100;
 export const laserTime = 2000;
 export const laserTimeMin = 300;
 export const laserTimeMax = 5000;
+export const fadeDisappearAfter = 5000;
 export const fadeDisappearAfterMin = 1000;
 export const fadeDisappearAfterMax = 30000;
 

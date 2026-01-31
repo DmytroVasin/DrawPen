@@ -451,8 +451,18 @@ html, body {
               border-top: 1px solid var(--gray-25);
               border-bottom: 1px solid var(--gray-25);
 
-              .settings-item {
-                padding-left: 24px;
+              .settings-item--forward {
+                display: flex;
+                justify-content: center;
+                width: 25px;
+                margin-right: 5px;
+                pointer-events: none;
+
+                .icon {
+                  width: 12px;
+                  height: 12px;
+                  color: var(--gray-500);
+                }
               }
 
               &:last-child {
