@@ -33,7 +33,8 @@ import { MdOutlineCancel } from "react-icons/md";
 import { FaFont } from "react-icons/fa6";
 
 import {
-  laserTime,
+  fadeDestroyAfterMs,
+  fadeOutDurationTime,
   eraserTime,
   shapeList,
   colorList,
@@ -70,7 +71,9 @@ const Application = (settings) => {
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
-  const initialLaserTime = settings.laser_time || laserTime
+  const initialLaserTime = settings.laser_time
+  const initialFadeMode = settings.fade_mode
+  const initialFadeDisappearAfterMs = settings.fade_disappear_after_ms
 
   const key_show_hide_toolbar       = settings.key_binding_show_hide_toolbar
   const key_show_hide_whiteboard    = settings.key_binding_show_hide_whiteboard
@@ -82,11 +85,11 @@ const Application = (settings) => {
 
   if (process.env.NODE_ENV === 'development') {
     initialFigures = [
-      { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      // { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      // { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
   }
 
@@ -111,6 +114,7 @@ const Application = (settings) => {
   const [redoStackFigures, setRedoStackFigures] = useState([]);
   const [clipboardFigure, setClipboardFigure] = useState(null);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const [isFadingPaused, setIsFadingPaused] = useState(false);
   const [showDrawingBorder, setShowDrawingBorder] = useState(initialShowDrawingBorder);
   const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
   const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
@@ -178,6 +182,18 @@ const Application = (settings) => {
 
     // Static keyboard shortcuts
     switch (eventKey) {
+      case ' ': {
+        event.preventDefault();
+
+        if (eventRepeat) break;
+
+        if (initialFadeMode) {
+          setIsFadingPaused(true);
+          resetIdleTimer();
+        }
+
+        break;
+      }
       case 'v': {
         if (ctrlOrMeta) {
           if (clipboardFigure) {
@@ -416,10 +432,27 @@ const Application = (settings) => {
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
 
+    if (textEditorContainer) {
+      return
+    }
+
     if (eventKey === 'shift') {
       setIsShiftPressed(false);
     }
-  }, []);
+
+    switch (eventKey) {
+      case ' ': {
+        event.preventDefault();
+
+        if (isFadingPaused) {
+          setIsFadingPaused(false);
+          startIdleTimer();
+        }
+
+        break;
+      }
+    }
+  }, [textEditorContainer, activeTool, isFadingPaused]);
 
   const parseAccelerator = (shortcut) => {
     if (!shortcut) return null
@@ -525,6 +558,89 @@ const Application = (settings) => {
     allErasersFiguresByRef.current = allEraserFigures;
   }, [allEraserFigures]);
 
+  const idleTimerRef = useRef(null);
+  const fadeRafRef = useRef(null);
+
+  const startIdleTimer = () => {
+    if (!initialFadeMode) return;
+
+    console.log('Start Idle Timer (+ Reset) after pen drawing end: ', initialFadeDisappearAfterMs);
+
+    resetIdleTimer();
+
+    idleTimerRef.current = setTimeout(() => {
+      idleTimerRef.current = null;
+      startFading();
+    }, initialFadeDisappearAfterMs);
+  }
+
+  const resetIdleTimer = () => {
+    if (!initialFadeMode) return;
+
+    console.log('-> Reset Idle Timer');
+
+    if (idleTimerRef.current) {
+      console.log('----> Clear idleTimerRef', idleTimerRef.current);
+
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+
+    if (fadeRafRef.current) {
+      console.log('----> Clear fadeRafRef', fadeRafRef.current);
+      console.log('----> Reset figures store');
+
+      cancelAnimationFrame(fadeRafRef.current);
+      fadeRafRef.current = null;
+
+      setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: 1 } : figure));
+    }
+  }
+
+  const getFadeOpacity = (elapsedMs) => {
+    let progress = 1 - (elapsedMs / fadeOutDurationTime);
+
+    if (progress < 0) progress = 0; // clamp to 0..1
+    if (progress > 1) progress = 1;
+
+    return Math.round(progress * 100) / 100; // round to 0.01
+  };
+
+  const startFading = () => {
+    console.log('Start Fading Figures Destroy after: ', fadeDestroyAfterMs);
+
+    const fadeStartAt = Date.now();
+    let memoLastOpacity = null;
+
+    const tick = () => {
+      console.log('Fading tick');
+
+      if (!fadeRafRef.current) return;
+      const now = Date.now();
+      const elapsedMs = now - fadeStartAt;
+      const opacity = getFadeOpacity(elapsedMs)
+
+      if (memoLastOpacity !== opacity) {
+        memoLastOpacity = opacity;
+
+        setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: opacity } : figure));
+      }
+
+      if (elapsedMs >= fadeDestroyAfterMs) {
+        console.log('Fading done, destroying figures');
+
+        setAllFigures(prev => prev.filter(figure => figure.type !== 'pen'));
+
+        fadeRafRef.current = null;
+        return;
+      }
+
+      fadeRafRef.current = requestAnimationFrame(tick);
+    };
+
+    fadeRafRef.current = requestAnimationFrame(tick);
+  }
+
   const isActiveFigureMoving = () => {
     return activeFigureInfo && (activeFigureInfo.dragging || activeFigureInfo.resizing)
   }
@@ -603,10 +719,14 @@ const Application = (settings) => {
   };
 
   const moveFigureToTop = (figureId) => {
-    const figureIndex = allFigures.findIndex((figure) => figure.id === figureId)
-    const [figure] = allFigures.splice(figureIndex, 1)
+    setAllFigures(figures => {
+      const target = figures.find(figure => figure.id === figureId);
+      if (!target) return figures;
 
-    setAllFigures([...allFigures, figure]);
+      const others = figures.filter(figure => figure.id !== figureId);
+
+      return [...others, target];
+    });
   };
 
   const getFigureAtMousePosition = (x, y) => {
@@ -750,6 +870,10 @@ const Application = (settings) => {
       return;
     }
 
+    if (activeTool === 'pen') {
+      resetIdleTimer();
+    }
+
     let newFigure = {
       id: Date.now(),
       type: activeTool,
@@ -758,6 +882,7 @@ const Application = (settings) => {
       points: [[x, y]],
       rainbowColorDeg: rainbowColorDeg,
       ratio: 1,
+      fadeOpacity: 1,
     };
 
     if (shapeList.includes(newFigure.type)) {
@@ -768,7 +893,7 @@ const Application = (settings) => {
       newFigure.colorIndex = Math.floor(Math.random() * (colorList.length - 1)) + 1
     }
 
-    setAllFigures([...allFigures, newFigure]);
+    setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
     setIsDrawing(true);
   };
 
@@ -896,14 +1021,20 @@ const Application = (settings) => {
       }
 
       if (activeTool === 'pen') {
+        if (!isFadingPaused) {
+          startIdleTimer();
+        }
+
         const currentFigure = allFigures.at(-1);
 
         if (currentFigure.colorIndex !== 0) { // Not Rainbow
           currentFigure.points = [...filterClosePoints(currentFigure.points, currentFigure.widthIndex)];
         }
 
-        setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
-        setRedoStackFigures([]);
+        if (!initialFadeMode) {
+          setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+          setRedoStackFigures([]);
+        }
 
         setAllFigures([...allFigures]);
       }
@@ -991,6 +1122,16 @@ const Application = (settings) => {
 
   const handleReset = () => {
     console.log('Main -> Renderer: Handle Reset');
+
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+
+    if (fadeRafRef.current) {
+      cancelAnimationFrame(fadeRafRef.current);
+      fadeRafRef.current = null;
+    }
 
     setIsDrawing(false);
     setActiveFigureInfo(null);

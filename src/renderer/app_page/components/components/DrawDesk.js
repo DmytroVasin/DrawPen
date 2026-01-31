@@ -32,7 +32,6 @@ const DrawDesk = ({
   activeTool,
   handleChangeTool,
 }) => {
-  // console.log('DrawDesk render');
   const canvasRef = useRef(null);
   const prevToolRef = useRef(null);
   const simulateKeyDown = useRef(false);

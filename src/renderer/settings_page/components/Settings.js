@@ -54,7 +54,7 @@ const Settings = (config) => {
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
   const [fadeMode, setFadeMode] = useState(config.fade_mode);
-  const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms ?? 5000); // TODO: REMOVE!
+  const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms);
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);

@@ -18,6 +18,10 @@ const hslColor = (degree) => {
   return `hsl(${degree % 360}, 70%, 60%)`
 }
 
+function fadeAlpha(opacity) {
+  return Math.round(opacity * 255).toString(16).padStart(2, '0');
+}
+
 const drawDot = (ctx, point) => {
   const [x, y] = point;
 
@@ -143,13 +147,17 @@ export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
   const widthInfo = widthList[widthIndex]
 
   if (colorInfo.name === 'color_rainbow') {
+    // TODO:>>>>>>>>>>>>>>>>>>>>>>>>>> .>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     drawLazyPen(ctx, figure, widthInfo.rainbow_pen_width, updateRainbowColorDeg)
     return;
   }
 
   let penColor = colorInfo.color
+
   if (figure.erased) {
     penColor = erasedFigureColorWithOpacity
+  } else if (figure.fadeOpacity < 1) {
+    penColor = penColor + fadeAlpha(figure.fadeOpacity)
   }
 
   const path2DData = getPerfectPath2D(points, { size: widthInfo.pen_width });

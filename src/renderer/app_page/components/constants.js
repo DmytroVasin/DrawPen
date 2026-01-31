@@ -5,6 +5,8 @@ export const laserTimeMax = 5000;
 export const fadeDisappearAfter = 5000;
 export const fadeDisappearAfterMin = 1000;
 export const fadeDisappearAfterMax = 30000;
+export const fadeOutDurationTime = 4000;
+export const fadeDestroyAfterMs = fadeOutDurationTime + 6000;
 
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
