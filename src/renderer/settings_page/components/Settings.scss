@@ -1,12 +1,12 @@
 :root {
   --gray-25:  #FFFFFF;
   --gray-50:  #F3F3F3;
-  --gray-75:  #E9E9E9;
+  --gray-75:  #F0F0F0;
   --gray-100: #E9EBEC;
-  --gray-200: #DADEE0;
-  --gray-225: #DEE2E3;
-  --gray-250: #F0F0F0;
-  --gray-300: #CCCECF;
+  --gray-200: #E9E9E9;
+  --gray-250: #DEE2E3;
+  --gray-300: #DADEE0;
+  --gray-400: #CCCECF;
   --gray-500: #9F9F9F;
   --gray-600: #6C757D;
   --gray-700: #2E3439;
@@ -35,7 +35,7 @@ html, body {
   padding: 0;
   font-family: var(--font-primary);
   font-size: 10px;
-  background-color: var(--gray-200);
+  background-color: var(--gray-300);
   color: var(--gray-700);
 
   :focus {
@@ -66,7 +66,7 @@ html, body {
         user-select: none;
         box-sizing: border-box;
         background-color: var(--gray-50);
-        border: 2px solid var(--gray-250);
+        border: 2px solid var(--gray-75);
         border-radius: 20px;
         box-shadow: 2px 2px 8px #bbbbbb;
         padding: var(--space-lg);
@@ -88,7 +88,7 @@ html, body {
           .icon {
             width: 16px;
             height: 16px;
-            background-color: var(--gray-200);
+            background-color: var(--gray-300);
             border: 1px solid var(--gray-500);
             border-radius: 5px;
             margin-right: 8px;
@@ -100,7 +100,7 @@ html, body {
           margin-top: auto;
           font-size: 12px;
           color: var(--gray-500);
-          border: 1px solid var(--gray-300);
+          border: 1px solid var(--gray-400);
           border-radius: 30px;
           text-align: center;
           font-weight: 600;
@@ -142,14 +142,14 @@ html, body {
             border-radius: 20px;
             padding: 2px 15px;
             box-shadow: 0 1px 3px var(--shadow-ambient);
-            border: 2px solid var(--gray-250);
+            border: 2px solid var(--gray-75);
 
             .settings-item {
               display: flex;
               align-items: center;
               height: 30px;
               padding: 12px 0;
-              border-bottom: 1px solid var(--gray-200);
+              border-bottom: 1px solid var(--gray-300);
 
               &:last-child {
                 border-bottom: none;
@@ -189,7 +189,7 @@ html, body {
                   position: relative;
                   width: 44px;
                   height: 24px;
-                  background-color: var(--gray-300);
+                  background-color: var(--gray-400);
                   border-radius: 12px;
                   cursor: pointer;
                   transition: background-color 0.2s ease;
@@ -221,7 +221,7 @@ html, body {
 
                 .button {
                   padding: 6px 16px;
-                  border: 1px solid var(--gray-300);
+                  border: 1px solid var(--gray-400);
                   border-radius: 4px;
                   background-color: var(--gray-25);
                   color: var(--gray-500);
@@ -235,7 +235,7 @@ html, body {
                   }
 
                   &:active {
-                    background-color: var(--gray-225);
+                    background-color: var(--gray-250);
                     transform: translateY(1px);
                   }
                 }
@@ -245,7 +245,7 @@ html, body {
 
                   .selectbar {
                     padding: 6px 16px;
-                    border: 1px solid var(--gray-300);
+                    border: 1px solid var(--gray-400);
                     border-radius: 4px;
                     background-color: var(--gray-25);
                     color: var(--gray-500);
@@ -287,7 +287,7 @@ html, body {
                   display: flex;
                   height: 27px;
                   background-color: var(--gray-25);
-                  border: 1px solid var(--gray-300);
+                  border: 1px solid var(--gray-400);
                   border-radius: 4px;
                   overflow: hidden;
 
@@ -319,8 +319,8 @@ html, body {
                     color: var(--gray-500);
                     font-weight: 600;
 
-                    border-left: 1px solid var(--gray-300);
-                    border-right: 1px solid var(--gray-300);
+                    border-left: 1px solid var(--gray-400);
+                    border-right: 1px solid var(--gray-400);
                   }
                 }
 
@@ -355,7 +355,7 @@ html, body {
                     transition: background-color 0.3s ease;
 
                     &:hover {
-                      background-color: var(--gray-225);
+                      background-color: var(--gray-250);
                     }
 
                     &.recording {
@@ -387,7 +387,7 @@ html, body {
                         align-items: center;
                         font-size: 12px;
                         justify-content: center;
-                        border: 1px solid var(--gray-300);
+                        border: 1px solid var(--gray-400);
                         background-color: var(--gray-25);
                         border-radius: 4px;
                       }
@@ -461,7 +461,7 @@ html, body {
             }
 
             .settings-item--nested + .settings-item {
-              border-top: 1px solid var(--gray-200);
+              border-top: 1px solid var(--gray-300);
             }
           }
         }

@@ -44,7 +44,7 @@
   .toast-action {
     .toast-action-button {
       padding: 6px 16px;
-      border: 1px solid var(--gray-300);
+      border: 1px solid var(--gray-400);
       border-radius: 4px;
       background-color: var(--gray-25);
       color: var(--gray-500);
@@ -57,7 +57,7 @@
       }
 
       &:active {
-        background-color: var(--gray-225);
+        background-color: var(--gray-250);
       }
     }
   }
