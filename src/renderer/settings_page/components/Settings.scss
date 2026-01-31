@@ -446,6 +446,23 @@ html, body {
                 }
               }
             }
+
+            .settings-item--nested {
+              border-top: 1px solid var(--gray-25);
+              border-bottom: 1px solid var(--gray-25);
+
+              .settings-item {
+                padding-left: 24px;
+              }
+
+              &:last-child {
+                border-bottom: none;
+              }
+            }
+
+            .settings-item--nested + .settings-item {
+              border-top: 1px solid var(--gray-200);
+            }
           }
         }
       }

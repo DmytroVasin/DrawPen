@@ -3,9 +3,11 @@ import './Settings.scss';
 import ShortcutRecorder from './ShortcutRecorder';
 import {
   colorList,
+  timeStep,
   laserTimeMin,
   laserTimeMax,
-  laserTimeStep,
+  fadeDisappearAfterMin,
+  fadeDisappearAfterMax,
 } from "../../app_page/components/constants.js";
 
 import {
@@ -50,7 +52,9 @@ const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
-  const [laserTime, setLaserTime] = useState(config.laser_time);
+  const [fadeMode, setFadeMode] = useState(config.fade_mode || 'persist');
+  const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms ?? 5000);
+  const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
 
@@ -169,13 +173,27 @@ const Settings = (config) => {
   }
 
   const applyLaserTime = (value) => {
-    const newLaserTime = Math.min(laserTimeMax, Math.max(laserTimeMin, Number(value)))
+    const newLaserTimeMs = Math.min(laserTimeMax, Math.max(laserTimeMin, Number(value)))
 
-    if (newLaserTime === laserTime) return
+    if (newLaserTimeMs === laserTimeMs) return
 
-    setLaserTime(newLaserTime)
+    setLaserTimeMs(newLaserTimeMs)
+    window.electronAPI.setLaserTime(newLaserTimeMs)
+  }
 
-    window.electronAPI.setLaserTime(newLaserTime)
+  const selectFadeMode = (event) => {
+    const mode = event.target.value;
+    setFadeMode(mode);
+    window.electronAPI.setFadeMode(mode);
+  }
+
+  const applyFadeDisappearAfter = (value) => {
+    const ms = Math.min(fadeDisappearAfterMax, Math.max(fadeDisappearAfterMin, Number(value)))
+
+    if (ms === fadeDisappearAfterMs) return
+
+    setFadeDisappearAfterMs(ms)
+    window.electronAPI.setFadeDisappearAfterMs(ms)
   }
 
   const nextMainColor = () => {
@@ -362,17 +380,64 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
+                    <div className="settings-item-title">Fade / Persist Mode</div>
+                    <div className="settings-item-description">Control whether annotations fade out after a duration or persist on the screen</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={fadeMode}
+                        onChange={selectFadeMode}
+                      >
+                        <option value="persist">Persist</option>
+                        <option value="fade">Fade</option>
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {fadeMode === 'fade' && (
+                  <div className="settings-item--nested">
+                    <div className="settings-item">
+                      <div className="settings-item-info">
+                        <div className="settings-item-title">Disappear after</div>
+                        <div className="settings-item-description">Total time before annotations are fully removed</div>
+                      </div>
+
+                      <div className="settings-item-control">
+                        <div className="stepper-container">
+                          <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs - timeStep)}>
+                            <FaMinus className="stepper-button--icon" />
+                          </div>
+                          <div className="stepper-value">{fadeDisappearAfterMs / 1000}s</div>
+                          <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs + timeStep)}>
+                            <FaPlus className="stepper-button--icon" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
                     <div className="settings-item-title">Laser Duration</div>
                     <div className="settings-item-description">Adjust how long the laser remains on screen</div>
                   </div>
 
                   <div className="settings-item-control">
                     <div className="stepper-container">
-                      <div className="stepper-button" onClick={() => applyLaserTime(laserTime - laserTimeStep)}>
+                      <div className="stepper-button" onClick={() => applyLaserTime(laserTimeMs - timeStep)}>
                         <FaMinus className="stepper-button--icon" />
                       </div>
-                      <div className="stepper-value">{laserTime / 1000}s</div>
-                      <div className="stepper-button" onClick={() => applyLaserTime(laserTime + laserTimeStep)}>
+                      <div className="stepper-value">{laserTimeMs / 1000}s</div>
+                      <div className="stepper-button" onClick={() => applyLaserTime(laserTimeMs + timeStep)}>
                         <FaPlus className="stepper-button--icon" />
                       </div>
                     </div>
