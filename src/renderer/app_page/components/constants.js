@@ -16,6 +16,7 @@ export const figureMinScale = 0.2;
 export const pastCooldownMs = 300;
 export const escDoubleTapMs = 300;
 export const SNAP_ANGLE = Math.PI / 12; // 45°
+export const highlighterAlpha = 0.4;
 
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 

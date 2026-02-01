@@ -7,6 +7,7 @@ import {
   drawPen,
   drawRainbowPen,
   drawHighlighter,
+  drawRainbowHighlighter,
   drawLine,
   drawLineActive,
   drawArrow,
@@ -87,7 +88,11 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'highlighter') {
-        drawHighlighter(ctx, figure)
+        if (colorList[figure.colorIndex].name === 'color_rainbow') {
+          drawRainbowHighlighter(ctx, offscreenCanvas, figure, updateRainbowColorDeg)
+        } else {
+          drawHighlighter(ctx, figure)
+        }
       }
 
       if (figure.type === 'arrow') {

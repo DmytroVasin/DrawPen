@@ -889,10 +889,6 @@ const Application = (settings) => {
       newFigure.points.push([x, y]);
     }
 
-    if (newFigure.type === 'highlighter' && newFigure.colorIndex === 0) {
-      newFigure.colorIndex = Math.floor(Math.random() * (colorList.length - 1)) + 1
-    }
-
     setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
     setIsDrawing(true);
   };

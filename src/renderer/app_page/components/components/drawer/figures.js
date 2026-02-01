@@ -12,6 +12,7 @@ import {
   erasedFigureColor,
   erasedFigureColorWithOpacity,
   eraserTailColor,
+  highlighterAlpha,
 } from '../../constants.js'
 
 const hslColor = (degree) => {
@@ -161,12 +162,14 @@ export const drawPen = (ctx, figure) => {
 }
 
 export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorDeg) => {
-  const { fadeOpacity } = figure;
+  const { fadeOpacity, widthIndex } = figure;
 
   const offCtx = offscreenCanvas.getContext('2d');
   offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
 
-  drawLazyPen(offCtx, figure, updateRainbowColorDeg)
+  const widthInfo = widthList[widthIndex]
+
+  drawLazyRainbowLine(offCtx, figure, updateRainbowColorDeg, widthInfo.rainbow_pen_width)
 
   let alpha = fadeOpacity;
 
@@ -181,10 +184,8 @@ export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorD
   ctx.restore();
 }
 
-const drawLazyPen = (ctx, figure, updateRainbowColorDeg) => {
-  const { points, widthIndex, rainbowColorDeg, erased } = figure;
-
-  const width = widthList[widthIndex].rainbow_pen_width
+const drawLazyRainbowLine = (ctx, figure, updateRainbowColorDeg, width) => {
+  const { points, rainbowColorDeg, erased } = figure;
 
   const lazyPoints = getLazyPoints(points, { size: width })
   let colorDeg = rainbowColorDeg
@@ -227,7 +228,7 @@ export const drawHighlighter = (ctx, figure) => {
   const colorInfo = colorList[colorIndex]
   const widthInfo = widthList[widthIndex]
 
-  let highlighterColor = colorInfo.highlighterColor
+  let highlighterColor = colorInfo.color + fadeAlpha(highlighterAlpha);
   if (figure.erased) {
     highlighterColor = erasedFigureColorWithOpacity
   }
@@ -240,6 +241,25 @@ export const drawHighlighter = (ctx, figure) => {
 
   ctx.fillStyle = highlighterColor;
   ctx.fill(path2DData);
+}
+
+export const drawRainbowHighlighter = (ctx, offscreenCanvas, figure, updateRainbowColorDeg) => {
+  const { widthIndex } = figure;
+
+  const offCtx = offscreenCanvas.getContext('2d');
+  offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+  const widthInfo = widthList[widthIndex]
+
+  drawLazyRainbowLine(offCtx, figure, updateRainbowColorDeg, widthInfo.highlighter_width);
+
+  let alpha = highlighterAlpha;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.resetTransform();
+  ctx.drawImage(offscreenCanvas, 0, 0);
+  ctx.restore();
 }
 
 export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
