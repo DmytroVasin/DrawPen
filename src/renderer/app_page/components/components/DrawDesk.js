@@ -1,9 +1,11 @@
 import './DrawDesk.scss';
 
 import React, { useEffect, useRef } from 'react';
+import { colorList } from '../constants.js'
 import { getMouseCoordinates } from '../utils/general.js';
 import {
   drawPen,
+  drawRainbowPen,
   drawHighlighter,
   drawLine,
   drawLineActive,
@@ -32,7 +34,10 @@ const DrawDesk = ({
   activeTool,
   handleChangeTool,
 }) => {
+
   const canvasRef = useRef(null);
+  const offscreenCanvasRef = useRef(null);
+
   const prevToolRef = useRef(null);
   const simulateKeyDown = useRef(false);
 
@@ -49,19 +54,36 @@ const DrawDesk = ({
 
     canvas.style.width = `${window.innerWidth}px`;
     canvas.style.height = `${window.innerHeight}px`;
+
+    // Offscreen canvas layer setup
+    if (!offscreenCanvasRef.current) {
+      offscreenCanvasRef.current = document.createElement('canvas');
+    }
+
+    const offscreenCanvas = offscreenCanvasRef.current;
+    const offCtx = offscreenCanvas.getContext('2d');
+
+    offscreenCanvas.width = canvas.width;
+    offscreenCanvas.height = canvas.height;
+
+    offCtx.scale(dpr, dpr);
   }, []);
 
   useEffect(() => {
-    draw(allFigures, allLaserFigures, allEraserFigures, activeFigureInfo)
+    draw(allFigures, allLaserFigures, allEraserFigures, activeFigureInfo, offscreenCanvasRef.current)
   }, [allFigures, allLaserFigures, allEraserFigures, activeFigureInfo]);
 
-  const draw = (allFigures, allLaserFigures, allEraserFigures, activeFigureInfo) => {
+  const draw = (allFigures, allLaserFigures, allEraserFigures, activeFigureInfo, offscreenCanvas) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
     allFigures.forEach((figure) => {
       if (figure.type === 'pen') {
-        drawPen(ctx, figure, updateRainbowColorDeg)
+        if (colorList[figure.colorIndex].name === 'color_rainbow') {
+          drawRainbowPen(ctx, offscreenCanvas, figure, updateRainbowColorDeg)
+        } else {
+          drawPen(ctx, figure)
+        }
       }
 
       if (figure.type === 'highlighter') {

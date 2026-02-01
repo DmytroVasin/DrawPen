@@ -140,17 +140,11 @@ export const getCursorColor = (colorIndex, rainbowColorDeg) => {
   return colorInfo.color
 }
 
-export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
+export const drawPen = (ctx, figure) => {
   const { points, colorIndex, widthIndex } = figure;
 
   const colorInfo = colorList[colorIndex]
   const widthInfo = widthList[widthIndex]
-
-  if (colorInfo.name === 'color_rainbow') {
-    // TODO:>>>>>>>>>>>>>>>>>>>>>>>>>> .>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    drawLazyPen(ctx, figure, widthInfo.rainbow_pen_width, updateRainbowColorDeg)
-    return;
-  }
 
   let penColor = colorInfo.color
 
@@ -166,11 +160,27 @@ export const drawPen = (ctx, figure, updateRainbowColorDeg) => {
   ctx.fill(path2DData);
 }
 
-const drawLazyPen = (ctx, figure, width, updateRainbowColorDeg) => {
-  const { points, rainbowColorDeg, erased } = figure;
+export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorDeg) => {
+  const { fadeOpacity } = figure;
+
+  const offCtx = offscreenCanvas.getContext('2d');
+  offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+  drawLazyPen(offCtx, figure, updateRainbowColorDeg)
+
+  ctx.save();
+  ctx.globalAlpha = fadeOpacity;
+  ctx.resetTransform();
+  ctx.drawImage(offscreenCanvas, 0, 0);
+  ctx.restore();
+}
+
+const drawLazyPen = (ctx, figure, updateRainbowColorDeg) => {
+  const { points, widthIndex, rainbowColorDeg, erased } = figure;
+
+  const width = widthList[widthIndex].rainbow_pen_width
 
   const lazyPoints = getLazyPoints(points, { size: width })
-
   let colorDeg = rainbowColorDeg
 
   lazyPoints.forEach((point, index) => {
