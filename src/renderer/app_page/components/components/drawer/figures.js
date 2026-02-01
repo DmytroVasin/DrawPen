@@ -191,20 +191,11 @@ const drawLazyPen = (ctx, figure, updateRainbowColorDeg) => {
 
     const distance = distanceBetweenPoints(pointA, pointB) * rainbowScaleFactor
 
-    const amountOfColorChanges = Math.round(distance)
-
     let color
     if (erased) {
       color = erasedFigureColor
-    } else if (amountOfColorChanges === 0) {
-      color = hslColor(colorDeg)
-    } else {
-      const gradient = ctx.createLinearGradient(...pointA, ...pointB);
-
-      gradient.addColorStop(0, hslColor(colorDeg))
-      gradient.addColorStop(1, hslColor(colorDeg + distance))
-
-      color = gradient
+    } else  {
+      color = hslColor(colorDeg + distance / 2);
     }
 
     ctx.beginPath()
