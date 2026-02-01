@@ -43,5 +43,5 @@ export const widthList = [
 ]
 
 export const erasedFigureColor = '#D3D3D3'; // lightgray
-export const erasedFigureColorWithOpacity = '#D3D3D350';
+export const erasedFigureColorWithOpacity = erasedFigureColor + '80' // 50% opacity in HEX
 export const eraserTailColor = '#69696969'; // dimgray with opacity

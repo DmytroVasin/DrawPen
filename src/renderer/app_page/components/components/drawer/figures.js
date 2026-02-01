@@ -149,9 +149,9 @@ export const drawPen = (ctx, figure) => {
   let penColor = colorInfo.color
 
   if (figure.erased) {
-    penColor = erasedFigureColorWithOpacity
+    penColor = erasedFigureColor + fadeAlpha(Math.min(0.5, figure.fadeOpacity));
   } else if (figure.fadeOpacity < 1) {
-    penColor = penColor + fadeAlpha(figure.fadeOpacity)
+    penColor = colorInfo.color + fadeAlpha(figure.fadeOpacity);
   }
 
   const path2DData = getPerfectPath2D(points, { size: widthInfo.pen_width });
@@ -168,8 +168,14 @@ export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorD
 
   drawLazyPen(offCtx, figure, updateRainbowColorDeg)
 
+  let alpha = fadeOpacity;
+
+  if (figure.erased) {
+    alpha = Math.min(0.5, fadeOpacity);
+  }
+
   ctx.save();
-  ctx.globalAlpha = fadeOpacity;
+  ctx.globalAlpha = alpha;
   ctx.resetTransform();
   ctx.drawImage(offscreenCanvas, 0, 0);
   ctx.restore();
