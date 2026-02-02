@@ -1,12 +1,12 @@
 export const timeStep = 100;
-export const laserTime = 2000;
+// export const laserTime = 2000; // schema.laser_time.default
 export const laserTimeMin = 300;
 export const laserTimeMax = 5000;
-export const fadeDisappearAfter = 5000;
-export const fadeDisappearAfterMin = 1000;
-export const fadeDisappearAfterMax = 30000;
-export const fadeOutDurationTime = 4000;
-export const fadeDestroyAfterMs = fadeOutDurationTime + 6000;
+// export const fadeDisappearAfter = 1500; // schema.fade_disappear_after_ms.default
+export const fadeDisappearAfterMin = 500;
+export const fadeDisappearAfterMax = 15000;
+export const fadeOutDurationTime = 1000;
+export const fadeOutDestroyAfterMs = 500;
 
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
@@ -16,18 +16,18 @@ export const figureMinScale = 0.2;
 export const pastCooldownMs = 300;
 export const escDoubleTapMs = 300;
 export const SNAP_ANGLE = Math.PI / 12; // 45°
-export const highlighterAlpha = 0.4;
+export const highlighterAlpha = 0.35;
 
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 
 export const colorList = [
-  { color: '#000000', highlighterColor: '#00000070', name: 'color_rainbow' },
-  { color: '#529BE0', highlighterColor: '#529BE070', name: 'color_blue' },
-  { color: '#E05252', highlighterColor: '#E0525270', name: 'color_red' },
-  { color: '#52E06C', highlighterColor: '#52E06C70', name: 'color_green' },
-  { color: '#E0A552', highlighterColor: '#E0A55270', name: 'color_orange' },
-  { color: '#FFFFFF', highlighterColor: '#FFFFFF70', name: 'color_white' },
-  { color: '#1E1E1E', highlighterColor: '#1E1E1E70', name: 'color_black' },
+  { color: '#000000', name: 'color_rainbow' },
+  { color: '#529BE0', name: 'color_blue' },
+  { color: '#E05252', name: 'color_red' },
+  { color: '#52E06C', name: 'color_green' },
+  { color: '#E0A552', name: 'color_orange' },
+  { color: '#FFFFFF', name: 'color_white' },
+  { color: '#1E1E1E', name: 'color_black' },
 ];
 
 // - font_y_offset_compensation: Hack to make HTML similar to Canvas

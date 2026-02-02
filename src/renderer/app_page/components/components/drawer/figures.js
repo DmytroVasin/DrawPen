@@ -230,7 +230,7 @@ export const drawHighlighter = (ctx, figure) => {
 
   let highlighterColor = colorInfo.color + fadeAlpha(highlighterAlpha);
   if (figure.erased) {
-    highlighterColor = erasedFigureColorWithOpacity
+    highlighterColor = erasedFigureColor + fadeAlpha(highlighterAlpha);
   }
 
   const path2DData = getPerfectPath2D(points, {

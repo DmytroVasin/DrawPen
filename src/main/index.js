@@ -107,7 +107,7 @@ const schema = {
   },
   fade_disappear_after_ms: {
     type: 'number',
-    default: 5000
+    default: 1500
   },
   laser_time: {
     type: 'number',

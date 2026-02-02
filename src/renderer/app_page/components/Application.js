@@ -33,8 +33,8 @@ import { MdOutlineCancel } from "react-icons/md";
 import { FaFont } from "react-icons/fa6";
 
 import {
-  fadeDestroyAfterMs,
   fadeOutDurationTime,
+  fadeOutDestroyAfterMs,
   eraserTime,
   shapeList,
   colorList,
@@ -564,8 +564,6 @@ const Application = (settings) => {
   const startIdleTimer = () => {
     if (!initialFadeMode) return;
 
-    console.log('Start Idle Timer (+ Reset) after pen drawing end: ', initialFadeDisappearAfterMs);
-
     resetIdleTimer();
 
     idleTimerRef.current = setTimeout(() => {
@@ -577,19 +575,12 @@ const Application = (settings) => {
   const resetIdleTimer = () => {
     if (!initialFadeMode) return;
 
-    console.log('-> Reset Idle Timer');
-
     if (idleTimerRef.current) {
-      console.log('----> Clear idleTimerRef', idleTimerRef.current);
-
       clearTimeout(idleTimerRef.current);
       idleTimerRef.current = null;
     }
 
     if (fadeRafRef.current) {
-      console.log('----> Clear fadeRafRef', fadeRafRef.current);
-      console.log('----> Reset figures store');
-
       cancelAnimationFrame(fadeRafRef.current);
       fadeRafRef.current = null;
 
@@ -597,8 +588,8 @@ const Application = (settings) => {
     }
   }
 
-  const getFadeOpacity = (elapsedMs) => {
-    let progress = 1 - (elapsedMs / fadeOutDurationTime);
+  const getFadeOpacity = (elapsedMs, opacityDuration) => {
+    let progress = 1 - (elapsedMs / opacityDuration);
 
     if (progress < 0) progress = 0; // clamp to 0..1
     if (progress > 1) progress = 1;
@@ -607,18 +598,15 @@ const Application = (settings) => {
   };
 
   const startFading = () => {
-    console.log('Start Fading Figures Destroy after: ', fadeDestroyAfterMs);
-
     const fadeStartAt = Date.now();
     let memoLastOpacity = null;
 
     const tick = () => {
-      console.log('Fading tick');
-
       if (!fadeRafRef.current) return;
+
       const now = Date.now();
       const elapsedMs = now - fadeStartAt;
-      const opacity = getFadeOpacity(elapsedMs)
+      const opacity = getFadeOpacity(elapsedMs, fadeOutDurationTime)
 
       if (memoLastOpacity !== opacity) {
         memoLastOpacity = opacity;
@@ -626,9 +614,7 @@ const Application = (settings) => {
         setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: opacity } : figure));
       }
 
-      if (elapsedMs >= fadeDestroyAfterMs) {
-        console.log('Fading done, destroying figures');
-
+      if (elapsedMs >= (fadeOutDurationTime + fadeOutDestroyAfterMs)) {
         setAllFigures(prev => prev.filter(figure => figure.type !== 'pen'));
 
         fadeRafRef.current = null;
