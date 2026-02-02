@@ -33,7 +33,6 @@ import { MdOutlineCancel } from "react-icons/md";
 import { FaFont } from "react-icons/fa6";
 
 import {
-  fadeOutDurationTime,
   fadeOutDestroyAfterMs,
   eraserTime,
   shapeList,
@@ -74,6 +73,7 @@ const Application = (settings) => {
   const initialLaserTime = settings.laser_time
   const initialFadeMode = settings.fade_mode
   const initialFadeDisappearAfterMs = settings.fade_disappear_after_ms
+  const initialFadeOutDurationTimeMs = settings.fade_out_duration_time_ms
 
   const key_show_hide_toolbar       = settings.key_binding_show_hide_toolbar
   const key_show_hide_whiteboard    = settings.key_binding_show_hide_whiteboard
@@ -606,7 +606,7 @@ const Application = (settings) => {
 
       const now = Date.now();
       const elapsedMs = now - fadeStartAt;
-      const opacity = getFadeOpacity(elapsedMs, fadeOutDurationTime)
+      const opacity = getFadeOpacity(elapsedMs, initialFadeOutDurationTimeMs)
 
       if (memoLastOpacity !== opacity) {
         memoLastOpacity = opacity;
@@ -614,7 +614,7 @@ const Application = (settings) => {
         setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: opacity } : figure));
       }
 
-      if (elapsedMs >= (fadeOutDurationTime + fadeOutDestroyAfterMs)) {
+      if (elapsedMs >= (initialFadeOutDurationTimeMs + fadeOutDestroyAfterMs)) {
         setAllFigures(prev => prev.filter(figure => figure.type !== 'pen'));
 
         fadeRafRef.current = null;

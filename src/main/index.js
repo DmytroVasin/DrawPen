@@ -109,6 +109,10 @@ const schema = {
     type: 'number',
     default: 1500
   },
+  fade_out_duration_time_ms: {
+    type: 'number',
+    default: 1000
+  },
   laser_time: {
     type: 'number',
     default: 2000
@@ -541,6 +545,7 @@ ipcMain.handle('get_settings', () => {
     laser_time: store.get('laser_time'),
     fade_mode: store.get('fade_mode'),
     fade_disappear_after_ms: store.get('fade_disappear_after_ms'),
+    fade_out_duration_time_ms: store.get('fade_out_duration_time_ms'),
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
@@ -625,6 +630,7 @@ ipcMain.handle('get_configuration', () => {
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
     fade_mode:                                store.get('fade_mode'),
     fade_disappear_after_ms:                  store.get('fade_disappear_after_ms'),
+    fade_out_duration_time_ms:                store.get('fade_out_duration_time_ms'),
     laser_time:                               store.get('laser_time'),
 
     displays:                                 getAllDisplaysInfo(),
@@ -753,10 +759,9 @@ ipcMain.handle('set_fade_mode', (_event, value) => {
   rawLog('Setting fade mode:', value)
 
   store.set('fade_mode', value)
-  refreshSettingsInRenderer()
 
   if (mainWindow) {
-    mainWindow.reload() // Updates laser time function
+    mainWindow.reload()
   }
 
   return null
@@ -766,10 +771,21 @@ ipcMain.handle('set_fade_disappear_after_ms', (_event, value) => {
   rawLog('Setting fade disappear after:', value)
 
   store.set('fade_disappear_after_ms', value)
-  refreshSettingsInRenderer()
 
   if (mainWindow) {
-    mainWindow.reload() // Updates laser time function
+    mainWindow.reload()
+  }
+
+  return null
+});
+
+ipcMain.handle('set_fade_out_duration_time_ms', (_event, value) => {
+  rawLog('Setting fade out duration time:', value)
+
+  store.set('fade_out_duration_time_ms', value)
+
+  if (mainWindow) {
+    mainWindow.reload()
   }
 
   return null
@@ -781,7 +797,7 @@ ipcMain.handle('set_laser_time', (_event, value) => {
   store.set('laser_time', value)
 
   if (mainWindow) {
-    mainWindow.reload() // Updates laser time function
+    mainWindow.reload()
   }
 
   return null

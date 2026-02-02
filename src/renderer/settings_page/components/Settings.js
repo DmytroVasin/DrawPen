@@ -8,6 +8,8 @@ import {
   laserTimeMax,
   fadeDisappearAfterMin,
   fadeDisappearAfterMax,
+  fadeOutDurationTimeMsMin,
+  fadeOutDurationTimeMsMax,
 } from "../../app_page/components/constants.js";
 
 import {
@@ -55,6 +57,7 @@ const Settings = (config) => {
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
   const [fadeMode, setFadeMode] = useState(config.fade_mode);
   const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms);
+  const [fadeOutDurationTimeMs, setFadeOutDurationTimeMs] = useState(config.fade_out_duration_time_ms);
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
@@ -196,6 +199,15 @@ const Settings = (config) => {
 
     setFadeDisappearAfterMs(ms)
     window.electronAPI.setFadeDisappearAfterMs(ms)
+  }
+
+  const applyFadeOutDurationTimeMs = (value) => {
+    const ms = Math.min(fadeOutDurationTimeMsMax, Math.max(fadeOutDurationTimeMsMin, Number(value)))
+
+    if (ms === fadeOutDurationTimeMs) return
+
+    setFadeOutDurationTimeMs(ms)
+    window.electronAPI.setFadeOutDurationTimeMs(ms)
   }
 
   const nextMainColor = () => {
@@ -403,8 +415,8 @@ const Settings = (config) => {
                       </div>
 
                       <div className="settings-item-info">
-                        <div className="settings-item-title">Fade-out delay</div>
-                        <div className="settings-item-description">Press SPACE to switch colors</div>
+                        <div className="settings-item-title">Fade start delay</div>
+                        <div className="settings-item-description">Press SPACE to pause the timer</div>
                       </div>
 
                       <div className="settings-item-control">
@@ -414,6 +426,30 @@ const Settings = (config) => {
                           </div>
                           <div className="stepper-value">{fadeDisappearAfterMs / 1000}s</div>
                           <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs + timeStep)}>
+                            <FaPlus className="stepper-button--icon" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="settings-item">
+
+                      <div className="settings-item--forward">
+                        <IoChevronForward className="icon" />
+                      </div>
+
+                      <div className="settings-item-info">
+                        <div className="settings-item-title">Fade-out duration</div>
+                        <div className="settings-item-description">Duration of the fade animation</div>
+                      </div>
+
+                      <div className="settings-item-control">
+                        <div className="stepper-container">
+                          <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs - timeStep)}>
+                            <FaMinus className="stepper-button--icon" />
+                          </div>
+                          <div className="stepper-value">{fadeOutDurationTimeMs / 1000}s</div>
+                          <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs + timeStep)}>
                             <FaPlus className="stepper-button--icon" />
                           </div>
                         </div>

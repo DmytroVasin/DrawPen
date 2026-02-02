@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDrawingMonitor: (value) => ipcRenderer.invoke('set_drawing_monitor', value),
   setFadeMode: (value) => ipcRenderer.invoke('set_fade_mode', value),
   setFadeDisappearAfterMs: (value) => ipcRenderer.invoke('set_fade_disappear_after_ms', value),
+  setFadeOutDurationTimeMs: (value) => ipcRenderer.invoke('set_fade_out_duration_time_ms', value),
 
   isMac: platform === 'darwin',
 });

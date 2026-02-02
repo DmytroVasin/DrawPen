@@ -3,9 +3,11 @@ export const timeStep = 100;
 export const laserTimeMin = 300;
 export const laserTimeMax = 5000;
 // export const fadeDisappearAfter = 1500; // schema.fade_disappear_after_ms.default
-export const fadeDisappearAfterMin = 500;
+export const fadeDisappearAfterMin = 300;
 export const fadeDisappearAfterMax = 15000;
-export const fadeOutDurationTime = 1000;
+// export const fadeOutDurationTime = 1000; // schema.fade_out_duration_time_ms.default
+export const fadeOutDurationTimeMsMin = 300;
+export const fadeOutDurationTimeMsMax = 5000;
 export const fadeOutDestroyAfterMs = 500;
 
 export const eraserTime = 100;
