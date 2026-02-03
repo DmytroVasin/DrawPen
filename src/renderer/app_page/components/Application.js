@@ -31,10 +31,12 @@ import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
 import { FaFont } from "react-icons/fa6";
+import FaMagicPaintBrush from "./components/icons/FaMagicPaintBrush.js";
 
 import {
   fadeOutDestroyAfterMs,
   eraserTime,
+  brushList,
   shapeList,
   colorList,
   widthList,
@@ -45,6 +47,7 @@ import {
 
 const Icons = {
   FaPaintBrush,
+  FaMagicPaintBrush,
   FaRegSquare,
   FaRegCircle,
   FaArrowRight,
@@ -67,11 +70,11 @@ const Application = (settings) => {
   const initialShowWhiteboard = settings.show_whiteboard
   const initialShowDrawingBorder = settings.show_drawing_border
   const initialShowCuteCursor = settings.show_cute_cursor
+  const initialToolbarDefaultBrush = settings.tool_bar_default_brush
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
   const initialLaserTime = settings.laser_time
-  const initialFadeMode = settings.fade_mode
   const initialFadeDisappearAfterMs = settings.fade_disappear_after_ms
   const initialFadeOutDurationTimeMs = settings.fade_out_duration_time_ms
 
@@ -85,11 +88,11 @@ const Application = (settings) => {
 
   if (process.env.NODE_ENV === 'development') {
     initialFigures = [
-      // { id: 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      // { id: 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      // { id: 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      // { id: 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      // { id: 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      { id: Date.now() + 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
     ]
   }
 
@@ -98,6 +101,7 @@ const Application = (settings) => {
   const [allFigures, setAllFigures] = useState(initialFigures);
   const [allLaserFigures, setLaserFigure] = useState([]);
   const [allEraserFigures, setEraserFigure] = useState([]);
+  const [allFadeFigures, setFadeFigures] = useState([]);
   const [activeTool, setActiveTool] = useState(initialActiveTool);
   const [activeFigureInfo, setActiveFigureInfo] = useState(null);
   const [activeColorIndex, setActiveColorIndex] = useState(initialActiveColor);
@@ -107,6 +111,7 @@ const Application = (settings) => {
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
+  const [toolbarLastActiveBrush, setToolbarLastActiveBrush] = useState(initialToolbarDefaultBrush);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [rippleEffects, setRippleEffects] = useState([]);
@@ -114,12 +119,14 @@ const Application = (settings) => {
   const [redoStackFigures, setRedoStackFigures] = useState([]);
   const [clipboardFigure, setClipboardFigure] = useState(null);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
-  const [isFadingPaused, setIsFadingPaused] = useState(false);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [isFadeDrawing, setIsFadeDrawing] = useState(false);
   const [showDrawingBorder, setShowDrawingBorder] = useState(initialShowDrawingBorder);
   const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
   const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
   const [secondaryColorIndex, setSecondaryColorIndex] = useState(initialSecondaryColorIndex);
   const [toastInfo, setToastInfo] = useState(null);
+  const [fadeOpacity, setFadeOpacity] = useState(1.0);
 
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
@@ -147,6 +154,10 @@ const Application = (settings) => {
 
     if (eventKey === 'shift' && !eventRepeat) {
       setIsShiftPressed(true);
+    }
+
+    if (eventCode === 'space' && !eventRepeat) {
+      setIsSpacePressed(true);
     }
 
     if (isDrawing || isActiveFigureMoving()) {
@@ -182,18 +193,6 @@ const Application = (settings) => {
 
     // Static keyboard shortcuts
     switch (eventKey) {
-      case ' ': {
-        event.preventDefault();
-
-        if (eventRepeat) break;
-
-        if (initialFadeMode) {
-          setIsFadingPaused(true);
-          resetIdleTimer();
-        }
-
-        break;
-      }
       case 'v': {
         if (ctrlOrMeta) {
           if (clipboardFigure) {
@@ -379,7 +378,16 @@ const Application = (settings) => {
 
     switch (eventCode) {
       case 'digit1': {
-        handleChangeTool('pen');
+        let nextBrush = toolbarLastActiveBrush;
+
+        if (activeTool === toolbarLastActiveBrush) {
+          const activeBrushIndex = brushList.indexOf(activeTool);
+          const nextBrushIndex = (activeBrushIndex + direction + brushList.length) % brushList.length;
+
+          nextBrush = brushList[nextBrushIndex];
+        }
+
+        handleChangeTool(nextBrush);
         break;
       }
       case 'digit2': {
@@ -427,10 +435,11 @@ const Application = (settings) => {
         break;
       }
     }
-  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
+    const eventCode = (event.code || '').toLowerCase();
 
     if (textEditorContainer) {
       return
@@ -440,19 +449,12 @@ const Application = (settings) => {
       setIsShiftPressed(false);
     }
 
-    switch (eventKey) {
-      case ' ': {
-        event.preventDefault();
+    if (eventCode === 'space') {
+      setIsSpacePressed(false);
 
-        if (isFadingPaused) {
-          setIsFadingPaused(false);
-          startIdleTimer();
-        }
-
-        break;
-      }
+      event.preventDefault();
     }
-  }, [textEditorContainer, activeTool, isFadingPaused]);
+  }, [textEditorContainer]);
 
   const parseAccelerator = (shortcut) => {
     if (!shortcut) return null
@@ -526,6 +528,7 @@ const Application = (settings) => {
         tool_bar_active_tool: activeTool,
         tool_bar_active_color_index: activeColorIndex,
         tool_bar_active_weight_index: activeWidthIndex,
+        tool_bar_default_brush: toolbarLastActiveBrush,
         tool_bar_default_figure: toolbarLastActiveFigure,
         tool_bar_x: toolbarPosition.x,
         tool_bar_y: toolbarPosition.y,
@@ -537,7 +540,7 @@ const Application = (settings) => {
     return () => {
       debouncedUpdateSettings.cancel();
     };
-  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveFigure, toolbarPosition]);
+  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarPosition]);
 
   useEffect(() => {
     if (!activeFigureInfo) { return }
@@ -560,11 +563,25 @@ const Application = (settings) => {
 
   const idleTimerRef = useRef(null);
   const fadeRafRef = useRef(null);
+  const allFadeFiguresByRef = useRef(null)
+  useEffect(() => {
+    allFadeFiguresByRef.current = allFadeFigures;
+  }, [allFadeFigures]);
+
+  useEffect(() => {
+    const fadePaused = isSpacePressed || isFadeDrawing;
+    
+    if (fadePaused) {
+      resetFadeTimer();
+    }
+  
+    if (!fadePaused && allFadeFiguresByRef.current.length > 0) {
+      startIdleTimer();
+    }
+  }, [isSpacePressed, isFadeDrawing]);
 
   const startIdleTimer = () => {
-    if (!initialFadeMode) return;
-
-    resetIdleTimer();
+    resetFadeTimer();
 
     idleTimerRef.current = setTimeout(() => {
       idleTimerRef.current = null;
@@ -572,8 +589,8 @@ const Application = (settings) => {
     }, initialFadeDisappearAfterMs);
   }
 
-  const resetIdleTimer = () => {
-    if (!initialFadeMode) return;
+  const resetFadeTimer = () => {
+    setFadeOpacity(1.0);
 
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
@@ -583,8 +600,6 @@ const Application = (settings) => {
     if (fadeRafRef.current) {
       cancelAnimationFrame(fadeRafRef.current);
       fadeRafRef.current = null;
-
-      setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: 1 } : figure));
     }
   }
 
@@ -611,11 +626,11 @@ const Application = (settings) => {
       if (memoLastOpacity !== opacity) {
         memoLastOpacity = opacity;
 
-        setAllFigures(prev => prev.map(figure => figure.type === 'pen' ? { ...figure, fadeOpacity: opacity } : figure));
+        setFadeOpacity(opacity);
       }
 
       if (elapsedMs >= (initialFadeOutDurationTimeMs + fadeOutDestroyAfterMs)) {
-        setAllFigures(prev => prev.filter(figure => figure.type !== 'pen'));
+        setFadeFigures([]);
 
         fadeRafRef.current = null;
         return;
@@ -699,6 +714,10 @@ const Application = (settings) => {
     setActiveFigureInfo(null);
     setActiveTool(toolName);
 
+    if (brushList.includes(toolName)) {
+      setToolbarLastActiveBrush(toolName);
+    }
+
     if (shapeList.includes(toolName)) {
       setToolbarLastActiveFigure(toolName);
     }
@@ -741,7 +760,7 @@ const Application = (settings) => {
       }
     }
 
-    if (['pen', ...shapeList, 'text'].includes(activeTool)) {
+    if ([...brushList, ...shapeList, 'text'].includes(activeTool)) {
       const selectedFigure = getFigureAtMousePosition(x, y);
 
       if (selectedFigure) {
@@ -754,22 +773,23 @@ const Application = (settings) => {
   };
   const setMouseCursorThrottle = throttle(setMouseCursor, 100);
 
-  const eraseFiguresOnIntersection = (eraserFigure) => {
-    setAllFigures(prevFigures => {
-      let hasChanges = false;
+  const eraseOnIntersection = (eraserFigure) => (prevFigures) => {
+    let hasChanges = false;
 
-      const updatedFigures = prevFigures.map(figure => {
-        if (!figure.erased && areFiguresIntersecting(eraserFigure, figure)) {
-          hasChanges = true;
-
-          return { ...figure, erased: true };
-        }
-
-        return figure;
-      });
-
-      return hasChanges ? updatedFigures : prevFigures;
+    const updatedFigures = prevFigures.map((figure) => {
+      if (!figure.erased && areFiguresIntersecting(eraserFigure, figure)) {
+        hasChanges = true;
+        return { ...figure, erased: true };
+      }
+      return figure;
     });
+
+    return hasChanges ? updatedFigures : prevFigures;
+  };
+
+  const eraseFiguresOnIntersection = (eraserFigure) => {
+    setAllFigures(eraseOnIntersection(eraserFigure));
+    setFadeFigures(eraseOnIntersection(eraserFigure));
   }
 
   const handleMouseDown = ({ x, y }) => {
@@ -799,7 +819,7 @@ const Application = (settings) => {
     }
 
     // Click on the figure
-    if (['pen', ...shapeList, 'text'].includes(activeTool)) {
+    if ([...brushList, ...shapeList, 'text'].includes(activeTool)) {
       const selectedFigure = getFigureAtMousePosition(x, y);
 
       if (selectedFigure) {
@@ -841,6 +861,7 @@ const Application = (settings) => {
     if (activeTool === 'text') {
       if (!textEditorContainer) {
         const newTextEditor = {
+          id: Date.now(),
           isActive: true,
           startAt: [x, y],
           colorIndex: activeColorIndex,
@@ -856,10 +877,6 @@ const Application = (settings) => {
       return;
     }
 
-    if (activeTool === 'pen') {
-      resetIdleTimer();
-    }
-
     let newFigure = {
       id: Date.now(),
       type: activeTool,
@@ -868,11 +885,17 @@ const Application = (settings) => {
       points: [[x, y]],
       rainbowColorDeg: rainbowColorDeg,
       ratio: 1,
-      fadeOpacity: 1,
     };
 
     if (shapeList.includes(newFigure.type)) {
       newFigure.points.push([x, y]);
+    }
+
+    if (activeTool === 'fadepen') {
+      setIsFadeDrawing(true);
+      setFadeFigures(prevFadeFigures => [...prevFadeFigures, newFigure]);
+      setIsDrawing(true);
+      return;
     }
 
     setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
@@ -915,6 +938,15 @@ const Application = (settings) => {
         eraseFiguresOnIntersection(currentEraser);
         setEraserFigure([...allEraserFigures]);
         scheduleClearEraserTail(currentEraser.id)
+        return;
+      }
+
+      if (activeTool === 'fadepen') {
+        const currentFigure = allFadeFigures[allFadeFigures.length - 1];
+
+        currentFigure.points = [...currentFigure.points, [x, y]];
+
+        setFadeFigures([...allFadeFigures]);
         return;
       }
 
@@ -986,12 +1018,17 @@ const Application = (settings) => {
 
       if (activeTool === 'eraser') {
         const figuresToRemove = allFigures.filter(figure => figure.erased).map(figure => ({ ...figure, erased: false }));
+        const fadeFiguresToRemove = allFadeFigures.filter(figure => figure.erased).map(figure => ({ ...figure, erased: false }));
 
         if (figuresToRemove.length > 0) {
           setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'remove', figures: figuresToRemove }]);
           setRedoStackFigures([]);
 
           setAllFigures(allFigures.filter(figure => !figure.erased));
+        }
+
+        if (fadeFiguresToRemove.length > 0) {
+          setFadeFigures(allFadeFigures.filter(figure => !figure.erased));
         }
       }
 
@@ -1002,21 +1039,26 @@ const Application = (settings) => {
         setRedoStackFigures([]);
       }
 
-      if (activeTool === 'pen') {
-        if (!isFadingPaused) {
-          startIdleTimer();
-        }
+      if (activeTool === 'fadepen') {
+        const currentFigure = allFadeFigures.at(-1);
 
-        const currentFigure = allFigures.at(-1);
-
-        if (currentFigure.colorIndex !== 0) { // Not Rainbow
+        if (colorList[currentFigure.colorIndex].name !== 'color_rainbow') {
           currentFigure.points = [...filterClosePoints(currentFigure.points, currentFigure.widthIndex)];
         }
 
-        if (!initialFadeMode) {
-          setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
-          setRedoStackFigures([]);
+        setFadeFigures([...allFadeFigures]);
+        setIsFadeDrawing(false);
+      }
+
+      if (activeTool === 'pen') {
+        const currentFigure = allFigures.at(-1);
+
+        if (colorList[currentFigure.colorIndex].name !== 'color_rainbow') {
+          currentFigure.points = [...filterClosePoints(currentFigure.points, currentFigure.widthIndex)];
         }
+
+        setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+        setRedoStackFigures([]);
 
         setAllFigures([...allFigures]);
       }
@@ -1105,19 +1147,11 @@ const Application = (settings) => {
   const handleReset = () => {
     console.log('Main -> Renderer: Handle Reset');
 
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-      idleTimerRef.current = null;
-    }
-
-    if (fadeRafRef.current) {
-      cancelAnimationFrame(fadeRafRef.current);
-      fadeRafRef.current = null;
-    }
-
     setIsDrawing(false);
     setActiveFigureInfo(null);
     setAllFigures([]);
+    setFadeFigures([]);
+    resetFadeTimer();
     setLaserFigure([]);
     setEraserFigure([]);
     setRippleEffects([]);
@@ -1275,8 +1309,10 @@ const Application = (settings) => {
 
       <DrawDesk
         allFigures={allFigures}
+        allFadeFigures={allFadeFigures}
         allLaserFigures={allLaserFigures}
         allEraserFigures={allEraserFigures}
+        fadeOpacity={fadeOpacity}
         activeFigureInfo={activeFigureInfo}
         cursorType={cursorType}
         handleMouseDown={handleMouseDown}
@@ -1293,6 +1329,7 @@ const Application = (settings) => {
           <ToolBar
             position={toolbarPosition}
             setPosition={setToolbarPosition}
+            lastActiveBrush={toolbarLastActiveBrush}
             lastActiveFigure={toolbarLastActiveFigure}
             activeTool={activeTool}
             activeColorIndex={activeColorIndex}
@@ -1301,7 +1338,6 @@ const Application = (settings) => {
             handleChangeColor={handleChangeColor}
             handleChangeWidth={handleChangeWidth}
             handleChangeTool={handleChangeTool}
-            handleReset={handleReset}
             Icons={Icons}
           />
       }

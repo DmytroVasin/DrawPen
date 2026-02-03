@@ -8,7 +8,7 @@ export const fadeDisappearAfterMax = 15000;
 // export const fadeOutDurationTime = 1000; // schema.fade_out_duration_time_ms.default
 export const fadeOutDurationTimeMsMin = 300;
 export const fadeOutDurationTimeMsMax = 5000;
-export const fadeOutDestroyAfterMs = 500;
+export const fadeOutDestroyAfterMs = 300;
 
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
@@ -19,7 +19,9 @@ export const pastCooldownMs = 300;
 export const escDoubleTapMs = 300;
 export const SNAP_ANGLE = Math.PI / 12; // 45°
 export const highlighterAlpha = 0.35;
+export const eraserAlpha = 0.5;
 
+export const brushList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
 
 export const colorList = [
@@ -46,5 +48,4 @@ export const widthList = [
 ]
 
 export const erasedFigureColor = '#D3D3D3'; // lightgray
-export const erasedFigureColorWithOpacity = erasedFigureColor + '80' // 50% opacity in HEX
 export const eraserTailColor = '#69696969'; // dimgray with opacity

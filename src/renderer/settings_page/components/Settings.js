@@ -55,7 +55,6 @@ const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
-  const [fadeMode, setFadeMode] = useState(config.fade_mode);
   const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms);
   const [fadeOutDurationTimeMs, setFadeOutDurationTimeMs] = useState(config.fade_out_duration_time_ms);
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
@@ -183,13 +182,6 @@ const Settings = (config) => {
 
     setLaserTimeMs(newLaserTimeMs)
     window.electronAPI.setLaserTimeMs(newLaserTimeMs)
-  }
-
-  const toggleFadeMode = () => {
-    const nextState = !fadeMode;
-    setFadeMode(nextState);
-
-    window.electronAPI.setFadeMode(nextState);
   }
 
   const applyFadeDisappearAfter = (value) => {
@@ -394,69 +386,47 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
-                    <div className="settings-item-title">Auto-fade annotations</div>
-                    <div className="settings-item-description">Automatically remove drawings after a short time</div>
+                    <div className="settings-item-title">Fade start delay</div>
+                    <div className="settings-item-description">Press SPACE to pause the timer</div>
                   </div>
 
                   <div className="settings-item-control">
-                    <div
-                      className={`toggle ${fadeMode ? 'active' : ''}`}
-                      onClick={toggleFadeMode}
-                    ></div>
+                    <div className="stepper-container">
+                      <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs - timeStep)}>
+                        <FaMinus className="stepper-button--icon" />
+                      </div>
+                      <div className="stepper-value">{fadeDisappearAfterMs / 1000}s</div>
+                      <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs + timeStep)}>
+                        <FaPlus className="stepper-button--icon" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {fadeMode && (
-                  <div className="settings-item--nested">
-                    <div className="settings-item">
-
-                      <div className="settings-item--forward">
-                        <IoChevronForward className="icon" />
-                      </div>
-
-                      <div className="settings-item-info">
-                        <div className="settings-item-title">Fade start delay</div>
-                        <div className="settings-item-description">Press SPACE to pause the timer</div>
-                      </div>
-
-                      <div className="settings-item-control">
-                        <div className="stepper-container">
-                          <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs - timeStep)}>
-                            <FaMinus className="stepper-button--icon" />
-                          </div>
-                          <div className="stepper-value">{fadeDisappearAfterMs / 1000}s</div>
-                          <div className="stepper-button" onClick={() => applyFadeDisappearAfter(fadeDisappearAfterMs + timeStep)}>
-                            <FaPlus className="stepper-button--icon" />
-                          </div>
-                        </div>
-                      </div>
+                <div className="settings-item--nested">
+                  <div className="settings-item">
+                    <div className="settings-item--forward">
+                      <IoChevronForward className="icon" />
                     </div>
 
-                    <div className="settings-item">
+                    <div className="settings-item-info">
+                      <div className="settings-item-title">Fade-out duration</div>
+                      <div className="settings-item-description">Duration of the fade animation</div>
+                    </div>
 
-                      <div className="settings-item--forward">
-                        <IoChevronForward className="icon" />
-                      </div>
-
-                      <div className="settings-item-info">
-                        <div className="settings-item-title">Fade-out duration</div>
-                        <div className="settings-item-description">Duration of the fade animation</div>
-                      </div>
-
-                      <div className="settings-item-control">
-                        <div className="stepper-container">
-                          <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs - timeStep)}>
-                            <FaMinus className="stepper-button--icon" />
-                          </div>
-                          <div className="stepper-value">{fadeOutDurationTimeMs / 1000}s</div>
-                          <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs + timeStep)}>
-                            <FaPlus className="stepper-button--icon" />
-                          </div>
+                    <div className="settings-item-control">
+                      <div className="stepper-container">
+                        <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs - timeStep)}>
+                          <FaMinus className="stepper-button--icon" />
+                        </div>
+                        <div className="stepper-value">{fadeOutDurationTimeMs / 1000}s</div>
+                        <div className="stepper-button" onClick={() => applyFadeOutDurationTimeMs(fadeOutDurationTimeMs + timeStep)}>
+                          <FaPlus className="stepper-button--icon" />
                         </div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
                 <div className="settings-item">
                   <div className="settings-item-info">
@@ -586,8 +556,8 @@ const Settings = (config) => {
                   <div className="settings-item-control">
                     <button className="button" onClick={resetToOriginals}>Reset All</button>
                   </div>
-
                 </div>
+                
               </div>
             </div>
           </div>

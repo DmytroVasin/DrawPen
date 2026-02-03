@@ -181,7 +181,7 @@
           &::before { border-color: #D9D9D9; }
         }
 
-        &.color_tool_laser, 
+        &.color_tool_laser,
         &.color_tool_eraser {
           &::before { border-color: #FFFFFF; }
         }
@@ -201,12 +201,14 @@
 }
 
 #toolbar.tool-slide .toolbar__body,
+#toolbar.brush-slide .toolbar__body,
 #toolbar.color-slide .toolbar__body,
 #toolbar.width-slide .toolbar__body {
   top: -70px;
 }
 
 #toolbar.tool-slide .tool-group,
+#toolbar.brush-slide .brush-group,
 #toolbar.color-slide .color-group,
 #toolbar.width-slide .width-group {
   top: 0;

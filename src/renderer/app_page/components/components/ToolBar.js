@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.scss";
-import { shapeList, colorList, widthList } from "../constants.js";
+import { brushList, shapeList, colorList, widthList } from "../constants.js";
 
 const STICKY_DISTANCE = 15;
 const ZONE_BORDER = 5; // Equals to "--border-size"
@@ -8,6 +8,7 @@ const ZONE_BORDER = 5; // Equals to "--border-size"
 const ToolBar = ({
   position,
   setPosition,
+  lastActiveBrush,
   lastActiveFigure,
   activeTool,
   activeColorIndex,
@@ -16,14 +17,15 @@ const ToolBar = ({
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
-  handleReset,
   Icons,
 }) => {
 
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
-  const figureIcons = {
+  const allIcons = {
+    pen: <Icons.FaPaintBrush />,
+    fadepen: <Icons.FaMagicPaintBrush />,
     arrow: <Icons.FaArrowRight />,
     rectangle: <Icons.FaRegSquare />,
     oval: <Icons.FaRegCircle />,
@@ -120,13 +122,45 @@ const ToolBar = ({
     setSlide("")
   };
 
-  const renderGroupIcon = () => figureIcons[lastActiveFigure] || null;
+  const renderFigureTitle = () => {
+    switch (lastActiveFigure) {
+      case "arrow":
+        return "Arrow";
+      case "rectangle":
+        return "Rectangle";
+      case "oval":
+        return "Oval";
+      case "line":
+        return "Line";
+      default:
+        return "Shape";
+    }
+  };
+
+  const renderBrushTitle = () => {
+    switch (lastActiveBrush) {
+      case "pen":
+        return "Pen";
+      case "fadepen":
+        return "Fade Pen";
+      default:
+        return "Brush";
+    }
+  };
 
   const pickFigureOrSwitchView = () => {
     if (shapeList.includes(activeTool)) {
       setSlide("tool-slide");
     } else {
       pickTool(lastActiveFigure);
+    }
+  };
+
+  const pickBrushOrSwitchView = () => {
+    if (brushList.includes(activeTool)) {
+      setSlide("brush-slide");
+    } else {
+      pickTool(lastActiveBrush);
     }
   };
 
@@ -137,17 +171,18 @@ const ToolBar = ({
           <Icons.MdOutlineCancel size={16} />
         </button>
       </div>
+
       <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
-            <li className={activeTool === "pen" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("pen")} title="Pen">
-                <Icons.FaPaintBrush />
+            <li className={brushList.includes(activeTool) ? "active more_figures" : undefined}>
+              <button onClick={() => pickBrushOrSwitchView()} title={renderBrushTitle()}>
+                {allIcons[lastActiveBrush]}
               </button>
             </li>
             <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined}>
-              <button onClick={() => pickFigureOrSwitchView()} title="Shapes">
-                {renderGroupIcon()}
+              <button onClick={() => pickFigureOrSwitchView()} title={renderFigureTitle()}>
+                {allIcons[lastActiveFigure]}
               </button>
             </li>
             <li className={activeTool === "text" ? "active" : undefined}>
@@ -156,7 +191,7 @@ const ToolBar = ({
               </button>
             </li>
             <li className={activeTool === "highlighter" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("highlighter")} title="Text">
+              <button onClick={() => handleChangeTool("highlighter")} title="Highlighter">
                 <Icons.FaHighlighter />
               </button>
             </li>
@@ -186,6 +221,47 @@ const ToolBar = ({
             </li>
           </ul>
         </div>
+
+        <div className="side-view-body brush-group">
+          <ul className="toolbar__items">
+            <li className={activeTool === "pen" ? "active" : undefined}>
+              <button onClick={() => pickTool("pen")} tabIndex={-1} title="Pen">
+                <Icons.FaPaintBrush />
+              </button>
+            </li>
+            <li className={activeTool === "fadepen" ? "active" : undefined}>
+              <button onClick={() => pickTool("fadepen")} tabIndex={-1} title="Fade Pen">
+                <Icons.FaMagicPaintBrush />
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div className="side-view-body tool-group">
+          <ul className="toolbar__items">
+            <li className={activeTool === "arrow" ? "active" : undefined}>
+              <button onClick={() => pickTool("arrow")} tabIndex={-1} title="Arrow">
+                <Icons.FaArrowRight />
+              </button>
+            </li>
+            <li className={activeTool === "rectangle" ? "active" : undefined}>
+              <button onClick={() => pickTool("rectangle")} tabIndex={-1} title="Rectangle">
+                <Icons.FaRegSquare />
+              </button>
+            </li>
+            <li className={activeTool === "oval" ? "active" : undefined}>
+              <button onClick={() => pickTool("oval")} tabIndex={-1} title="Oval">
+                <Icons.FaRegCircle />
+              </button>
+            </li>
+            <li className={activeTool === "line" ? "active" : undefined}>
+              <button onClick={() => pickTool("line")} tabIndex={-1} title="Line">
+                <Icons.AiOutlineLine />
+              </button>
+            </li>
+          </ul>
+        </div>
+
         <div className="side-view-body color-group">
           <ul className="toolbar__items">
             {colorList.map((color, index) => (
@@ -199,35 +275,16 @@ const ToolBar = ({
             ))}
           </ul>
         </div>
-        <div className="side-view-body tool-group">
-          <ul className="toolbar__items">
-            <li className={activeTool === "arrow" ? "active" : undefined}>
-              <button onClick={() => pickTool("arrow")} tabIndex={-1}>
-                <Icons.FaArrowRight />
-              </button>
-            </li>
-            <li className={activeTool === "rectangle" ? "active" : undefined}>
-              <button onClick={() => pickTool("rectangle")} tabIndex={-1}>
-                <Icons.FaRegSquare />
-              </button>
-            </li>
-            <li className={activeTool === "oval" ? "active" : undefined}>
-              <button onClick={() => pickTool("oval")} tabIndex={-1}>
-                <Icons.FaRegCircle />
-              </button>
-            </li>
-            <li className={activeTool === "line" ? "active" : undefined}>
-              <button onClick={() => pickTool("line")} tabIndex={-1}>
-                <Icons.AiOutlineLine />
-              </button>
-            </li>
-          </ul>
-        </div>
+
         <div className="side-view-body width-group">
           <ul className="toolbar__items">
             {widthList.map((width, index) => (
               <li key={index}>
-                <button className="toolbar__width-button" onClick={() => onChangeWidth(index)} tabIndex={-1}>
+                <button
+                  className="toolbar__width-button"
+                  onClick={() => onChangeWidth(index)}
+                  tabIndex={-1}
+                >
                   <div className={width.name} />
                 </button>
               </li>
@@ -235,6 +292,7 @@ const ToolBar = ({
           </ul>
         </div>
       </div>
+
       <div className="toolbar__draglines" onMouseDown={onMouseDown}>
         <div className="draglines">
           <div />

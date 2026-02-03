@@ -62,6 +62,10 @@ const schema = {
     type: 'number',
     default: 1
   },
+  tool_bar_default_brush: {
+    type: 'string',
+    default: 'pen'
+  },
   tool_bar_default_figure: {
     type: 'string',
     default: 'arrow'
@@ -100,10 +104,6 @@ const schema = {
   key_binding_clear_desk: {
     type: 'string',
     default: KEY_CLEAR_DESK
-  },
-  fade_mode: {
-    type: 'boolean',
-    default: false
   },
   fade_disappear_after_ms: {
     type: 'number',
@@ -540,12 +540,12 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_tool: store.get('tool_bar_active_tool'),
     tool_bar_active_color_index: store.get('tool_bar_active_color_index'),
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
+    tool_bar_default_brush: store.get('tool_bar_default_brush'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
     swap_colors_indexes: store.get('swap_colors_indexes'),
-    laser_time: store.get('laser_time'),
-    fade_mode: store.get('fade_mode'),
     fade_disappear_after_ms: store.get('fade_disappear_after_ms'),
     fade_out_duration_time_ms: store.get('fade_out_duration_time_ms'),
+    laser_time: store.get('laser_time'),
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
@@ -628,7 +628,6 @@ ipcMain.handle('get_configuration', () => {
     show_drawing_border:                      store.get('show_drawing_border'),
     show_cute_cursor:                         store.get('show_cute_cursor'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
-    fade_mode:                                store.get('fade_mode'),
     fade_disappear_after_ms:                  store.get('fade_disappear_after_ms'),
     fade_out_duration_time_ms:                store.get('fade_out_duration_time_ms'),
     laser_time:                               store.get('laser_time'),
@@ -753,18 +752,6 @@ ipcMain.handle('set_swap_colors', (_event, value) => {
   refreshSettingsInRenderer();
 
   return null;
-});
-
-ipcMain.handle('set_fade_mode', (_event, value) => {
-  rawLog('Setting fade mode:', value)
-
-  store.set('fade_mode', value)
-
-  if (mainWindow) {
-    mainWindow.reload()
-  }
-
-  return null
 });
 
 ipcMain.handle('set_fade_disappear_after_ms', (_event, value) => {

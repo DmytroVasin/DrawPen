@@ -1,11 +1,6 @@
-import "./CuteCursor.scss";
-
 import React from "react";
-
-import {
-  colorList,
-  widthList,
-} from "../constants.js"
+import "./CuteCursor.scss";
+import { colorList, widthList } from "../constants.js"
 
 const CuteCursor = ({
   mouseCoordinates,
@@ -52,6 +47,8 @@ const CuteCursor = ({
         return <Icons.GiLaserburn {...monochromeIconProps} />
       case "pen":
         return <Icons.FaPaintBrush {...iconProps} />
+      case "fadepen":
+        return <Icons.FaMagicPaintBrush {...iconProps} />
       case "arrow":
         return <Icons.FaArrowRight {...iconProps} />
       case "rectangle":

@@ -23,8 +23,10 @@ import {
 
 const DrawDesk = ({
   allFigures,
+  allFadeFigures,
   allLaserFigures,
   allEraserFigures,
+  fadeOpacity,
   activeFigureInfo,
   cursorType,
   handleMouseDown,
@@ -45,6 +47,7 @@ const DrawDesk = ({
   const dpr = window.devicePixelRatio || 1;
 
   useEffect(() => {
+    // Main canvas layer setup
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
@@ -71,10 +74,10 @@ const DrawDesk = ({
   }, []);
 
   useEffect(() => {
-    draw(allFigures, allLaserFigures, allEraserFigures, activeFigureInfo, offscreenCanvasRef.current)
-  }, [allFigures, allLaserFigures, allEraserFigures, activeFigureInfo]);
+    draw(allFigures, allFadeFigures, allLaserFigures, allEraserFigures, activeFigureInfo, fadeOpacity, offscreenCanvasRef.current);
+  }, [allFigures, allFadeFigures, allLaserFigures, allEraserFigures, activeFigureInfo, fadeOpacity]);
 
-  const draw = (allFigures, allLaserFigures, allEraserFigures, activeFigureInfo, offscreenCanvas) => {
+  const draw = (allFigures, allFadeFigures, allLaserFigures, allEraserFigures, activeFigureInfo, fadeOpacity, offscreenCanvas) => {
     const ctx = canvasRef.current.getContext('2d');
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
@@ -135,6 +138,16 @@ const DrawDesk = ({
         }
 
         drawText(ctx, figure, updateRainbowColorDeg, isActive)
+      }
+    })
+
+    allFadeFigures.forEach((figure) => {
+      if (figure.type === 'fadepen') {
+        if (colorList[figure.colorIndex].name === 'color_rainbow') {
+          drawRainbowPen(ctx, offscreenCanvas, figure, updateRainbowColorDeg, fadeOpacity)
+        } else {
+          drawPen(ctx, figure, fadeOpacity)
+        }
       }
     })
 

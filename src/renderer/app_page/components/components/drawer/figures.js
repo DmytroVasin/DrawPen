@@ -10,9 +10,9 @@ import {
   rainbowScaleFactor,
   dotMargin,
   erasedFigureColor,
-  erasedFigureColorWithOpacity,
   eraserTailColor,
   highlighterAlpha,
+  eraserAlpha,
 } from '../../constants.js'
 
 const hslColor = (degree) => {
@@ -100,7 +100,7 @@ const detectColorAndWidth = (ctx, figure, updateRainbowColorDeg) => {
   }
 
   if (erased) {
-    color = erasedFigureColorWithOpacity;
+    color = erasedFigureColor + fadeAlpha(eraserAlpha);
   }
 
   return [color, width]
@@ -125,7 +125,7 @@ const detectColorAndFontSize = (ctx, figure, updateRainbowColorDeg) => {
   }
 
   if (erased) {
-    color = erasedFigureColorWithOpacity;
+    color = erasedFigureColor + fadeAlpha(eraserAlpha);
   }
 
   return [color, fontSize, font_y_offset_compensation]
@@ -141,7 +141,7 @@ export const getCursorColor = (colorIndex, rainbowColorDeg) => {
   return colorInfo.color
 }
 
-export const drawPen = (ctx, figure) => {
+export const drawPen = (ctx, figure, fadeOpacity = 1) => {
   const { points, colorIndex, widthIndex } = figure;
 
   const colorInfo = colorList[colorIndex]
@@ -150,9 +150,9 @@ export const drawPen = (ctx, figure) => {
   let penColor = colorInfo.color
 
   if (figure.erased) {
-    penColor = erasedFigureColor + fadeAlpha(Math.min(0.5, figure.fadeOpacity));
-  } else if (figure.fadeOpacity < 1) {
-    penColor = colorInfo.color + fadeAlpha(figure.fadeOpacity);
+    penColor = erasedFigureColor + fadeAlpha(Math.min(eraserAlpha, fadeOpacity));
+  } else if (fadeOpacity < 1) {
+    penColor = colorInfo.color + fadeAlpha(fadeOpacity);
   }
 
   const path2DData = getPerfectPath2D(points, { size: widthInfo.pen_width });
@@ -161,8 +161,8 @@ export const drawPen = (ctx, figure) => {
   ctx.fill(path2DData);
 }
 
-export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorDeg) => {
-  const { fadeOpacity, widthIndex } = figure;
+export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorDeg, fadeOpacity = 1) => {
+  const { widthIndex } = figure;
 
   const offCtx = offscreenCanvas.getContext('2d');
   offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
@@ -174,7 +174,7 @@ export const drawRainbowPen = (ctx, offscreenCanvas, figure, updateRainbowColorD
   let alpha = fadeOpacity;
 
   if (figure.erased) {
-    alpha = Math.min(0.5, fadeOpacity);
+    alpha = Math.min(eraserAlpha, fadeOpacity);
   }
 
   ctx.save();
