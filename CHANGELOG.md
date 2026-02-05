@@ -1,5 +1,20 @@
 # Change Log
 
+## [0.0.40] - 2026-02-05
+### Features:
+- Added Auto-fade system (Fade/Persist mode).
+- Added settings to control the delay before fading starts.
+- Added settings to adjust the fade-out duration.
+- Fade pause: press SPACE to temporarily pause the fade timer and keep annotations visible longer.
+- Improved Rainbow Highlighter: the Highlighter tool now supports a full rainbow gradient.
+
+### Bug Fixes:
+- Fixed rendering of erased segments when using the Rainbow Highlighter.
+
+### Improvements:
+- Moved the App Icon Color selector to the Application section in Settings.
+- Laser Duration now displays values in seconds in Settings for better clarity.
+
 ## [0.0.39] - 2026-01-29
 ### Features:
 - Updated Settings panel
