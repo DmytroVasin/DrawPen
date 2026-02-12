@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.40] - 2026-02-12
+- Update Electron to 40.4.0
+- Update Icons for Linux (512px)
+- Added Opt-in workaround: when FORCE_X11 is set, force X11 backend
+
 ## [0.0.40] - 2026-02-05
 ### Features:
 - Added Auto-fade system (Fade/Persist mode).
