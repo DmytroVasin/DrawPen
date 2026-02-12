@@ -4,11 +4,13 @@ const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
 
+const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
+
 module.exports = {
   packagerConfig: {
     asar: true,
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
-    icon: path.join(rootDir, 'assets/build/icon'),
+    icon: process.platform === 'linux' ? linuxIconPng : path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
     ...(process.argv.includes('--no-sign')
       ? {}
@@ -48,11 +50,24 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {}
+      config: {
+        options: {
+          icon: linuxIconPng,
+          categories: ['Graphics', 'Utility'],
+          maintainer: "Dmytro Vasin",
+          homepage: 'https://drawpen.app'
+        }
+      }
     },
     {
       name: "@electron-forge/maker-rpm",
-      config: {}
+      config: {
+        options: {
+          icon: linuxIconPng,
+          categories: ['Graphics', 'Utility'],
+          homepage: 'https://drawpen.app'
+        }
+      }
     },
     {
       name: "@electron-forge/maker-zip",
