@@ -10,7 +10,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
-    icon: process.platform === 'linux' ? linuxIconPng : path.join(rootDir, 'assets/build/icon'),
+    icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
     ...(process.argv.includes('--no-sign')
       ? {}
