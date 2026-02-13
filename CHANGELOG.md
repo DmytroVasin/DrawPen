@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.41] - 2026-02-13
+- Added `drawpen-x11` package for Linux users with Wayland
+- Removed Opt-in workaround FORCE_X11 infavor of using `drawpen-x11` package for Linux users with Wayland
+
 ## [0.0.40] - 2026-02-12
 - Update Electron to 40.4.0
 - Update Icons for Linux (512px)
