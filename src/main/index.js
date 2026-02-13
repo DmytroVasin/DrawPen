@@ -473,26 +473,6 @@ app.on('second-instance', () => {
   showDrawWindow();
 });
 
-function applyLinuxDisplayBackendWorkaround() {
-  if (!isLinux) return;
-
-  // On FORCE_X11 force X11 per Electron 38+ breaking changes.
-  // Only apply if user didn't already specify --ozone-platform.
-
-  const userSpecifiedOzone = app.commandLine.hasSwitch('ozone-platform');
-  if (userSpecifiedOzone) {
-    return;
-  }
-
-  // Opt-in workaround: force X11 only when explicitly enabled via env.
-  const forceX11 = ['1', 'true', 'yes', 'on'].includes(String(process.env.FORCE_X11 || '').toLowerCase());
-  if (!forceX11) return;
-
-  app.commandLine.appendSwitch('ozone-platform', 'x11');
-  rawLog('[DrawPen] Forcing --ozone-platform=x11 via FORCE_X11');
-}
-
-applyLinuxDisplayBackendWorkaround();
 app.commandLine.appendSwitch('disable-pinch');
 
 app.whenReady().then(() => {

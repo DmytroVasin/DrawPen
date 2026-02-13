@@ -39,15 +39,12 @@ scoop install extras/drawpen
 
 ### Known issues
 
-On some Linux setups running **Wayland** (e.g. [Fedora KDE Plasma](https://github.com/DmytroVasin/DrawPen/issues/82), [Zorin](https://github.com/DmytroVasin/DrawPen/issues/81)), DrawPen may start with a **segmentation fault**.
+On some Linux setups running **Wayland** (e.g. [Fedora KDE Plasma](https://github.com/DmytroVasin/DrawPen/issues/82), [Zorin](https://github.com/DmytroVasin/DrawPen/issues/81)), DrawPen may start with a **segmentation fault**. [Explanation In Details](https://github.com/IsmaelMartinez/teams-for-linux/blob/1c28e146ca78bcb0ec4df317d7f0684984adf205/docs-site/docs/development/research/wayland-x11-ozone-platform-investigation.md)
 
-#### Workaround: Run DrawPen with X11 backend:
+#### Workaround:
 
-```bash
-FORCE_X11=1 drawpen
-# or
-drawpen --ozone-platform=x11
-```
+- Run DrawPen with X11 backend: `drawpen --ozone-platform=x11`
+- Use DrawPen `drawpen-x11` package available in [releases](https://github.com/DmytroVasin/DrawPen/releases/latest/)
 
 ### Keybindings
 
