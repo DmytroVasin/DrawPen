@@ -70,6 +70,20 @@ module.exports = {
       }
     },
     {
+      // Second RPM: forces X11 via Exec args in generated .desktop
+      name: "@electron-forge/maker-rpm",
+      config: {
+        options: {
+          name: "drawpen-x11",
+          productName: "DrawPen (X11)",
+          icon: linuxIconPng,
+          categories: ['Graphics', 'Utility'],
+          homepage: 'https://drawpen.app',
+          execArguments: ['--ozone-platform=x11'],
+        }
+      }
+    },
+    {
       name: "@electron-forge/maker-zip",
       platforms: ["darwin", "linux", "win32"]
     }
