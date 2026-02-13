@@ -84,6 +84,21 @@ module.exports = {
       }
     },
     {
+      // Second DEB: forces X11 via custom .desktop template
+      name: "@electron-forge/maker-deb",
+      config: {
+        options: {
+          name: "drawpen-x11",
+          productName: "DrawPen (X11)",
+          icon: linuxIconPng,
+          categories: ['Graphics', 'Utility'],
+          maintainer: "Dmytro Vasin",
+          homepage: 'https://drawpen.app',
+          desktopTemplate: path.join(rootDir, 'assets/build/desktop-x11.desktop.ejs'),
+        }
+      }
+    },
+    {
       name: "@electron-forge/maker-zip",
       platforms: ["darwin", "linux", "win32"]
     }
