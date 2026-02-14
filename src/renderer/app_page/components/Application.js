@@ -570,11 +570,11 @@ const Application = (settings) => {
 
   useEffect(() => {
     const fadePaused = isSpacePressed || isFadeDrawing;
-    
+
     if (fadePaused) {
       resetFadeTimer();
     }
-  
+
     if (!fadePaused && allFadeFiguresByRef.current.length > 0) {
       startIdleTimer();
     }

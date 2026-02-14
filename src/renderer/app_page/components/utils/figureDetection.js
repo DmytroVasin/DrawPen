@@ -73,7 +73,7 @@ const isOnPolygon = (x, y, points) => {
 const isOnArrow = (x, y, figure) => {
   const { points, widthIndex } = figure
 
-  const { figurePoints } = calcPointsArrow(points, widthIndex)
+  const figurePoints = calcPointsArrow(points, widthIndex)
 
   return isOnPolygon(x, y, figurePoints)
 }
@@ -336,7 +336,7 @@ const isSegmentTouchArrow = (segmentPoints, figure) => {
     return true
   }
 
-  const { figurePoints } = calcPointsArrow(points, figure.widthIndex)
+  const figurePoints = calcPointsArrow(points, figure.widthIndex)
 
   return isSegmentIntersectCurve(segmentPoints, figurePoints)
 }

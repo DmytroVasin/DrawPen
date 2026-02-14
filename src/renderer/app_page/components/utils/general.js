@@ -236,10 +236,10 @@ export const calcPointsArrow = (points, widthIndex) => {
   const minArrowLength = 20;
   const minTailSize = 1;
   const arrowSetup = [
-    { max_scale_length: 100, d1_y: 1, d2_y: 5,  d3_y: 15, d2_x: 13, d3_x: 15 },
-    { max_scale_length: 200, d1_y: 2, d2_y: 7,  d3_y: 21, d2_x: 18, d3_x: 20 },
-    { max_scale_length: 300, d1_y: 3, d2_y: 12, d3_y: 36, d2_x: 38, d3_x: 40 },
-    { max_scale_length: 400, d1_y: 4, d2_y: 17, d3_y: 51, d2_x: 58, d3_x: 60 },
+    { max_scale_length: 70,  d1_y: 1, d2_y: 4,  d3_y: 18, d2_x: 17, d3_x: 20 },
+    { max_scale_length: 130, d1_y: 2, d2_y: 8,  d3_y: 34, d2_x: 31, d3_x: 36 },
+    { max_scale_length: 190, d1_y: 3, d2_y: 11, d3_y: 49, d2_x: 46, d3_x: 53 },
+    { max_scale_length: 250, d1_y: 4, d2_y: 15, d3_y: 65, d2_x: 60, d3_x: 70 },
   ]
 
   const arrow = arrowSetup[widthIndex]
@@ -252,13 +252,13 @@ export const calcPointsArrow = (points, widthIndex) => {
 
   const diffX = endX - startX;
   const diffY = endY - startY;
-  let length = Math.sqrt(diffX ** 2 + diffY ** 2);
+  const rawLength = Math.hypot(diffX, diffY);
 
-  const cos = diffX / length;
-  const sin = diffY / length;
+  const cos = diffX / rawLength;
+  const sin = diffY / rawLength;
 
-  length = Math.max(length, minArrowLength);
-  let scaleFactor = Math.min(length / arrow.max_scale_length, 1)
+  const length = Math.max(rawLength, minArrowLength);
+  const scaleFactor = Math.min(length / arrow.max_scale_length, 1)
 
   // ---
 
@@ -270,8 +270,8 @@ export const calcPointsArrow = (points, widthIndex) => {
   const d6 = [d2[0],                                  d2[1] * -1]
   const d7 = [d1[0],                                  d1[1] * -1]
 
-  const t1 = [ -2 * d1[1],                            d7[1]]
-  const t2 = [ -2 * d1[1],                            d1[1]]
+  // const t1 = [ -2 * d1[1],                            d7[1]]
+  // const t2 = [ -2 * d1[1],                            d1[1]]
 
   function transformPoint([x, y]) {
     return [
@@ -281,7 +281,63 @@ export const calcPointsArrow = (points, widthIndex) => {
   }
 
   const figurePoints = [d1, d2, d3, d4, d5, d6, d7].map(transformPoint)
-  const tailPoints = [t1, t2].map(transformPoint)
+  // const tailPoints = [t1, t2].map(transformPoint)
 
-  return { figurePoints, tailPoints }
+  return figurePoints
+}
+
+export const isSmallArrowFigure = (points, widthIndex) => {
+  const [startPoint, endPoint] = points;
+
+  const smallArrowLengths = [60, 80, 100, 120];
+  const smallArrowLength = smallArrowLengths[widthIndex];
+  const arrowLength = distanceBetweenPoints(startPoint, endPoint);
+
+  return arrowLength < smallArrowLength;
+}
+
+export const buildArrowArcSegments = (arrowPoints, widthIndex) => {
+  const arrowRoundSetup = [
+    { radius: 1, offset: 2 },
+    { radius: 2, offset: 3 },
+    { radius: 3, offset: 4 },
+    { radius: 4, offset: 5 },
+  ];
+
+  const moveTowards = (fromPoint, toPoint, distance) => {
+    const fullDistance = distanceBetweenPoints(fromPoint, toPoint);
+    if (!fullDistance) {
+      return [...fromPoint];
+    }
+
+    const ratio = distance / fullDistance;
+
+    return [
+      fromPoint[0] + (toPoint[0] - fromPoint[0]) * ratio,
+      fromPoint[1] + (toPoint[1] - fromPoint[1]) * ratio,
+    ];
+  };
+
+  const pointsCount = arrowPoints.length;
+  const arcRadius = arrowRoundSetup[widthIndex].radius;
+  const arcOffset = arrowRoundSetup[widthIndex].offset;
+
+  return arrowPoints.map((cornerPoint, index) => {
+    const prevPoint = arrowPoints[(index - 1 + pointsCount) % pointsCount];
+    const nextPoint = arrowPoints[(index + 1) % pointsCount];
+
+    const prevLength = distanceBetweenPoints(cornerPoint, prevPoint);
+    const nextLength = distanceBetweenPoints(cornerPoint, nextPoint);
+    const safeOffset = Math.min(arcOffset, prevLength * 0.35, nextLength * 0.35);
+
+    const entryPoint = moveTowards(cornerPoint, prevPoint, safeOffset);
+    const exitPoint = moveTowards(cornerPoint, nextPoint, safeOffset);
+
+    return {
+      entryPoint,
+      cornerPoint,
+      exitPoint,
+      arcRadius,
+    };
+  });
 }
