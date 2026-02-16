@@ -3,6 +3,7 @@ import {
   getLazyPoints,
   distanceBetweenPoints,
   calcPointsArrow,
+  calcSegmentsFlatArrow,
   buildArrowArcSegments,
   isSmallArrowFigure,
 } from '../../utils/general.js';
@@ -304,6 +305,19 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 }
 
 export const drawArrowActive = (ctx, figure) => {
+  drawDotsForFigure(ctx, figure)
+}
+
+export const drawFlatArrow = (ctx, figure, updateRainbowColorDeg) => {
+  const [color, width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
+  const segments = calcSegmentsFlatArrow(figure.points, figure.widthIndex)
+
+  segments.forEach(([pointA, pointB]) => {
+    drawLineSkeleton(ctx, pointA, pointB, color, width)
+  })
+}
+
+export const drawFlatArrowActive = (ctx, figure) => {
   drawDotsForFigure(ctx, figure)
 }
 

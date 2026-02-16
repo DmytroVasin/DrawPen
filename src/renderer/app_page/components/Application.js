@@ -26,7 +26,7 @@ import {
   moveToCoordinates,
   calculateAspectRatio,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaEraser } from "react-icons/fa";
+import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -46,17 +46,18 @@ import {
 } from './constants.js'
 
 const Icons = {
-  FaPaintBrush,
-  FaMagicPaintBrush,
-  FaRegSquare,
-  FaRegCircle,
-  FaArrowRight,
-  AiOutlineLine,
-  GiLaserburn,
-  MdOutlineCancel,
-  FaEraser,
-  FaHighlighter,
-  FaFont,
+  Close: MdOutlineCancel,
+  Brush: FaPaintBrush,
+  MagicBrush: FaMagicPaintBrush,
+  Arrow: FaArrowRight,
+  FlatArrow: FaLongArrowAltRight,
+  Rectangle: FaRegSquare,
+  Oval: FaRegCircle,
+  Line: AiOutlineLine,
+  Text: FaFont,
+  Highlighter: FaHighlighter,
+  Laser: GiLaserburn,
+  Eraser: FaEraser,
 };
 
 const Application = (settings) => {
@@ -963,7 +964,7 @@ const Application = (settings) => {
         const currentFigure = allFigures[allFigures.length - 1];
 
         if (isShiftPressed) {
-          if (['line', 'arrow'].includes(currentFigure.type)) {
+          if (['line', 'arrow', 'flat_arrow'].includes(currentFigure.type)) {
             const startPoint = currentFigure.points[0];
 
             const result = applySoftSnap(startPoint[0], startPoint[1], x, y);

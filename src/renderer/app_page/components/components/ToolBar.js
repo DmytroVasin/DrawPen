@@ -24,12 +24,13 @@ const ToolBar = ({
   const windowHeight = window.innerHeight;
 
   const allIcons = {
-    pen: <Icons.FaPaintBrush />,
-    fadepen: <Icons.FaMagicPaintBrush />,
-    arrow: <Icons.FaArrowRight />,
-    rectangle: <Icons.FaRegSquare />,
-    oval: <Icons.FaRegCircle />,
-    line: <Icons.AiOutlineLine />,
+    pen: <Icons.Brush />,
+    fadepen: <Icons.MagicBrush />,
+    arrow: <Icons.Arrow />,
+    flat_arrow: <Icons.FlatArrow />,
+    rectangle: <Icons.Rectangle />,
+    oval: <Icons.Oval />,
+    line: <Icons.Line />,
   };
 
   const [dragging, setDragging] = useState(false);
@@ -126,6 +127,8 @@ const ToolBar = ({
     switch (lastActiveFigure) {
       case "arrow":
         return "Arrow";
+      case "flat_arrow":
+        return "Flat Arrow";
       case "rectangle":
         return "Rectangle";
       case "oval":
@@ -168,7 +171,7 @@ const ToolBar = ({
     <aside id="toolbar" ref={toolbarRef} className={`${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar} title="Close">
-          <Icons.MdOutlineCancel size={16} />
+          <Icons.Close size={16} />
         </button>
       </div>
 
@@ -187,22 +190,22 @@ const ToolBar = ({
             </li>
             <li className={activeTool === "text" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("text")} title="Text">
-                <Icons.FaFont />
+                <Icons.Text />
               </button>
             </li>
             <li className={activeTool === "highlighter" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("highlighter")} title="Highlighter">
-                <Icons.FaHighlighter />
+                <Icons.Highlighter />
               </button>
             </li>
             <li className={activeTool === "laser" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("laser")} title="Laser">
-                <Icons.GiLaserburn />
+                <Icons.Laser />
               </button>
             </li>
             <li className={activeTool === "eraser" ? "active" : undefined}>
               <button onClick={() => handleChangeTool("eraser")} title="Eraser">
-                <Icons.FaEraser />
+                <Icons.Eraser />
               </button>
             </li>
             <li className="cross-line"></li>
@@ -226,12 +229,12 @@ const ToolBar = ({
           <ul className="toolbar__items">
             <li className={activeTool === "pen" ? "active" : undefined}>
               <button onClick={() => pickTool("pen")} tabIndex={-1} title="Pen">
-                <Icons.FaPaintBrush />
+                <Icons.Brush />
               </button>
             </li>
             <li className={activeTool === "fadepen" ? "active" : undefined}>
               <button onClick={() => pickTool("fadepen")} tabIndex={-1} title="Fade Pen">
-                <Icons.FaMagicPaintBrush />
+                <Icons.MagicBrush />
               </button>
             </li>
           </ul>
@@ -241,22 +244,27 @@ const ToolBar = ({
           <ul className="toolbar__items">
             <li className={activeTool === "arrow" ? "active" : undefined}>
               <button onClick={() => pickTool("arrow")} tabIndex={-1} title="Arrow">
-                <Icons.FaArrowRight />
+                <Icons.Arrow />
+              </button>
+            </li>
+            <li className={activeTool === "flat_arrow" ? "active" : undefined}>
+              <button onClick={() => pickTool("flat_arrow")} tabIndex={-1} title="Flat Arrow">
+                <Icons.FlatArrow />
               </button>
             </li>
             <li className={activeTool === "rectangle" ? "active" : undefined}>
               <button onClick={() => pickTool("rectangle")} tabIndex={-1} title="Rectangle">
-                <Icons.FaRegSquare />
+                <Icons.Rectangle />
               </button>
             </li>
             <li className={activeTool === "oval" ? "active" : undefined}>
               <button onClick={() => pickTool("oval")} tabIndex={-1} title="Oval">
-                <Icons.FaRegCircle />
+                <Icons.Oval />
               </button>
             </li>
             <li className={activeTool === "line" ? "active" : undefined}>
               <button onClick={() => pickTool("line")} tabIndex={-1} title="Line">
-                <Icons.AiOutlineLine />
+                <Icons.Line />
               </button>
             </li>
           </ul>

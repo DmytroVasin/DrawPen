@@ -12,6 +12,8 @@ import {
   drawLineActive,
   drawArrow,
   drawArrowActive,
+  drawFlatArrow,
+  drawFlatArrowActive,
   drawOval,
   drawOvalActive,
   drawRectangle,
@@ -103,6 +105,14 @@ const DrawDesk = ({
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawArrowActive(ctx, figure)
+        }
+      }
+
+      if (figure.type === 'flat_arrow') {
+        drawFlatArrow(ctx, figure, updateRainbowColorDeg)
+
+        if (activeFigureInfo && figure.id === activeFigureInfo.id) {
+          drawFlatArrowActive(ctx, figure)
         }
       }
 

@@ -4,6 +4,7 @@ import {
   applySoftSnap,
   applyAspectRatioLock,
   calcPointsArrow,
+  calcSegmentsFlatArrow,
 } from './general.js';
 
 import { dotMargin, figureMinScale, widthList } from '../constants.js'
@@ -78,6 +79,25 @@ const isOnArrow = (x, y, figure) => {
   return isOnPolygon(x, y, figurePoints)
 }
 
+const isOnFlatArrow = (x, y, figure) => {
+  const { points, widthIndex } = figure
+
+  const baseTolerance = 5;
+  const tolerance = baseTolerance + widthList[widthIndex].figure_size / 2
+
+  const [shaftSegment, headTopSegment, headBottomSegment] = calcSegmentsFlatArrow(points, widthIndex)
+
+  const shaftDistance      = pointToSegmentDistance(x, y, shaftSegment[0], shaftSegment[1]);
+  const headTopDistance    = pointToSegmentDistance(x, y, headTopSegment[0], headTopSegment[1]);
+  const headBottomDistance = pointToSegmentDistance(x, y, headBottomSegment[0], headBottomSegment[1]);
+
+  const closeToShaft      = shaftDistance <= tolerance;
+  const closeToHeadTop    = headTopDistance <= tolerance;
+  const closeToHeadBottom = headBottomDistance <= tolerance;
+
+  return (closeToShaft || closeToHeadTop || closeToHeadBottom)
+}
+
 const isOnOval = (x, y, figure) => {
   const { points } = figure
 
@@ -136,11 +156,7 @@ const isOnRectangle = (x, y, figure) => {
   const closeToLeftEdge   = distLeft <= tolerance && withinVerticalBounds;
   const closeToRightEdge  = distRight <= tolerance && withinVerticalBounds;
 
-  if (closeToTopEdge || closeToBottomEdge || closeToLeftEdge || closeToRightEdge) {
-    return true;
-  }
-
-  return false
+  return (closeToTopEdge || closeToBottomEdge || closeToLeftEdge || closeToRightEdge)
 }
 
 const isOverText = (x, y, figure) => {
@@ -213,6 +229,8 @@ export const isOnFigure = (x, y, figure) => {
   switch (figure.type) {
     case 'arrow':
       return isOnArrow(x, y, figure)
+    case 'flat_arrow':
+      return isOnFlatArrow(x, y, figure)
     case 'rectangle':
       return isOnRectangle(x, y, figure)
     case 'oval':
@@ -341,6 +359,20 @@ const isSegmentTouchArrow = (segmentPoints, figure) => {
   return isSegmentIntersectCurve(segmentPoints, figurePoints)
 }
 
+const isSegmentTouchFlatArrow = (segmentPoints, figure) => {
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (isOnFlatArrow(eraseAtX, eraseAtY, figure)) {
+    return true
+  }
+
+  const [shaftSegment, headTopSegment, headBottomSegment] = calcSegmentsFlatArrow(figure.points, figure.widthIndex)
+
+  return isSegmentIntersectCurve(segmentPoints, shaftSegment) ||
+         isSegmentIntersectCurve(segmentPoints, headTopSegment) ||
+         isSegmentIntersectCurve(segmentPoints, headBottomSegment)
+}
+
 const isSegmentTouchRectangle = (segmentPoints, figure) => {
   const { points } = figure
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
@@ -423,6 +455,8 @@ export const areFiguresIntersecting = (eraserFigure, figure) => {
       return isSegmentTouchCurve(eraserFigure.points, figure)
     case 'arrow':
       return isSegmentTouchArrow(eraserFigure.points, figure)
+    case 'flat_arrow':
+      return isSegmentTouchFlatArrow(eraserFigure.points, figure)
     case 'rectangle':
       return isSegmentTouchRectangle(eraserFigure.points, figure)
     case 'oval':
@@ -440,6 +474,7 @@ export const getDotNameOnFigure = (x, y, figure) => {
   switch (figure.type) {
     case 'line':
     case 'arrow':
+    case 'flat_arrow':
       return isOnTwoDots(x, y, figure) // ['pointA', 'pointB', null]
     case 'oval':
     case 'rectangle':
@@ -482,7 +517,7 @@ const anchorPoints = {
 
 export const resizeFigure = (figure, resizingDotName, { x, y, isShiftPressed }) => {
   if (isShiftPressed) {
-    if (['line', 'arrow'].includes(figure.type)) {
+    if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
       let pointA = figure.points[0];
       let pointB = figure.points[1];
 

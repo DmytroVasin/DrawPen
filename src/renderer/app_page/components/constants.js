@@ -22,7 +22,7 @@ export const highlighterAlpha = 0.35;
 export const eraserAlpha = 0.5;
 
 export const brushList = ['pen', 'fadepen'];
-export const shapeList = ['arrow', 'rectangle', 'oval', 'line'];
+export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'oval', 'line'];
 
 export const colorList = [
   { color: '#000000', name: 'color_rainbow' },

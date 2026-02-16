@@ -286,6 +286,54 @@ export const calcPointsArrow = (points, widthIndex) => {
   return figurePoints
 }
 
+export const calcSegmentsFlatArrow = (points, widthIndex) => {
+  const minArrowLength = 20;
+  const arrowSetup = [
+    { max_scale_length: 70,  max_head_len: 17, max_head_half: 8 },
+    { max_scale_length: 92,  max_head_len: 24, max_head_half: 11 },
+    { max_scale_length: 121, max_head_len: 33, max_head_half: 15 },
+    { max_scale_length: 150, max_head_len: 42, max_head_half: 19 },
+  ]
+
+  const arrow = arrowSetup[widthIndex]
+
+  const [pointA, pointB] = points;
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+  const rawLength = Math.hypot(diffX, diffY);
+
+  const cos = diffX / rawLength;
+  const sin = diffY / rawLength;
+
+  const length = Math.max(rawLength, minArrowLength);
+  const scaleFactor = Math.min(length / arrow.max_scale_length, 1)
+
+  const headLen = arrow.max_head_len * scaleFactor
+  const headHalf = arrow.max_head_half * scaleFactor
+  const headBaseX = length - headLen
+
+  function transformPoint([x, y]) {
+    return [
+      startX + x * cos - y * sin,
+      startY + x * sin + y * cos
+    ];
+  }
+
+  const shaftStart = transformPoint([0, 0]);
+  const tip        = transformPoint([length, 0]);
+  const headTop    = transformPoint([headBaseX, -headHalf]);
+  const headBottom = transformPoint([headBaseX, headHalf]);
+
+  return [
+    [shaftStart, tip],
+    [tip, headTop],
+    [tip, headBottom],
+  ];
+}
+
 export const isSmallArrowFigure = (points, widthIndex) => {
   const [startPoint, endPoint] = points;
 
