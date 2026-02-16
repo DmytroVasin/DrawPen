@@ -5,6 +5,7 @@ import {
   calcPointsArrow,
   buildArrowArcSegments,
   isSmallArrowFigure,
+  calcPointHandWrittenArrow,
 } from '../../utils/general.js';
 import {
   colorList,
@@ -305,6 +306,20 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 
 export const drawArrowActive = (ctx, figure) => {
   drawDotsForFigure(ctx, figure)
+}
+
+export const drawHandWrittenArrow = (ctx, figure, updateRainbowColorDeg) => {
+  const { points, widthIndex } = figure;
+
+  const widthInfo = widthList[widthIndex]
+  const [color] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
+
+  const arrowPoints = calcPointHandWrittenArrow(points, widthIndex);
+
+  const path2DData = getPerfectPath2D(arrowPoints, { size: widthInfo.figure_size });
+
+  ctx.fillStyle = color;
+  ctx.fill(path2DData);
 }
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg) => {

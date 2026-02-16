@@ -341,3 +341,74 @@ export const buildArrowArcSegments = (arrowPoints, widthIndex) => {
     };
   });
 }
+
+export const calcPointHandWrittenArrow = (points, widthIndex) => {
+  const ARROW_BASE_HEAD_LEN = 100;
+  const ARROW_HEAD_MAX_SCALE_BY_WIDTH = [0.4, 0.5, 0.6, 0.7];
+  const ARROW_HEAD_RATIO = 0.5;
+
+  const arrowHeadSetup = [
+    [0, 0],
+    [25, 0],
+    [48, 0],
+    [55, -2],
+    [58, -5],
+    [55, -7],
+    [48, -10],
+    [0, -30],
+    [0, -30],
+    [0, -30],
+    [93, -5],
+    [98, -3],
+    [100, 0],
+    [100, 0],
+    [100, 0],
+    [98, 3],
+    [93, 5],
+    [25, 25],
+    [18, 28],
+  ];
+
+  const minArrowLength = 20;
+  const [pointA, pointB] = points;
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+  const rawLength = Math.hypot(diffX, diffY);
+
+  const cos = diffX / rawLength;
+  const sin = diffY / rawLength;
+
+  const length = Math.max(rawLength, minArrowLength);
+
+  const maxHeadScale = ARROW_HEAD_MAX_SCALE_BY_WIDTH[widthIndex];
+  const maxHeadLen = ARROW_BASE_HEAD_LEN * maxHeadScale;
+  const headLen = Math.min(length * ARROW_HEAD_RATIO, maxHeadLen);
+  const headScale = headLen / ARROW_BASE_HEAD_LEN;
+  const tailLen = length - headLen;
+
+  function transformPoint([x, y]) {
+    return [
+      startX + x * cos - y * sin,
+      startY + x * sin + y * cos,
+    ];
+  }
+
+  const arrowPoints = [
+    transformPoint([0, 0]),
+    transformPoint([tailLen, 0]),
+  ];
+
+  arrowHeadSetup.forEach(([x, y]) => {
+    const localX = x * headScale;
+    const localY = y * headScale;
+
+    arrowPoints.push(
+      transformPoint([tailLen + localX, localY])
+    );
+  });
+
+  return arrowPoints;
+}

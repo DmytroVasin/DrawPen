@@ -86,14 +86,318 @@ const Application = (settings) => {
 
   let initialFigures = []
 
+
+
+const TEMPLATE_POINTS = [
+  // tail (goes into negative x)
+  [-60, 0],
+  [-40, 0],
+  [-20, 0],
+
+  // arrowHeadSetup (0..100)
+    [0, 0],
+    [25, 0],
+    [48, 0],
+    [55, -2],
+    [58, -5],
+    [55, -7],
+    [48, -10],
+    [0, -30],
+    [0, -30],
+    [0, -30],
+    [93, -5],
+    [98, -3],
+    [100, 0],
+    [100, 0],
+    [100, 0],
+    [98, 3],
+    [93, 5],
+    [25, 25],
+    [18, 28],
+];
+
+const makeArrowFigure = (start, end, opts = {}) => {
+  const [sx, sy] = start;
+  const [ex, ey] = end;
+
+  const dx = ex - sx;
+  const dy = ey - sy;
+  const targetLen = Math.hypot(dx, dy);
+
+  if (targetLen === 0) {
+    // Дегенеративний кейс — просто повернемо шаблон біля start
+    return {
+      id: opts.id ?? Date.now(),
+      type: 'pen',
+      colorIndex: opts.colorIndex ?? 1,
+      widthIndex: opts.widthIndex ?? 0,
+      rainbowColorDeg: (Math.random() * 360),
+      points: [start, end],
+    };
+  }
+
+  // Якір шаблону: "хвіст" = перша точка
+  const [tx0, ty0] = TEMPLATE_POINTS[0];
+
+  // "Голова" шаблону: точка найдальша від хвоста (стабільніше, ніж брати last)
+  let headIdx = 0;
+  let bestD2 = -1;
+  for (let i = 0; i < TEMPLATE_POINTS.length; i++) {
+    const [x, y] = TEMPLATE_POINTS[i];
+    const ddx = x - tx0;
+    const ddy = y - ty0;
+    const d2 = ddx * ddx + ddy * ddy;
+    if (d2 > bestD2) { bestD2 = d2; headIdx = i; }
+  }
+  const [txh, tyh] = TEMPLATE_POINTS[headIdx];
+
+  const templateVecX = txh - tx0;
+  const templateVecY = tyh - ty0;
+  const templateLen = Math.hypot(templateVecX, templateVecY) || 1;
+
+  const scale = targetLen / templateLen;
+
+  // Кут повороту: templateVec -> targetVec
+  const angTemplate = Math.atan2(templateVecY, templateVecX);
+  const angTarget = Math.atan2(dy, dx);
+  const ang = angTarget - angTemplate;
+
+  const cos = Math.cos(ang);
+  const sin = Math.sin(ang);
+
+  const points = TEMPLATE_POINTS.map(([x, y]) => {
+    // у координати відносно хвоста
+    let px = x - tx0;
+    let py = y - ty0;
+
+    // масштаб
+    px *= scale;
+    py *= scale;
+
+    // поворот
+    const rx = px * cos - py * sin;
+    const ry = px * sin + py * cos;
+
+    // перенос у start
+    return [Math.round(rx + sx), Math.round(ry + sy)];
+  });
+
+  return {
+    id: Date.now(),
+    type: 'pen',
+    colorIndex: opts.colorIndex ?? 1,
+    widthIndex: opts.widthIndex ?? 0,
+    rainbowColorDeg: (Math.random() * 360),
+    points,
+  };
+}
+
+
+
+
   if (process.env.NODE_ENV === 'development') {
+    // const myPoints = [
+    //   [120, 520], [140, 520], [160, 520], [180, 520], [200, 520], [220, 520],
+    //   [240, 520], [260, 520], [280, 520], [300, 520], [320, 520], [340, 520],
+    //   [360, 520], [380, 520], [400, 520], [420, 520], [440, 520], [460, 520],
+    //   [440, 500], [460, 520], [440, 540]
+    // ]
+
     initialFigures = [
-      { id: Date.now() + 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      { id: Date.now() + 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
-      { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      // { id: Date.now() + 0, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 200], [600, 200]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: Date.now() + 1, type: 'arrow',     colorIndex: 2, widthIndex: 1, points: [[200, 300], [600, 300]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: Date.now() + 2, type: 'arrow',     colorIndex: 3, widthIndex: 2, points: [[200, 400], [600, 400]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: Date.now() + 3, type: 'arrow',     colorIndex: 4, widthIndex: 3, points: [[200, 500], [600, 500]], rainbowColorDeg: (Math.random() * 360) },
+      // { id: Date.now() + 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
+      // { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 2, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
+      // { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+
+
+
+      // {
+      //   id: 1771081297885,
+      //   type: 'pen',
+      //   colorIndex: 1,
+      //   widthIndex: 0,
+      //   rainbowColorDeg: 123.05765013683666,
+      //   ratio: 1,
+      //   points: [
+      //     [89, 380],
+      //     [91, 377],
+      //     [101, 364],
+      //     [107, 357],
+      //     [118, 345],
+      //     [128, 334],
+      //     [137, 325],
+      //     [148, 313],
+      //     [160, 303],
+      //     [170, 294],
+      //     [175, 289],
+      //     [179, 284],
+      //     [183, 280],
+      //     [186, 277],
+      //     [188, 274],
+      //     [190, 271],
+      //     [191, 269],
+      //     [191, 268],
+      //     [191, 267],
+      //     [191, 265],
+      //     [190, 265],
+      //     [188, 265],
+      //     [185, 265],
+      //     [181, 266],
+      //     [176, 268],
+      //     [171, 271],
+      //     [163, 276],
+      //     [160, 279],
+      //     [158, 280],
+      //     [156, 282],
+      //     [154, 283],
+      //     [153, 284],
+      //     [154, 284],
+      //     [158, 281],
+      //     [164, 276],
+      //     [171, 271],
+      //     [188, 260],
+      //     [202, 251],
+      //     [207, 248],
+      //     [211, 246],
+      //     [214, 244],
+      //     [217, 242],
+      //     [220, 241],
+      //     [223, 240],
+      //     [222, 242],
+      //     [220, 245],
+      //     [217, 249],
+      //     [209, 260],
+      //     [205, 267],
+      //     [202, 273],
+      //     [198, 284],
+      //     [194, 294],
+      //     [193, 300],
+      //     [191, 306],
+      //     [190, 310],
+      //     [189, 313],
+      //     [189, 316],
+      //     [189, 317]
+      //   ]
+      // },
+      // {
+      //   id: 1771081301451,
+      //   type: 'pen',
+      //   colorIndex: 1,
+      //   widthIndex: 0,
+      //   rainbowColorDeg: 123.05765013683666,
+      //   ratio: 1,
+      //   points: [
+      //     [178, 413],
+      //     [187, 406],
+      //     [196, 398],
+      //     [205, 391],
+      //     [215, 380],
+      //     [228, 368],
+      //     [241, 355],
+      //     [249, 347],
+      //     [256, 339],
+      //     [263, 331],
+      //     [268, 324],
+      //     [273, 318],
+      //     [277, 312],
+      //     [278, 310],
+      //     [277, 309],
+      //     [275, 310],
+      //     [265, 315],
+      //     [260, 318],
+      //     [255, 321],
+      //     [251, 325],
+      //     [248, 328],
+      //     [241, 334],
+      //     [240, 335],
+      //     [238, 336],
+      //     [237, 337],
+      //     [236, 338],
+      //     [239, 335],
+      //     [246, 327],
+      //     [254, 319],
+      //     [264, 310],
+      //     [275, 301],
+      //     [286, 293],
+      //     [296, 285],
+      //     [304, 280],
+      //     [312, 274],
+      //     [317, 270],
+      //     [322, 267],
+      //     [323, 266],
+      //     [323, 268],
+      //     [320, 272],
+      //     [317, 277],
+      //     [308, 289],
+      //     [303, 296],
+      //     [299, 302],
+      //     [294, 310],
+      //     [290, 316],
+      //     [286, 321],
+      //     [283, 327],
+      //     [281, 332],
+      //     [278, 338],
+      //     [277, 340]
+      //   ]
+      // },
+
+
+      { id: Date.now() + 1, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 500], [220, 500]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 2, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 530], [250, 530]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 3, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 560], [275, 560]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 4, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 590], [300, 590]], rainbowColorDeg: (Math.random() * 360) },
+
+      { id: Date.now() + 5, type: 'arrow',     colorIndex: 1, widthIndex: 1, points: [[200, 620], [220, 620]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 6, type: 'arrow',     colorIndex: 1, widthIndex: 1, points: [[200, 650], [250, 650]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 7, type: 'arrow',     colorIndex: 1, widthIndex: 1, points: [[200, 680], [275, 680]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 8, type: 'arrow',     colorIndex: 1, widthIndex: 1, points: [[200, 710], [300, 710]], rainbowColorDeg: (Math.random() * 360) },
+
+      { id: Date.now() + 9, type: 'arrow',     colorIndex: 1, widthIndex: 2, points: [[200, 740], [220, 740]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 10, type: 'arrow',     colorIndex: 1, widthIndex: 2, points: [[200, 770], [250, 770]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 11, type: 'arrow',     colorIndex: 1, widthIndex: 2, points: [[200, 800], [275, 800]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 12, type: 'arrow',     colorIndex: 1, widthIndex: 2, points: [[200, 830], [300, 830]], rainbowColorDeg: (Math.random() * 360) },
+
+      { id: Date.now() + 13, type: 'arrow',     colorIndex: 1, widthIndex: 3, points: [[200, 860], [220, 860]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 14, type: 'arrow',     colorIndex: 1, widthIndex: 3, points: [[200, 890], [250, 890]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 15, type: 'arrow',     colorIndex: 1, widthIndex: 3, points: [[200, 920], [275, 920]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 16, type: 'arrow',     colorIndex: 1, widthIndex: 3, points: [[200, 950], [300, 950]], rainbowColorDeg: (Math.random() * 360) },
+
+
+
+      { id: Date.now() + 17, type: 'arrow',     colorIndex: 1, widthIndex: 0, points: [[200, 1000], [800, 1000]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 18, type: 'arrow',     colorIndex: 1, widthIndex: 1, points: [[200, 1050], [800, 1050]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 19, type: 'arrow',     colorIndex: 1, widthIndex: 2, points: [[200, 1120], [800, 1120]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 20, type: 'arrow',     colorIndex: 1, widthIndex: 3, points: [[200, 1225], [800, 1225]], rainbowColorDeg: (Math.random() * 360) },
+
+
+
+
+
+
+
     ]
+
+    initialFigures.push(makeArrowFigure([0, 0], [0, 0], { widthIndex: 0 }));
+    initialFigures.push(makeArrowFigure([0, 0], [100, 0], { widthIndex: 0 }));
+    initialFigures.push(makeArrowFigure([100, 200], [200, 200], { widthIndex: 0 }));
+    initialFigures.push(makeArrowFigure([100, 250], [400, 250], { widthIndex: 0 }));
+    initialFigures.push(makeArrowFigure([100, 300], [400, 300], { widthIndex: 0 }));
+
+    TEMPLATE_POINTS.forEach((point, index) => {
+      initialFigures.push({
+        id: Date.now() + 6 + index,
+        type: 'line',
+        colorIndex: 2,
+        widthIndex: 0,
+        points: [[500 + point[0] * 4, 400 + point[1] * 4], [500 + point[0] * 4, 401 + point[1] * 4]],
+        rainbowColorDeg: 250
+      });
+    });
+
   }
 
   const [rainbowColorDeg, updateRainbowColorDeg] = useState(initialColorDeg);
@@ -127,7 +431,9 @@ const Application = (settings) => {
   const [secondaryColorIndex, setSecondaryColorIndex] = useState(initialSecondaryColorIndex);
   const [toastInfo, setToastInfo] = useState(null);
   const [fadeOpacity, setFadeOpacity] = useState(1.0);
-
+  useEffect(() => {
+    console.log('All Figures: ', allFigures);
+  }, [allFigures]);
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
