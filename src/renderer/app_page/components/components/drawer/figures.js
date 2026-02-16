@@ -3,6 +3,9 @@ import {
   getLazyPoints,
   distanceBetweenPoints,
   calcPointsArrow,
+  buildArrowArcSegments,
+  isSmallArrowFigure,
+  calcPointHandWrittenArrow,
 } from '../../utils/general.js';
 import {
   colorList,
@@ -264,13 +267,16 @@ export const drawRainbowHighlighter = (ctx, offscreenCanvas, figure, updateRainb
 
 export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
   const { points, widthIndex } = figure;
-  const { figurePoints, tailPoints } = calcPointsArrow(points, widthIndex);
-  const [color, _width] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
 
-  let shadowColor = '#222';
-  let shadowBlur = 4;
-  let shadowOffsetX = 1;
-  let shadowOffsetY = 2;
+  const isSmallArrow = isSmallArrowFigure(points, widthIndex);
+  const figurePoints = calcPointsArrow(points, widthIndex);
+  const arcSegments = buildArrowArcSegments(figurePoints, widthIndex);
+
+  const [color] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
+  const shadowColor = '#222';
+  const shadowBlur = 2;
+  const shadowOffsetX = 1;
+  const shadowOffsetY = 2;
 
   ctx.fillStyle = color;
   ctx.shadowColor = shadowColor;
@@ -279,17 +285,17 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
   ctx.shadowOffsetY = shadowOffsetY;
 
   ctx.beginPath();
+  ctx.moveTo(...figurePoints[0]);
 
-  figurePoints.forEach((point, index) => {
-    if (index === 0) {
-      ctx.moveTo(...point)
-      return
+  arcSegments.forEach(({ entryPoint, cornerPoint, exitPoint, arcRadius }) => {
+    if (isSmallArrow) {
+      ctx.lineTo(...cornerPoint);
+      return;
     }
 
-    ctx.lineTo(...point)
+    ctx.lineTo(...entryPoint);
+    ctx.arcTo(cornerPoint[0], cornerPoint[1], exitPoint[0], exitPoint[1], arcRadius);
   });
-
-  ctx.bezierCurveTo(...tailPoints[0], ...tailPoints[1], ...figurePoints[0]);
 
   ctx.closePath();
   ctx.fill();
@@ -300,6 +306,20 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
 
 export const drawArrowActive = (ctx, figure) => {
   drawDotsForFigure(ctx, figure)
+}
+
+export const drawHandWrittenArrow = (ctx, figure, updateRainbowColorDeg) => {
+  const { points, widthIndex } = figure;
+
+  const widthInfo = widthList[widthIndex]
+  const [color] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg)
+
+  const arrowPoints = calcPointHandWrittenArrow(points, widthIndex);
+
+  const path2DData = getPerfectPath2D(arrowPoints, { size: widthInfo.figure_size });
+
+  ctx.fillStyle = color;
+  ctx.fill(path2DData);
 }
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg) => {

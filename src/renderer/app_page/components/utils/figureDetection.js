@@ -3,7 +3,7 @@ import {
   segmentsIntersect,
   applySoftSnap,
   applyAspectRatioLock,
-  calcPointsArrow,
+  calcPointHandWrittenArrow,
 } from './general.js';
 
 import { dotMargin, figureMinScale, widthList } from '../constants.js'
@@ -73,7 +73,7 @@ const isOnPolygon = (x, y, points) => {
 const isOnArrow = (x, y, figure) => {
   const { points, widthIndex } = figure
 
-  const { figurePoints } = calcPointsArrow(points, widthIndex)
+  const figurePoints = calcPointHandWrittenArrow(points, widthIndex)
 
   return isOnPolygon(x, y, figurePoints)
 }
@@ -211,7 +211,7 @@ const isOnTextDots = (x, y, figure) => {
 
 export const isOnFigure = (x, y, figure) => {
   switch (figure.type) {
-    case 'arrow':
+    case 'arrow': /// TODO: <<<<<<<<<<<<<<<<
       return isOnArrow(x, y, figure)
     case 'rectangle':
       return isOnRectangle(x, y, figure)
@@ -336,7 +336,7 @@ const isSegmentTouchArrow = (segmentPoints, figure) => {
     return true
   }
 
-  const { figurePoints } = calcPointsArrow(points, figure.widthIndex)
+  const figurePoints = calcPointHandWrittenArrow(points, figure.widthIndex)
 
   return isSegmentIntersectCurve(segmentPoints, figurePoints)
 }
@@ -421,7 +421,7 @@ export const areFiguresIntersecting = (eraserFigure, figure) => {
     case 'highlighter':
     case 'fadepen':
       return isSegmentTouchCurve(eraserFigure.points, figure)
-    case 'arrow':
+    case 'arrow': // TODO: <<<<<<<<<<<
       return isSegmentTouchArrow(eraserFigure.points, figure)
     case 'rectangle':
       return isSegmentTouchRectangle(eraserFigure.points, figure)

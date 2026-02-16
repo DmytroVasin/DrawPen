@@ -11,6 +11,7 @@ import {
   drawLine,
   drawLineActive,
   drawArrow,
+  drawHandWrittenArrow,
   drawArrowActive,
   drawOval,
   drawOvalActive,
@@ -99,7 +100,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'arrow') {
-        drawArrow(ctx, figure, updateRainbowColorDeg)
+        drawHandWrittenArrow(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawArrowActive(ctx, figure)
