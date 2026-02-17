@@ -13,7 +13,6 @@ export const fadeOutDestroyAfterMs = 300;
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
 export const minObjectDistance = 5; // Minimum length of drawn object
-export const dotMargin = 5; // Margin from figure to dot
 export const figureMinScale = 0.2;
 export const pastCooldownMs = 300;
 export const escDoubleTapMs = 300;
@@ -23,6 +22,13 @@ export const eraserAlpha = 0.5;
 
 export const brushList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'oval', 'line'];
+
+export const dotRadius = 5;
+export const dotStrokeWidth = 1;
+export const dotHoverRadius = 10;
+export const dotBorderColor = '#6CC3E2';
+export const dotHoverColor = dotBorderColor + '99';
+export const dotTextMargin = 5;
 
 export const colorList = [
   { color: '#000000', name: 'color_rainbow' },

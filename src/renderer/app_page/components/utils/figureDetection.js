@@ -7,10 +7,10 @@ import {
   calcSegmentsFlatArrow,
 } from './general.js';
 
-import { dotMargin, figureMinScale, widthList } from '../constants.js'
+import { dotTextMargin, figureMinScale, widthList, dotHoverRadius } from '../constants.js'
 
 const withinRadius = (x, y) => {
-  const radius = 10
+  const radius = dotHoverRadius
 
   return (point) => {
     const [pointX, pointY] = point;
@@ -163,10 +163,10 @@ const isOverText = (x, y, figure) => {
   const { points, width, height, scale } = figure
   const startAt = points[0]
 
-  const minX = startAt[0] - dotMargin;
-  const maxX = startAt[0] + width * scale + dotMargin;
-  const minY = startAt[1] - dotMargin;
-  const maxY = startAt[1] + height * scale + dotMargin;
+  const minX = startAt[0] - dotTextMargin;
+  const maxX = startAt[0] + width * scale + dotTextMargin;
+  const minY = startAt[1] - dotTextMargin;
+  const maxY = startAt[1] + height * scale + dotTextMargin;
 
   const withinHorizontalBounds = x >= minX && x <= maxX;
   const withinVerticalBounds = y >= minY && y <= maxY;
@@ -210,10 +210,10 @@ const isOnTextDots = (x, y, figure) => {
   const { points, width, height, scale } = figure
   const startAt = points[0];
 
-  const startX = startAt[0] - dotMargin
-  const startY = startAt[1] - dotMargin
-  const endX = startAt[0] + width * scale + dotMargin
-  const endY = startAt[1] + height * scale + dotMargin
+  const startX = startAt[0] - dotTextMargin
+  const startY = startAt[1] - dotTextMargin
+  const endX = startAt[0] + width * scale + dotTextMargin
+  const endY = startAt[1] + height * scale + dotTextMargin
 
   const inRadius = withinRadius(x, y)
 
@@ -498,20 +498,20 @@ export const dragFigure = (figure, oldCoordinates, newCoordinates) => {
 
 const anchorPoints = {
   pointAScale: (f) => [
-    f.points[0][0] - dotMargin,
-    f.points[0][1] - dotMargin
+    f.points[0][0] - dotTextMargin,
+    f.points[0][1] - dotTextMargin
   ],
   pointBScale: (f) => [
-    f.points[0][0] + f.width * f.scale + dotMargin,
-    f.points[0][1] + f.height * f.scale + dotMargin
+    f.points[0][0] + f.width * f.scale + dotTextMargin,
+    f.points[0][1] + f.height * f.scale + dotTextMargin
   ],
   pointCScale: (f) => [
-    f.points[0][0] - dotMargin,
-    f.points[0][1] + f.height * f.scale + dotMargin
+    f.points[0][0] - dotTextMargin,
+    f.points[0][1] + f.height * f.scale + dotTextMargin
   ],
   pointDScale: (f) => [
-    f.points[0][0] + f.width * f.scale + dotMargin,
-    f.points[0][1] - dotMargin
+    f.points[0][0] + f.width * f.scale + dotTextMargin,
+    f.points[0][1] - dotTextMargin
   ],
 };
 

@@ -745,20 +745,33 @@ const Application = (settings) => {
     return getDotNameOnFigure(x, y, activeFigure)
   }
 
+  const setActiveHoveredDotName = (hoveredDotName) => {
+    setActiveFigureInfo(prev => {
+      if (!prev) return prev;
+      if (prev.hoveredDotName === hoveredDotName) return prev;
+
+      return { ...prev, hoveredDotName };
+    });
+  }
+
   const setMouseCursor = (x, y) => {
     if (activeFigureInfo) {
       const activeFigure = findActiveFigure()
       const resizingDotName = getDotNameAtMousePosition(x, y);
 
       if (resizingDotName) {
+        setActiveHoveredDotName(resizingDotName);
         setCursorType('move');
         return
       }
 
       if (isOverFigure(x, y, activeFigure)) {
+        setActiveHoveredDotName(null);
         setCursorType('move');
         return
       }
+
+      setActiveHoveredDotName(null);
     }
 
     if ([...brushList, ...shapeList, 'text'].includes(activeTool)) {
@@ -806,12 +819,12 @@ const Application = (settings) => {
       const resizingDotName = getDotNameAtMousePosition(x, y);
 
       if (resizingDotName) {
-        setActiveFigureInfo({ ...activeFigureInfo, resizing: true, resizingDotName: resizingDotName });
+        setActiveFigureInfo(prev => ({ ...prev, resizing: true, resizingDotName: resizingDotName, hoveredDotName: null }));
         return;
       }
 
       if (isOverFigure(x, y, activeFigure)) {
-        setActiveFigureInfo({ ...activeFigureInfo, dragging: true, x, y });
+        setActiveFigureInfo(prev => ({ ...prev, dragging: true, x, y, hoveredDotName: null }));
         return;
       }
 
@@ -915,7 +928,7 @@ const Application = (settings) => {
         resizeFigure(activeFigure, activeFigureInfo.resizingDotName, { x, y, isShiftPressed })
       }
 
-      setActiveFigureInfo({ ...activeFigureInfo, x, y });
+      setActiveFigureInfo(prev => ({ ...prev, x, y }));
       setAllFigures([...allFigures]);
       return
     }

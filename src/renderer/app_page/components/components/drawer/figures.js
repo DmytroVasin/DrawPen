@@ -11,7 +11,12 @@ import {
   colorList,
   widthList,
   rainbowScaleFactor,
-  dotMargin,
+  dotTextMargin,
+  dotRadius,
+  dotStrokeWidth,
+  dotHoverRadius,
+  dotBorderColor,
+  dotHoverColor,
   erasedFigureColor,
   eraserTailColor,
   highlighterAlpha,
@@ -26,23 +31,23 @@ function fadeAlpha(opacity) {
   return Math.round(opacity * 255).toString(16).padStart(2, '0');
 }
 
-const drawDot = (ctx, point) => {
+const drawDot = (ctx, point, isHovered) => {
   const [x, y] = point;
 
-  ctx.beginPath();
-  ctx.arc(x, y, 9, 0, Math.PI*2, true);
-  ctx.fillStyle = '#DDD';
-  ctx.fill();
+  if (isHovered) {
+    ctx.beginPath();
+    ctx.arc(x, y, dotHoverRadius, 0, Math.PI * 2, true);
+    ctx.fillStyle = dotHoverColor;
+    ctx.fill();
+  }
 
   ctx.beginPath();
-  ctx.arc(x, y, 8, 0, Math.PI*2, true);
+  ctx.arc(x, y, dotRadius, 0, Math.PI * 2, true);
   ctx.fillStyle = '#FFF';
   ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(x, y, 6, 0, Math.PI*2, true);
-  ctx.fillStyle = '#6CC3E2';
-  ctx.fill();
+  ctx.lineWidth = dotStrokeWidth;
+  ctx.strokeStyle = dotBorderColor;
+  ctx.stroke();
 }
 
 const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg) => {
@@ -304,8 +309,8 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg) => {
   ctx.shadowColor = 'transparent'; // Reset shadows
 }
 
-export const drawArrowActive = (ctx, figure) => {
-  drawDotsForFigure(ctx, figure)
+export const drawArrowActive = (ctx, figure, hoveredDot) => {
+  drawDotsForFigure(ctx, figure, hoveredDot)
 }
 
 export const drawFlatArrow = (ctx, figure, updateRainbowColorDeg) => {
@@ -317,8 +322,8 @@ export const drawFlatArrow = (ctx, figure, updateRainbowColorDeg) => {
   })
 }
 
-export const drawFlatArrowActive = (ctx, figure) => {
-  drawDotsForFigure(ctx, figure)
+export const drawFlatArrowActive = (ctx, figure, hoveredDot) => {
+  drawDotsForFigure(ctx, figure, hoveredDot)
 }
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
@@ -328,13 +333,13 @@ export const drawLine = (ctx, figure, updateRainbowColorDeg) => {
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawLineActive = (ctx, figure) => {
+export const drawLineActive = (ctx, figure, hoveredDot) => {
   const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth(figure)
 
   drawLineSkeleton(ctx, pointA, pointB, color, width)
 
-  drawDotsForFigure(ctx, figure)
+  drawDotsForFigure(ctx, figure, hoveredDot)
 }
 
 const drawLineSkeleton = (ctx, pointA, pointB, color, width) => {
@@ -358,13 +363,13 @@ export const drawOval = (ctx, figure, updateRainbowColorDeg) => {
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawOvalActive = (ctx, figure) => {
+export const drawOvalActive = (ctx, figure, hoveredDot) => {
   const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth(figure)
 
   drawOvalSkeleton(ctx, pointA, pointB, color, width)
 
-  drawDotsForFigure(ctx, figure)
+  drawDotsForFigure(ctx, figure, hoveredDot)
 }
 
 const drawOvalSkeleton = (ctx, pointA, pointB, color, width) => {
@@ -392,12 +397,12 @@ export const drawRectangle = (ctx, figure, updateRainbowColorDeg) => {
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
 }
 
-export const drawRectangleActive = (ctx, figure) => {
+export const drawRectangleActive = (ctx, figure, hoveredDot) => {
   const [pointA, pointB] = figure.points
   const [color, width] = activeColorAndWidth(figure)
 
   drawRectangleSkeleton(ctx, pointA, pointB, color, width)
-  drawDotsForFigure(ctx, figure)
+  drawDotsForFigure(ctx, figure, hoveredDot)
 }
 
 const drawRectangleSkeleton = (ctx, pointA, pointB, color, width) => {
@@ -479,7 +484,7 @@ export const drawEraserTail = (ctx, figure) => {
   ctx.shadowBlur = 0;
 }
 
-export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
+export const drawText = (ctx, figure, updateRainbowColorDeg, isActive, hoveredDot) => {
   const { points: [startAt], text, scale, width, height } = figure;
 
   const [color, fontSize, font_y_offset_compensation] = detectColorAndFontSize(ctx, figure, updateRainbowColorDeg)
@@ -491,17 +496,17 @@ export const drawText = (ctx, figure, updateRainbowColorDeg, isActive) => {
     const endX = startX + width * scale;
     const endY = startY + height * scale;
 
-    const startXwithMargin = startX - dotMargin
-    const startYwithMargin = startY - dotMargin
-    const endXwithMargin = endX + dotMargin
-    const endYwithMargin = endY + dotMargin
+    const startXwithMargin = startX - dotTextMargin
+    const startYwithMargin = startY - dotTextMargin
+    const endXwithMargin = endX + dotTextMargin
+    const endYwithMargin = endY + dotTextMargin
 
     drawSelectionBox(ctx, startXwithMargin, startYwithMargin, endXwithMargin, endYwithMargin)
 
-    drawDot(ctx, [startXwithMargin, startYwithMargin])
-    drawDot(ctx, [endXwithMargin,   endYwithMargin])
-    drawDot(ctx, [startXwithMargin, endYwithMargin])
-    drawDot(ctx, [endXwithMargin,   startYwithMargin])
+    drawDot(ctx, [startXwithMargin, startYwithMargin], hoveredDot === 'pointAScale')
+    drawDot(ctx, [endXwithMargin,   endYwithMargin],   hoveredDot === 'pointBScale')
+    drawDot(ctx, [startXwithMargin, endYwithMargin],   hoveredDot === 'pointCScale')
+    drawDot(ctx, [endXwithMargin,   startYwithMargin], hoveredDot === 'pointDScale')
 
     // FOR DEV: Обведення прямокутника
     // ctx.strokeStyle = "red";
@@ -537,17 +542,17 @@ const drawSelectionBox = (ctx, startX, startY, endX, endY) => {
   ctx.strokeRect(startX, startY, endX - startX, endY - startY);
 }
 
-const drawDotsForFigure = (ctx, figure) => {
+const drawDotsForFigure = (ctx, figure, hoveredDot) => {
   const [pointA, pointB] = figure.points
 
-  drawDot(ctx, pointA)
-  drawDot(ctx, pointB)
+  drawDot(ctx, pointA, hoveredDot === 'pointA')
+  drawDot(ctx, pointB, hoveredDot === 'pointB')
 
   if (['rectangle', 'oval'].includes(figure.type)) {
     const [startX, startY] = pointA;
     const [endX, endY] = pointB;
 
-    drawDot(ctx, [startX, endY])
-    drawDot(ctx, [endX, startY])
+    drawDot(ctx, [startX, endY], hoveredDot === 'pointC')
+    drawDot(ctx, [endX, startY], hoveredDot === 'pointD')
   }
 }

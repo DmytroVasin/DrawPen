@@ -104,7 +104,7 @@ const DrawDesk = ({
         drawArrow(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawArrowActive(ctx, figure)
+          drawArrowActive(ctx, figure, activeFigureInfo.hoveredDotName)
         }
       }
 
@@ -112,7 +112,7 @@ const DrawDesk = ({
         drawFlatArrow(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawFlatArrowActive(ctx, figure)
+          drawFlatArrowActive(ctx, figure, activeFigureInfo.hoveredDotName)
         }
       }
 
@@ -120,7 +120,7 @@ const DrawDesk = ({
         drawLine(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawLineActive(ctx, figure)
+          drawLineActive(ctx, figure, activeFigureInfo.hoveredDotName)
         }
       }
 
@@ -128,7 +128,7 @@ const DrawDesk = ({
         drawRectangle(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawRectangleActive(ctx, figure)
+          drawRectangleActive(ctx, figure, activeFigureInfo.hoveredDotName)
         }
       }
 
@@ -136,18 +136,20 @@ const DrawDesk = ({
         drawOval(ctx, figure, updateRainbowColorDeg)
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
-          drawOvalActive(ctx, figure)
+          drawOvalActive(ctx, figure, activeFigureInfo.hoveredDotName)
         }
       }
 
       if (figure.type === 'text') {
         let isActive = false;
+        let dotName = null;
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           isActive = true;
+          dotName = activeFigureInfo.hoveredDotName;
         }
 
-        drawText(ctx, figure, updateRainbowColorDeg, isActive)
+        drawText(ctx, figure, updateRainbowColorDeg, isActive, dotName)
       }
     })
 
