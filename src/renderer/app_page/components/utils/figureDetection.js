@@ -486,6 +486,53 @@ export const getDotNameOnFigure = (x, y, figure) => {
   }
 };
 
+export const getDotCoordinates = (figure, dotName) => {
+  if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
+    if (dotName === 'pointA') return figure.points[0];
+    if (dotName === 'pointB') return figure.points[1];
+  }
+
+  if (['rectangle', 'oval'].includes(figure.type)) {
+    const [pointA, pointB] = figure.points;
+
+    if (dotName === 'pointA') return pointA;
+    if (dotName === 'pointB') return pointB;
+    if (dotName === 'pointC') return [pointA[0], pointB[1]];
+    if (dotName === 'pointD') return [pointB[0], pointA[1]];
+  }
+
+  if (figure.type === 'text') {
+    const startAt = figure.points[0];
+    const startX = startAt[0] - dotTextMargin;
+    const startY = startAt[1] - dotTextMargin;
+    const endX = startAt[0] + figure.width * figure.scale + dotTextMargin;
+    const endY = startAt[1] + figure.height * figure.scale + dotTextMargin;
+
+    if (dotName === 'pointAScale') return [startX, startY];
+    if (dotName === 'pointBScale') return [endX, endY];
+    if (dotName === 'pointCScale') return [startX, endY];
+    if (dotName === 'pointDScale') return [endX, startY];
+  }
+
+  return null;
+}
+
+export const getDotOffsetCoordinates = (figure, dotName, x, y) => {
+  const dotCoordinates = getDotCoordinates(figure, dotName);
+
+  if (!dotCoordinates) {
+    return {
+      offsetX: 0,
+      offsetY: 0,
+    };
+  }
+
+  return {
+    offsetX: x - dotCoordinates[0],
+    offsetY: y - dotCoordinates[1],
+  };
+}
+
 export const dragFigure = (figure, oldCoordinates, newCoordinates) => {
   const offsetX = newCoordinates.x - oldCoordinates.x;
   const offsetY = newCoordinates.y - oldCoordinates.y;
@@ -515,7 +562,12 @@ const anchorPoints = {
   ],
 };
 
-export const resizeFigure = (figure, resizingDotName, { x, y, isShiftPressed }) => {
+export const resizeFigure = (figure, activeFigureInfo, { x, y, isShiftPressed }) => {
+  const { resizingDotName, resizingPointerOffset } = activeFigureInfo;
+
+  x -= resizingPointerOffset.offsetX;
+  y -= resizingPointerOffset.offsetY;
+
   if (isShiftPressed) {
     if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
       let pointA = figure.points[0];

@@ -21,6 +21,7 @@ import {
   isOverFigure,
   areFiguresIntersecting,
   getDotNameOnFigure,
+  getDotOffsetCoordinates,
   dragFigure,
   resizeFigure,
   moveToCoordinates,
@@ -754,6 +755,39 @@ const Application = (settings) => {
     });
   }
 
+  const getResizeCursorByFigure = (figure, resizingDotName) => {
+    if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
+      return 'pointer';
+    }
+
+    if (['rectangle', 'oval'].includes(figure.type)) {
+      const [pointA, pointB] = figure.points;
+      const cornersByDotName = {
+        pointA,
+        pointB,
+        pointC: [pointA[0], pointB[1]],
+        pointD: [pointB[0], pointA[1]],
+      };
+
+      const activeCorner = cornersByDotName[resizingDotName];
+      const minX = Math.min(pointA[0], pointB[0]);
+      const minY = Math.min(pointA[1], pointB[1]);
+      const isLeft = activeCorner[0] === minX;
+      const isTop = activeCorner[1] === minY;
+
+      const isPrimaryDiagonal = isLeft === isTop; // top-left (true,true), bottom-right (false,false)
+
+      return isPrimaryDiagonal ? 'nwse-resize' : 'nesw-resize';
+    }
+
+    if (figure.type === 'text') {
+      if (['pointAScale', 'pointBScale'].includes(resizingDotName)) return 'nwse-resize';
+      if (['pointCScale', 'pointDScale'].includes(resizingDotName)) return 'nesw-resize';
+    }
+
+    return 'crosshair';
+  }
+
   const setMouseCursor = (x, y) => {
     if (activeFigureInfo) {
       const activeFigure = findActiveFigure()
@@ -761,7 +795,7 @@ const Application = (settings) => {
 
       if (resizingDotName) {
         setActiveHoveredDotName(resizingDotName);
-        setCursorType('move');
+        setCursorType(getResizeCursorByFigure(activeFigure, resizingDotName));
         return
       }
 
@@ -819,12 +853,29 @@ const Application = (settings) => {
       const resizingDotName = getDotNameAtMousePosition(x, y);
 
       if (resizingDotName) {
-        setActiveFigureInfo(prev => ({ ...prev, resizing: true, resizingDotName: resizingDotName, hoveredDotName: null }));
+        const resizingPointerOffset = getDotOffsetCoordinates(activeFigure, resizingDotName, x, y);
+
+        setActiveFigureInfo(prev => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            resizing: true,
+            resizingDotName: resizingDotName,
+            resizingPointerOffset: resizingPointerOffset,
+            hoveredDotName: null
+          };
+        });
         return;
       }
 
       if (isOverFigure(x, y, activeFigure)) {
-        setActiveFigureInfo(prev => ({ ...prev, dragging: true, x, y, hoveredDotName: null }));
+        setActiveFigureInfo(prev => {
+          if (!prev) return prev;
+
+          return { ...prev, dragging: true, x, y, hoveredDotName: null };
+        });
+
         return;
       }
 
@@ -925,7 +976,11 @@ const Application = (settings) => {
       }
 
       if (activeFigureInfo.resizing) {
-        resizeFigure(activeFigure, activeFigureInfo.resizingDotName, { x, y, isShiftPressed })
+        resizeFigure(
+          activeFigure,
+          activeFigureInfo,
+          { x, y, isShiftPressed }
+        )
       }
 
       setActiveFigureInfo(prev => ({ ...prev, x, y }));
