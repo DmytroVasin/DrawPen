@@ -167,58 +167,59 @@ const ToolBar = ({
     }
   };
 
+  const isColorControlDisabled = ["laser", "eraser"].includes(activeTool);
+
   return (
     <aside id="toolbar" ref={toolbarRef} className={`${slide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar} title="Close">
           <Icons.Close size={16} />
         </button>
+        <div className="toolbar__buttons_dragger" onMouseDown={onMouseDown}></div>
       </div>
 
       <div className="toolbar__container">
         <div className="toolbar__body">
           <ul className="toolbar__items">
-            <li className={brushList.includes(activeTool) ? "active more_figures" : undefined}>
-              <button onClick={() => pickBrushOrSwitchView()} title={renderBrushTitle()}>
+            <li className={brushList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickBrushOrSwitchView()}>
+              <button title={renderBrushTitle()}>
                 {allIcons[lastActiveBrush]}
               </button>
             </li>
-            <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined}>
-              <button onClick={() => pickFigureOrSwitchView()} title={renderFigureTitle()}>
+            <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickFigureOrSwitchView()}>
+              <button title={renderFigureTitle()}>
                 {allIcons[lastActiveFigure]}
               </button>
             </li>
-            <li className={activeTool === "text" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("text")} title="Text">
+            <li className={activeTool === "text" ? "active" : undefined} onClick={() => handleChangeTool("text")}>
+              <button title="Text">
                 <Icons.Text />
               </button>
             </li>
-            <li className={activeTool === "highlighter" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("highlighter")} title="Highlighter">
+            <li className={activeTool === "highlighter" ? "active" : undefined} onClick={() => handleChangeTool("highlighter")}>
+              <button title="Highlighter">
                 <Icons.Highlighter />
               </button>
             </li>
-            <li className={activeTool === "laser" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("laser")} title="Laser">
+            <li className={activeTool === "laser" ? "active" : undefined} onClick={() => handleChangeTool("laser")}>
+              <button title="Laser">
                 <Icons.Laser />
               </button>
             </li>
-            <li className={activeTool === "eraser" ? "active" : undefined}>
-              <button onClick={() => handleChangeTool("eraser")} title="Eraser">
+            <li className={activeTool === "eraser" ? "active" : undefined} onClick={() => handleChangeTool("eraser")}>
+              <button title="Eraser">
                 <Icons.Eraser />
               </button>
             </li>
             <li className="cross-line"></li>
-            <li>
+            <li onClick={() => !isColorControlDisabled && setSlide("color-slide")}>
               <button
                 className={`toolbar__color-picker ${colorList[activeColorIndex].name} color_tool_${activeTool}`}
-                onClick={() => setSlide("color-slide")}
                 title="Change Color"
-                disabled={["laser", "eraser"].includes(activeTool)}
               />
             </li>
-            <li>
-              <button className="toolbar__width-button" onClick={() => setSlide("width-slide")} title="Change Brush Size">
+            <li onClick={() => setSlide("width-slide")}>
+              <button className="toolbar__width-button" title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
               </button>
             </li>
@@ -227,13 +228,13 @@ const ToolBar = ({
 
         <div className="side-view-body brush-group">
           <ul className="toolbar__items">
-            <li className={activeTool === "pen" ? "active" : undefined}>
-              <button onClick={() => pickTool("pen")} tabIndex={-1} title="Pen">
+            <li className={activeTool === "pen" ? "active" : undefined} onClick={() => pickTool("pen")}>
+              <button tabIndex={-1} title="Pen">
                 <Icons.Brush />
               </button>
             </li>
-            <li className={activeTool === "fadepen" ? "active" : undefined}>
-              <button onClick={() => pickTool("fadepen")} tabIndex={-1} title="Fade Pen">
+            <li className={activeTool === "fadepen" ? "active" : undefined} onClick={() => pickTool("fadepen")}>
+              <button tabIndex={-1} title="Fade Pen">
                 <Icons.MagicBrush />
               </button>
             </li>
@@ -242,28 +243,28 @@ const ToolBar = ({
 
         <div className="side-view-body tool-group">
           <ul className="toolbar__items">
-            <li className={activeTool === "arrow" ? "active" : undefined}>
-              <button onClick={() => pickTool("arrow")} tabIndex={-1} title="Arrow">
+            <li className={activeTool === "arrow" ? "active" : undefined} onClick={() => pickTool("arrow")}>
+              <button tabIndex={-1} title="Arrow">
                 <Icons.Arrow />
               </button>
             </li>
-            <li className={activeTool === "flat_arrow" ? "active" : undefined}>
-              <button onClick={() => pickTool("flat_arrow")} tabIndex={-1} title="Flat Arrow">
+            <li className={activeTool === "flat_arrow" ? "active" : undefined} onClick={() => pickTool("flat_arrow")}>
+              <button tabIndex={-1} title="Flat Arrow">
                 <Icons.FlatArrow />
               </button>
             </li>
-            <li className={activeTool === "rectangle" ? "active" : undefined}>
-              <button onClick={() => pickTool("rectangle")} tabIndex={-1} title="Rectangle">
+            <li className={activeTool === "rectangle" ? "active" : undefined} onClick={() => pickTool("rectangle")}>
+              <button tabIndex={-1} title="Rectangle">
                 <Icons.Rectangle />
               </button>
             </li>
-            <li className={activeTool === "oval" ? "active" : undefined}>
-              <button onClick={() => pickTool("oval")} tabIndex={-1} title="Oval">
+            <li className={activeTool === "oval" ? "active" : undefined} onClick={() => pickTool("oval")}>
+              <button tabIndex={-1} title="Oval">
                 <Icons.Oval />
               </button>
             </li>
-            <li className={activeTool === "line" ? "active" : undefined}>
-              <button onClick={() => pickTool("line")} tabIndex={-1} title="Line">
+            <li className={activeTool === "line" ? "active" : undefined} onClick={() => pickTool("line")}>
+              <button tabIndex={-1} title="Line">
                 <Icons.Line />
               </button>
             </li>
@@ -273,10 +274,13 @@ const ToolBar = ({
         <div className="side-view-body color-group">
           <ul className="toolbar__items">
             {colorList.map((color, index) => (
-              <li key={index}>
+              <li
+                key={index}
+                className={activeColorIndex === index ? "active" : undefined}
+                onClick={() => onChangeColor(index)}
+              >
                 <button
                   className={`toolbar__color-picker ${color.name}`}
-                  onClick={() => onChangeColor(index)}
                   tabIndex={-1}
                 />
               </li>
@@ -287,10 +291,13 @@ const ToolBar = ({
         <div className="side-view-body width-group">
           <ul className="toolbar__items">
             {widthList.map((width, index) => (
-              <li key={index}>
+              <li
+                key={index}
+                className={activeWidthIndex === index ? "active" : undefined}
+                onClick={() => onChangeWidth(index)}
+              >
                 <button
                   className="toolbar__width-button"
-                  onClick={() => onChangeWidth(index)}
                   tabIndex={-1}
                 >
                   <div className={width.name} />

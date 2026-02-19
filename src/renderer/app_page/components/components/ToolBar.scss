@@ -7,7 +7,7 @@
   left: calc(50% - calc(var(--toolbar-width) / 2));
   background-color: rgba(230, 230, 230, 0.95);
   border-radius: 10px;
-  border: 1px solid rgba(50, 50, 50, 0.95);
+  border: 1px solid #666666;
   overflow: hidden;
 
   button {
@@ -16,7 +16,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    cursor: inherit;
 
     svg {
       pointer-events: none;
@@ -28,10 +28,18 @@
   }
 
   .toolbar__buttons {
+    display: flex;
+    flex-direction: column;
+
     button {
       padding: 2px;
       width: 20px;
       height: 20px;
+    }
+
+    .toolbar__buttons_dragger {
+      flex-grow: 1;
+      cursor: move;
     }
   }
 
@@ -95,8 +103,10 @@
         align-items: center;
         width: 26px;
         height: 26px;
-        margin: 0 4px;
+        margin: 2px;
+        padding: 2px;
         border: 1px solid transparent;
+        cursor: pointer;
 
         button {
           padding: 0;
@@ -109,7 +119,6 @@
         }
 
         &.active {
-          background-color: #C6C6C6;
           border: 1px solid #666666;
           border-radius: 5px;
           overflow: auto;
@@ -132,10 +141,12 @@
 
         &.cross-line {
           border: none;
-          background-color: #4c4c4c;
-          height: 20px;
+          background-color: #666666;
+          height: 26px;
           width: 2px;
-          margin: 0 4px;
+          margin: 2px 4px;
+          padding: 0;
+          cursor: default;
         }
       }
 
@@ -183,6 +194,8 @@
 
         &.color_tool_laser,
         &.color_tool_eraser {
+          cursor: default;
+
           &::before { border-color: #FFFFFF; }
         }
 
