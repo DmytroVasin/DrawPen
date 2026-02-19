@@ -27,7 +27,7 @@ import {
   moveToCoordinates,
   calculateAspectRatio,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser } from "react-icons/fa";
+import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineCancel } from "react-icons/md";
@@ -59,6 +59,7 @@ const Icons = {
   Highlighter: FaHighlighter,
   Laser: GiLaserburn,
   Eraser: FaEraser,
+  Trash: FaRegTrashAlt,
 };
 
 const Application = (settings) => {
@@ -1466,6 +1467,7 @@ const Application = (settings) => {
             handleChangeColor={handleChangeColor}
             handleChangeWidth={handleChangeWidth}
             handleChangeTool={handleChangeTool}
+            handleClearDesk={handleReset}
             Icons={Icons}
           />
       }

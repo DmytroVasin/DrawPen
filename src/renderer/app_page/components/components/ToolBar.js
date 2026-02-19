@@ -19,6 +19,7 @@ const ToolBar = ({
   handleChangeColor,
   handleChangeWidth,
   handleChangeTool,
+  handleClearDesk,
   Icons,
 }) => {
 
@@ -208,6 +209,12 @@ const ToolBar = ({
             <li onClick={() => setToolbarSlide("width-slide")}>
               <button className="toolbar__width-button" title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
+              </button>
+            </li>
+            <li className="cross-line"></li>
+            <li onClick={handleClearDesk}>
+              <button title="Clear Desk">
+                <Icons.Trash />
               </button>
             </li>
           </ul>
