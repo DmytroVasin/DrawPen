@@ -8,6 +8,8 @@ const ZONE_BORDER = 5; // Equals to "--border-size"
 const ToolBar = ({
   position,
   setPosition,
+  toolbarSlide,
+  setToolbarSlide,
   lastActiveBrush,
   lastActiveFigure,
   activeTool,
@@ -36,7 +38,6 @@ const ToolBar = ({
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const toolbarRef = useRef()
-  const [slide, setSlide] = useState("");
 
   const onMouseDown = useCallback((e) => {
     setDragging(true);
@@ -84,43 +85,29 @@ const ToolBar = ({
     setDragging(false);
   }, []);
 
-  const onKeyDown = useCallback((e) => {
-    switch (e.key) {
-      case "Escape":
-        setSlide("");
-        break;
-    }
-  }, [setSlide]);
-
   useEffect(() => {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
-    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onMouseMove, onMouseUp, onKeyDown]);
-
-  useEffect(() => {
-    setSlide("");
-  }, [activeTool, activeColorIndex, activeWidthIndex]);
+  }, [onMouseMove, onMouseUp]);
 
   const pickTool = (tool) => {
     handleChangeTool(tool);
-    setSlide("")
+    setToolbarSlide("main-slide")
   };
 
   const onChangeColor = (index) => {
     handleChangeColor(index);
-    setSlide("")
+    setToolbarSlide("main-slide")
   };
 
   const onChangeWidth = (index) => {
     handleChangeWidth(index);
-    setSlide("")
+    setToolbarSlide("main-slide")
   };
 
   const renderFigureTitle = () => {
@@ -153,7 +140,7 @@ const ToolBar = ({
 
   const pickFigureOrSwitchView = () => {
     if (shapeList.includes(activeTool)) {
-      setSlide("tool-slide");
+      setToolbarSlide("tool-slide");
     } else {
       pickTool(lastActiveFigure);
     }
@@ -161,7 +148,7 @@ const ToolBar = ({
 
   const pickBrushOrSwitchView = () => {
     if (brushList.includes(activeTool)) {
-      setSlide("brush-slide");
+      setToolbarSlide("brush-slide");
     } else {
       pickTool(lastActiveBrush);
     }
@@ -170,7 +157,7 @@ const ToolBar = ({
   const isColorControlDisabled = ["laser", "eraser"].includes(activeTool);
 
   return (
-    <aside id="toolbar" ref={toolbarRef} className={`${slide}`} style={{ left: position.x, top: position.y }}>
+    <aside id="toolbar" ref={toolbarRef} className={`${toolbarSlide}`} style={{ left: position.x, top: position.y }}>
       <div className="toolbar__buttons">
         <button onClick={handleCloseToolBar} title="Close">
           <Icons.Close size={16} />
@@ -212,13 +199,13 @@ const ToolBar = ({
               </button>
             </li>
             <li className="cross-line"></li>
-            <li onClick={() => !isColorControlDisabled && setSlide("color-slide")}>
+            <li onClick={() => !isColorControlDisabled && setToolbarSlide("color-slide")}>
               <button
                 className={`toolbar__color-picker ${colorList[activeColorIndex].name} color_tool_${activeTool}`}
                 title="Change Color"
               />
             </li>
-            <li onClick={() => setSlide("width-slide")}>
+            <li onClick={() => setToolbarSlide("width-slide")}>
               <button className="toolbar__width-button" title="Change Brush Size">
                 <div className={`${widthList[activeWidthIndex].name}`} />
               </button>

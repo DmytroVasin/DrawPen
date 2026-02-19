@@ -116,6 +116,7 @@ const Application = (settings) => {
   const [toolbarLastActiveBrush, setToolbarLastActiveBrush] = useState(initialToolbarDefaultBrush);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
+  const [toolbarSlide, setToolbarSlide] = useState('main-slide');
   const [rippleEffects, setRippleEffects] = useState([]);
   const [undoStackFigures, setUndoStackFigures] = useState([]);
   const [redoStackFigures, setRedoStackFigures] = useState([]);
@@ -340,6 +341,11 @@ const Application = (settings) => {
       case 'escape': {
         if (eventRepeat) break;
 
+        if (toolbarSlide !== 'main-slide') {
+          setToolbarSlide('main-slide');
+          break;
+        }
+
         if (activeFigureInfo) {
           setActiveFigureInfo(null);
           break;
@@ -378,66 +384,113 @@ const Application = (settings) => {
       }
     }
 
-    switch (eventCode) {
-      case 'digit1': {
-        let nextBrush = toolbarLastActiveBrush;
+    if (toolbarSlide === 'main-slide') {
+      switch (eventCode) {
+        case 'digit1': {
+          let nextBrush = toolbarLastActiveBrush;
 
-        if (activeTool === toolbarLastActiveBrush) {
-          const activeBrushIndex = brushList.indexOf(activeTool);
-          const nextBrushIndex = (activeBrushIndex + direction + brushList.length) % brushList.length;
+          if (activeTool === toolbarLastActiveBrush) {
+            const activeBrushIndex = brushList.indexOf(activeTool);
+            const nextBrushIndex = (activeBrushIndex + direction + brushList.length) % brushList.length;
 
-          nextBrush = brushList[nextBrushIndex];
-        }
+            nextBrush = brushList[nextBrushIndex];
+          }
 
-        handleChangeTool(nextBrush);
-        break;
-      }
-      case 'digit2': {
-        let nextShape = toolbarLastActiveFigure;
-
-        if (activeTool === toolbarLastActiveFigure) {
-          const activeShapeIndex = shapeList.indexOf(activeTool);
-          const nextShapeIndex = (activeShapeIndex + direction + shapeList.length) % shapeList.length;
-
-          nextShape = shapeList[nextShapeIndex];
-        }
-
-        handleChangeTool(nextShape);
-        break;
-      }
-      case 'digit3': {
-        handleChangeTool('text');
-        break;
-      }
-      case 'digit4': {
-        handleChangeTool('highlighter');
-        break;
-      }
-      case 'digit5': {
-        handleChangeTool('laser');
-        break;
-      }
-      case 'digit6': {
-        handleChangeTool('eraser');
-        break;
-      }
-      case 'digit7': {
-        if (['eraser', 'laser'].includes(activeTool)) {
+          handleChangeTool(nextBrush);
           break;
         }
-        const nextColorIndex = (activeColorIndex + direction + colorList.length) % colorList.length;
+        case 'digit2': {
+          let nextShape = toolbarLastActiveFigure;
 
-        handleChangeColor(nextColorIndex);
-        break;
-      }
-      case 'digit8': {
-        const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
+          if (activeTool === toolbarLastActiveFigure) {
+            const activeShapeIndex = shapeList.indexOf(activeTool);
+            const nextShapeIndex = (activeShapeIndex + direction + shapeList.length) % shapeList.length;
 
-        handleChangeWidth(nextWidthIndex);
-        break;
+            nextShape = shapeList[nextShapeIndex];
+          }
+
+          handleChangeTool(nextShape);
+          break;
+        }
+        case 'digit3': {
+          handleChangeTool('text');
+          break;
+        }
+        case 'digit4': {
+          handleChangeTool('highlighter');
+          break;
+        }
+        case 'digit5': {
+          handleChangeTool('laser');
+          break;
+        }
+        case 'digit6': {
+          handleChangeTool('eraser');
+          break;
+        }
+        case 'digit7': {
+          if (['eraser', 'laser'].includes(activeTool)) {
+            break;
+          }
+          const nextColorIndex = (activeColorIndex + direction + colorList.length) % colorList.length;
+
+          handleChangeColor(nextColorIndex);
+          break;
+        }
+        case 'digit8': {
+          const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
+
+          handleChangeWidth(nextWidthIndex);
+          break;
+        }
       }
+
+      return;
     }
-  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
+
+    let digitIndex = null;
+    if (eventCode === 'digit1') digitIndex = 0;
+    if (eventCode === 'digit2') digitIndex = 1;
+    if (eventCode === 'digit3') digitIndex = 2;
+    if (eventCode === 'digit4') digitIndex = 3;
+    if (eventCode === 'digit5') digitIndex = 4;
+    if (eventCode === 'digit6') digitIndex = 5;
+    if (eventCode === 'digit7') digitIndex = 6;
+    if (eventCode === 'digit8') digitIndex = 7;
+    if (eventCode === 'digit9') digitIndex = 8;
+    if (digitIndex === null) return;
+
+    switch (toolbarSlide) {
+      case 'brush-slide': {
+        if (digitIndex < brushList.length) {
+          handleChangeTool(brushList[digitIndex]);
+          setToolbarSlide("main-slide");
+        }
+        break;
+      }
+
+      case 'tool-slide':
+        if (digitIndex < shapeList.length) {
+          handleChangeTool(shapeList[digitIndex]);
+          setToolbarSlide("main-slide");
+        }
+        break;
+
+      case 'color-slide':
+        if (digitIndex < colorList.length) {
+          handleChangeColor(digitIndex);
+          setToolbarSlide("main-slide");
+        }
+        break;
+
+      case 'width-slide':
+        if (digitIndex < widthList.length) {
+          handleChangeWidth(digitIndex);
+          setToolbarSlide("main-slide");
+        }
+        break;
+    }
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
@@ -511,6 +564,10 @@ const Application = (settings) => {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [handleKeyDown, handleKeyUp]);
+
+  useEffect(() => {
+    setToolbarSlide('main-slide');
+  }, [activeTool, activeColorIndex, activeWidthIndex]);
 
   const firstLaunch = useRef(true);
   useEffect(() => {
@@ -1398,6 +1455,8 @@ const Application = (settings) => {
           <ToolBar
             position={toolbarPosition}
             setPosition={setToolbarPosition}
+            toolbarSlide={toolbarSlide}
+            setToolbarSlide={setToolbarSlide}
             lastActiveBrush={toolbarLastActiveBrush}
             lastActiveFigure={toolbarLastActiveFigure}
             activeTool={activeTool}
