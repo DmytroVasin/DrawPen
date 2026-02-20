@@ -1,5 +1,19 @@
 # Change Log
 
+## [0.0.43] - 2026-02-20
+### Features:
+- Added Clear Desk tool to the toolbar.
+- Added Flat Arrow.
+- Added toolbar hotkeys.
+- Added dot handle UX with hover glow.
+
+### Bug Fixes:
+- Fixed resize jump offset for dot handles.
+
+### Improvements:
+- Improved toolbar interactions and styling.
+- Refined old arrow geometry (scaling and smooth rendering).
+
 ## [0.0.41] - 2026-02-13
 - Added `drawpen-x11` package for Linux users with Wayland
 - Removed Opt-in workaround FORCE_X11 infavor of using `drawpen-x11` package for Linux users with Wayland
