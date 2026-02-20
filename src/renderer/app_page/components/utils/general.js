@@ -141,7 +141,7 @@ export const distanceBetweenPoints = (pointA, pointB) => {
   const [startX, startY] = pointA
   const [endX, endY] = pointB
 
-  return Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2)
+  return Math.hypot(endX - startX, endY - startY)
 }
 
 export const calculateCanvasTextWidth = (text, widthIndex) => {
@@ -252,7 +252,7 @@ export const calcPointsArrow = (points, widthIndex) => {
 
   const diffX = endX - startX;
   const diffY = endY - startY;
-  const rawLength = Math.hypot(diffX, diffY);
+  const rawLength = Math.hypot(diffX, diffY) || 1;
 
   const cos = diffX / rawLength;
   const sin = diffY / rawLength;
@@ -303,7 +303,7 @@ export const calcSegmentsFlatArrow = (points, widthIndex) => {
 
   const diffX = endX - startX;
   const diffY = endY - startY;
-  const rawLength = Math.hypot(diffX, diffY);
+  const rawLength = Math.hypot(diffX, diffY) || 1;
 
   const cos = diffX / rawLength;
   const sin = diffY / rawLength;
