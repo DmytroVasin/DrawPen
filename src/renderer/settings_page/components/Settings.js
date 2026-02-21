@@ -60,6 +60,7 @@ const Settings = (config) => {
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
+  const [disableGpu, setDisableGpu] = useState(config.disable_gpu === true);
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
   const [showHideToolbar, setShowHideToolbar]       = useState({ accelerator: config.key_binding_show_hide_toolbar,    init: config.key_binding_show_hide_toolbar_default });
@@ -166,6 +167,13 @@ const Settings = (config) => {
     setStartsHidden(nextState);
 
     window.electronAPI.setStartsHidden(nextState);
+  };
+
+  const toggleDisableGpu = () => {
+    const nextState = !disableGpu;
+    setDisableGpu(nextState);
+
+    window.electronAPI.setDisableGpu(nextState);
   };
 
   const selectAppIconColor = (event) => {
@@ -544,6 +552,20 @@ const Settings = (config) => {
                     <div
                       className={`toggle ${launchOnLogin ? 'active' : ''}`}
                       onClick={toggleLaunch}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Disable GPU</div>
+                    <div className="settings-item-description">Turns off hardware-accelerated graphics and forces CPU rendering</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div
+                      className={`toggle ${disableGpu ? 'active' : ''}`}
+                      onClick={toggleDisableGpu}
                     ></div>
                   </div>
                 </div>
