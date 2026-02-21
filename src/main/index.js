@@ -89,6 +89,10 @@ const schema = {
     type: 'boolean',
     default: false
   },
+  disable_gpu: {
+    type: 'boolean',
+    default: false
+  },
   key_binding_show_hide_app: {
     type: 'string',
     default: KEY_SHOW_HIDE_APP
@@ -465,6 +469,8 @@ function createSettingsWindow() {
 
 // Must be before "app.whenReady()"
 if (!app.requestSingleInstanceLock()) {
+  rawLog('Second instance launched, quitting this instance...')
+
   app.quit();
   process.exit(0); // return is forbidden in this context
 }
@@ -472,6 +478,16 @@ if (!app.requestSingleInstanceLock()) {
 app.on('second-instance', () => {
   showDrawWindow();
 });
+
+// Must be before "app.whenReady()"
+if (store.get('disable_gpu')) {
+  if (isLinux) {
+    app.commandLine.appendSwitch('enable-transparent-visuals');
+    app.commandLine.appendSwitch('disable-gpu');
+  }
+
+  app.disableHardwareAcceleration();
+}
 
 app.commandLine.appendSwitch('disable-pinch');
 
@@ -638,6 +654,7 @@ ipcMain.handle('get_configuration', () => {
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
     starts_hidden:                            store.get('starts_hidden'),
+    disable_gpu:                              store.get('disable_gpu'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -721,6 +738,17 @@ ipcMain.handle('set_starts_hidden', (_event, value) => {
   rawLog('Setting starts hidden:', value)
 
   store.set('starts_hidden', value)
+
+  return null;
+});
+
+ipcMain.handle('set_disable_gpu', (_event, value) => {
+  rawLog('Setting disable gpu:', value)
+
+  store.set('disable_gpu', value)
+
+  app.relaunch();
+  app.quit();
 
   return null;
 });
@@ -912,6 +940,7 @@ function resetApp() {
     unRegisterGlobalShortcuts()
 
     const preservedUserId = store.get('user_id')
+    const disableGpuWasEnabled = store.get('disable_gpu')
 
     store.clear()
 
@@ -931,6 +960,11 @@ function resetApp() {
 
     if (settingsWindow) {
       settingsWindow.reload()
+    }
+
+    if (disableGpuWasEnabled) {
+      app.relaunch();
+      app.quit();
     }
   })
 }
