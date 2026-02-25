@@ -121,6 +121,14 @@ module.exports = {
               },
             },
             {
+              name: 'extended_toolbar_window',
+              html: path.join(rootDir, 'src/renderer/extended_toolbar_page/index.html'),
+              js: path.join(rootDir, 'src/renderer/extended_toolbar_page/index.js'),
+              preload: {
+                js: path.join(rootDir, 'src/renderer/extended_toolbar_page/preload.js'),
+              },
+            },
+            {
               name: 'about_window',
               html: path.join(rootDir, 'src/renderer/about_page/index.html'),
               js: path.join(rootDir, 'src/renderer/about_page/index.js'),

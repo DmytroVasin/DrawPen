@@ -27,11 +27,12 @@ import {
   moveToCoordinates,
   calculateAspectRatio,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt } from "react-icons/fa";
+import { FaPaintBrush, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
-import { MdOutlineCancel } from "react-icons/md";
+import { MdOutlineClose } from "react-icons/md";
 import { FaFont } from "react-icons/fa6";
+import { LuSquareMousePointer } from "react-icons/lu";
 import FaMagicPaintBrush from "./components/icons/FaMagicPaintBrush.js";
 
 import {
@@ -47,7 +48,8 @@ import {
 } from './constants.js'
 
 const Icons = {
-  Close: MdOutlineCancel,
+  DrawModeEnabled: LuSquareMousePointer,
+  Close: MdOutlineClose,
   Brush: FaPaintBrush,
   MagicBrush: FaMagicPaintBrush,
   Arrow: FaArrowRight,
@@ -60,6 +62,8 @@ const Icons = {
   Laser: GiLaserburn,
   Eraser: FaEraser,
   Trash: FaRegTrashAlt,
+  AngleLeft: FaAngleLeft,
+  AngleRight: FaAngleRight,
 };
 
 const Application = (settings) => {
@@ -75,6 +79,7 @@ const Application = (settings) => {
   const initialShowCuteCursor = settings.show_cute_cursor
   const initialToolbarDefaultBrush = settings.tool_bar_default_brush
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
+  const initialToolbarCollapsed = settings.tool_bar_collapsed
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
   const initialLaserTime = settings.laser_time
@@ -116,6 +121,7 @@ const Application = (settings) => {
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
   const [toolbarLastActiveBrush, setToolbarLastActiveBrush] = useState(initialToolbarDefaultBrush);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
+  const [toolbarCollapsed, setToolbarCollapsed] = useState(initialToolbarCollapsed);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [toolbarSlide, setToolbarSlide] = useState('main-slide');
   const [rippleEffects, setRippleEffects] = useState([]);
@@ -137,6 +143,7 @@ const Application = (settings) => {
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onRefreshSettings(handleRefreshSettings);
+    window.electronAPI.onUpdateToolbarPosition(handleUpdateToolbarPosition);
     window.electronAPI.onShowNotification(handleShowNotification);
   }, []);
 
@@ -355,7 +362,7 @@ const Application = (settings) => {
         const now = Date.now();
         if (now - lastEscapeAtRef.current < escDoubleTapMs) {
           lastEscapeAtRef.current = 0;
-          invokeHideApp();
+          invokePointerMode();
         } else {
           lastEscapeAtRef.current = now;
         }
@@ -590,6 +597,7 @@ const Application = (settings) => {
         tool_bar_active_weight_index: activeWidthIndex,
         tool_bar_default_brush: toolbarLastActiveBrush,
         tool_bar_default_figure: toolbarLastActiveFigure,
+        tool_bar_collapsed: toolbarCollapsed,
         tool_bar_x: toolbarPosition.x,
         tool_bar_y: toolbarPosition.y,
       });
@@ -600,7 +608,7 @@ const Application = (settings) => {
     return () => {
       debouncedUpdateSettings.cancel();
     };
-  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarPosition]);
+  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarCollapsed, toolbarPosition]);
 
   useEffect(() => {
     if (!activeFigureInfo) { return }
@@ -1240,11 +1248,15 @@ const Application = (settings) => {
   }
 
   const handleContextMenu = (_event) => {
-    invokeHideApp();
+    invokePointerMode();
   }
 
+  const handleEnablePointerMode = () => {
+    invokePointerMode();
+  };
+
   const handleCloseToolBar = () => {
-    invokeHideApp();
+    invokeCloseApp();
   }
 
   const invokeOpenSettings = () => {
@@ -1265,10 +1277,16 @@ const Application = (settings) => {
     window.electronAPI.invokeOpenNotification(info);
   }
 
-  const invokeHideApp = () => {
-    console.log('Renderer -> Main: Invoke Hide App');
+  const invokePointerMode = () => {
+    console.log('Renderer -> Main: Invoke Pointer Mode');
 
-    window.electronAPI.invokeHideApp();
+    window.electronAPI.invokePointerMode();
+  }
+
+  const invokeCloseApp = () => {
+    console.log('Renderer -> Main: Invoke Close App');
+
+    window.electronAPI.invokeCloseApp();
   }
 
   const handleReset = () => {
@@ -1307,6 +1325,15 @@ const Application = (settings) => {
     setShowCuteCursor(newSettings.show_cute_cursor);
     setMainColorIndex(newSettings.swap_colors_indexes[0]);
     setSecondaryColorIndex(newSettings.swap_colors_indexes[1]);
+  };
+
+  const handleUpdateToolbarPosition = (_, newSettings) => {
+    console.log('Main -> Renderer: Update Toolbar Position');
+
+    setToolbarPosition({
+      x: newSettings.tool_bar_x,
+      y: newSettings.tool_bar_y,
+    });
   };
 
   const handleShowNotification = (_, data) => {
@@ -1458,6 +1485,8 @@ const Application = (settings) => {
             setPosition={setToolbarPosition}
             toolbarSlide={toolbarSlide}
             setToolbarSlide={setToolbarSlide}
+            isCollapsed={toolbarCollapsed}
+            setIsCollapsed={setToolbarCollapsed}
             lastActiveBrush={toolbarLastActiveBrush}
             lastActiveFigure={toolbarLastActiveFigure}
             activeTool={activeTool}
@@ -1468,6 +1497,7 @@ const Application = (settings) => {
             handleChangeWidth={handleChangeWidth}
             handleChangeTool={handleChangeTool}
             handleClearDesk={handleReset}
+            handleEnablePointerMode={handleEnablePointerMode}
             Icons={Icons}
           />
       }
