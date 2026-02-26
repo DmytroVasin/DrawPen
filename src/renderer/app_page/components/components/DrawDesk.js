@@ -1,7 +1,7 @@
 import './DrawDesk.scss';
 
 import React, { useEffect, useRef } from 'react';
-import { colorList } from '../constants.js'
+import { colorList, PALM_MIN_CONTACT_SIZE } from '../constants.js'
 import { getMouseCoordinates } from '../utils/general.js';
 import {
   drawPen,
@@ -177,6 +177,11 @@ const DrawDesk = ({
            (event.pointerType === 'mouse' && event.button === 1);
   }
 
+  const isPalmTouch = (event) => {
+    return event.pointerType === 'touch' &&
+           (event.width > PALM_MIN_CONTACT_SIZE || event.height > PALM_MIN_CONTACT_SIZE);
+  }
+
   const onPointerDown = (event) => {
     event.preventDefault(); // NOTE: Required for Text figure
 
@@ -184,6 +189,15 @@ const DrawDesk = ({
 
     if (isPenEraser(event) && activeTool !== 'eraser') {
       // Hard Trick! Rethink!
+      prevToolRef.current = activeTool;
+      simulateKeyDown.current = true;
+
+      handleChangeTool('eraser');
+      return
+    }
+
+    // Palm/fist eraser: large touch contact area triggers eraser
+    if (isPalmTouch(event) && activeTool !== 'eraser') {
       prevToolRef.current = activeTool;
       simulateKeyDown.current = true;
 
