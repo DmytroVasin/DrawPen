@@ -1,17 +1,17 @@
 <p align="center">
   <img src="https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/icon.png?raw=true" height="200">
   <h3 align="center">Draw Pen</h3>
-  <p align="center">An open-source screen annotation tool<p>
+  <p align="center">An open-source screen annotation tool</p>
 </p>
 
 <p align="center">
   <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen.Setup.exe'>
     <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.43-arm64.dmg'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.44-arm64.dmg'>
     <img alt='Get it on macOS' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacOS.png?raw=true'/>
   </a>
-  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.43_amd64.deb'>
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.44_amd64.deb'>
     <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
   </a>
 </p>
@@ -50,7 +50,7 @@ On some Linux setups running **Wayland** (e.g. [Fedora KDE Plasma](https://githu
 
 | Command                                 | Keybindings                                                  | Comment |
 | --------------------------------------- | ------------------------------------------------------------ | - |
-| Show/Hide App                           | <kbd>CMD/CTRL + SHIFT + A</kbd> | Global shortcut |
+| Enable Draw/Pointer Mode                | <kbd>CMD/CTRL + SHIFT + A</kbd> | Global shortcut |
 | Activate Pen                            | <kbd>1</kbd> | |
 | Activate/Switch Shapes (Arrow/Square/etc.)   | <kbd>2</kbd> | |
 | Activate Text                           | <kbd>3</kbd> | |
