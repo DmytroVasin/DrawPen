@@ -991,17 +991,6 @@ function enablePointerMode() {
   updateContextMenu()
 }
 
-function disableDrawMode() {
-  rawLog('Disable draw mode...')
-
-  if (!drawingMode) return;
-
-  hideWindow(mainWindow)
-
-  drawingMode = false
-  updateContextMenu()
-}
-
 function hideApp() {
   rawLog('Hiding app...')
 
