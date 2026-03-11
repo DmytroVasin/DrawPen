@@ -22,6 +22,8 @@
 
 ![DrawPen - Usage](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/main.gif?raw=true)
 
+![DrawPen - Pointer Mode](https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/pointer-mode.gif?raw=true)
+
 ### Installation
 
 You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases)
