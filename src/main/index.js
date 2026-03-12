@@ -344,6 +344,7 @@ function createMainWindow() {
 
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  mainWindow.setAlwaysOnTop(true)
 
   mainWindow.on('close', function (event) {
     rawLog('Main window: on close')
@@ -400,6 +401,7 @@ function createExtendedToolbarWindow() {
 
   extendedToolbarWindow.loadURL(EXTENDED_TOOLBAR_WINDOW_WEBPACK_ENTRY)
   extendedToolbarWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  extendedToolbarWindow.setAlwaysOnTop(true)
 
   extendedToolbarWindow.on('close', function (event) {
     rawLog('Extended toolbar window: on close')
@@ -1195,8 +1197,10 @@ function hideWindow(targetWindow) {
 
 function showWindow(targetWindow) {
   targetWindow.setOpacity(0)
+
   try {
     targetWindow.show()
+    targetWindow.moveTop()
   } finally {
     targetWindow.setOpacity(1)
   }
