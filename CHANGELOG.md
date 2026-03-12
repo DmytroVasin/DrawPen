@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.45] - 2026-03-12
+### Features:
+- Added "Hide Extended Toolbar" option
+
+### Improvements:
+- Improved always-on-top behavior
+
 ## [0.0.44] - 2026-03-07
 ### Features:
 - Added Pointer Mode (compact floating control that lets users switch into Draw Mode)
