@@ -60,6 +60,7 @@ const Settings = (config) => {
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
+  const [disableToolbarInPointerMode, setDisableToolbarInPointerMode] = useState(config.disable_toolbar_in_pointer_mode);
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
   const [showHideToolbar, setShowHideToolbar]       = useState({ accelerator: config.key_binding_show_hide_toolbar,    init: config.key_binding_show_hide_toolbar_default });
@@ -166,6 +167,13 @@ const Settings = (config) => {
     setStartsHidden(nextState);
 
     window.electronAPI.setStartsHidden(nextState);
+  };
+
+  const toggleDisableToolbarInPointerMode = () => {
+    const nextState = !disableToolbarInPointerMode;
+    setDisableToolbarInPointerMode(nextState);
+
+    window.electronAPI.setDisableToolbarInPointerMode(nextState);
   };
 
   const selectAppIconColor = (event) => {
@@ -380,6 +388,20 @@ const Settings = (config) => {
                     <div
                       className={`toggle ${showCuteCursor ? '' : 'active'}`}
                       onClick={toggleCuteCursor}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Hide Extended Toolbar</div>
+                    <div className="settings-item-description">Affects only Pointer Mode</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div
+                      className={`toggle ${disableToolbarInPointerMode ? 'active' : ''}`}
+                      onClick={toggleDisableToolbarInPointerMode}
                     ></div>
                   </div>
                 </div>

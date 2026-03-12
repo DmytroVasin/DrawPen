@@ -48,6 +48,10 @@ const schema = {
     type: 'boolean',
     default: true
   },
+  disable_toolbar_in_pointer_mode: {
+    type: 'boolean',
+    default: false
+  },
   tool_bar_x: {
     type: 'number',
     default: 5
@@ -761,6 +765,7 @@ ipcMain.handle('get_configuration', () => {
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
     starts_hidden:                            store.get('starts_hidden'),
+    disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -923,6 +928,16 @@ ipcMain.handle('set_drawing_monitor', (_event, value) => {
   return null
 });
 
+ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
+  rawLog('Setting disable toolbar in pointer mode:', value)
+
+  store.set('disable_toolbar_in_pointer_mode', value)
+
+  updateExternalToolbarVisibility()
+
+  return null
+});
+
 function refreshSettingsInRenderer() {
   mainWindow.webContents.send('refresh_settings', {
     show_drawing_border: store.get('show_drawing_border'),
@@ -1005,6 +1020,11 @@ function hideApp() {
 
 function updateExternalToolbarVisibility() {
   if (drawingMode) return;
+
+  if (store.get('disable_toolbar_in_pointer_mode')) {
+    hideWindow(extendedToolbarWindow)
+    return
+  }
 
   if (store.get('show_tool_bar')) {
     showExtendedToolbarWindow()
@@ -1270,13 +1290,14 @@ function updateMainWindowPosition(display) {
 // - Enable Toolbar from Tray
 // - Enable Pointer Mode (Click by Main Button or from Tray)
 function showExtendedToolbarWindow() {
+  if (store.get('disable_toolbar_in_pointer_mode')) return;
+  if (!store.get('show_tool_bar')) return;
+
   const currentDisplay = getLockedMonitor() || getActiveMonitor() || getUnderCursorMonitor()
 
   updateExtendedToolbarWindowPosition(currentDisplay)
 
-  if (store.get('show_tool_bar')) {
-    showWindow(extendedToolbarWindow)
-  }
+  showWindow(extendedToolbarWindow)
 }
 
 function updateExtendedToolbarWindowPosition(display) {
