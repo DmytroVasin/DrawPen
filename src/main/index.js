@@ -13,6 +13,7 @@ if (electronSquirrelStartup) {
 }
 
 const isDevelopment = process.env.NODE_ENV === 'development'
+
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWin = process.platform === 'win32'
@@ -26,8 +27,13 @@ const KEY_MAKE_SCREENSHOT      = 'CmdOrCtrl+Shift+P'
 const KEY_Q                    = 'CmdOrCtrl+Q'
 const KEY_NULL                 = '[NULL]'
 
+const EXTENDED_TOOLBAR_WINDOW_MARGIN = 10
+const EXTENDED_TOOLBAR_WINDOW_WIDTH  = EXTENDED_TOOLBAR_WINDOW_MARGIN+80+17+5
+const EXTENDED_TOOLBAR_WINDOW_HEIGHT = EXTENDED_TOOLBAR_WINDOW_MARGIN+70+5
+
 let lastShortcutTime = 0;
 const throttleDelay = 250;
+const updateStoreDelay = 300;
 
 const schema = {
   user_id: {
@@ -41,6 +47,10 @@ const schema = {
   show_tool_bar: {
     type: 'boolean',
     default: true
+  },
+  disable_toolbar_in_pointer_mode: {
+    type: 'boolean',
+    default: false
   },
   tool_bar_x: {
     type: 'number',
@@ -70,7 +80,11 @@ const schema = {
     type: 'string',
     default: 'arrow'
   },
-  active_monitor_id: {
+  tool_bar_collapsed: {
+    type: 'boolean',
+    default: false
+  },
+  active_monitor_id: { // show on what monitor we renderED draw window last time
     type: 'number',
   },
   show_drawing_border: {
@@ -128,7 +142,7 @@ const schema = {
   drawing_monitor: {
     type: 'object',
     default: {
-      mode: 'auto',
+      mode: 'auto', // auto | fixed
       display_id: null,
       label: null,
     }
@@ -140,6 +154,14 @@ const store = new Store({
   schema
 });
 
+store.onDidChange('show_tool_bar', (newValue, oldValue) => {
+  updateExternalToolbarVisibility()
+  updateContextMenu()
+})
+store.onDidChange('show_whiteboard', (newValue, oldValue) => {
+  updateContextMenu()
+})
+
 if (isDevelopment) {
   rawLog('Initial store: ', store.store)
 
@@ -150,10 +172,15 @@ if (isDevelopment) {
 
 let tray
 let mainWindow
+let extendedToolbarWindow
 let aboutWindow
 let settingsWindow
 
-let foregroundMode = true
+let isQuitting = false
+let startAsHidden = false
+let drawingMode = false
+
+let extendedToolbarPositionStoreTimeout = null
 
 const iconSrc = {
   WHITE:           path.resolve(__dirname, '../renderer/assets/trayIconWhite.png'),
@@ -178,6 +205,8 @@ function getTrayIconPath() {
 }
 
 function updateContextMenu() {
+  rawLog('Updating context menu...')
+
   if (!tray) return;
 
   const show_tool_bar   = store.get('show_tool_bar')
@@ -210,9 +239,9 @@ function updateContextMenu() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: withAccelHint((foregroundMode ? 'Hide DrawPen' : 'Show DrawPen'), key_show_hide_app),
+      label: withAccelHint((drawingMode ? 'Enable Pointer Mode' : 'Enable Draw Mode'), key_show_hide_app),
       accelerator: accelForTray(key_show_hide_app),
-      click: toggleDrawWindow
+      click: toggleDrawOrPointerMode
     },
     {
       label: withAccelHint((show_tool_bar ? 'Hide Toolbar' : 'Show Toolbar'), key_show_hide_toolbar),
@@ -269,38 +298,43 @@ function registerTrayActions() {
 
   if (isWin || isLinux) {
     tray.on('click', () => {
-      toggleDrawWindow()
+      toggleDrawOrPointerMode()
     })
   }
 }
 
 function createMainWindow() {
-  const currentDisplay = getDrawingDisplay()
+  const currentDisplay = getLockedMonitor() || getActiveMonitor() || getUnderCursorMonitor()
 
-  store.set('active_monitor_id', currentDisplay.id)
+  if (store.get('active_monitor_id') !== currentDisplay.id) {
+    store.set('active_monitor_id', currentDisplay.id)
+  }
 
-  let { x, y, width, height } = currentDisplay.workArea
+  let { x: displayX, y: displayY, width: displayWidth, height: displayHeight } = currentDisplay.workArea
+
   let isResizable = false
   let hasDevTools = false
 
   if (isDevelopment) {
-    width = 500
-    height = 500
+    displayWidth = 500
+    displayHeight = 500
     isResizable = true
     hasDevTools = true
   }
 
   mainWindow = new BrowserWindow({
     show: false,
-    x: x,
-    y: y,
-    width: width,
-    height: height,
+    x: displayX,
+    y: displayY,
+    width: displayWidth,
+    height: displayHeight,
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
     resizable: isResizable,
-    hasShadow: false,
+    minimizable: false,
+    maximizable: false,
     frame: false,
+    hasShadow: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     opacity: 0.9999999, // Fix transparency rendering artifacts
@@ -313,24 +347,23 @@ function createMainWindow() {
   })
 
   mainWindow.loadURL(APP_WINDOW_WEBPACK_ENTRY);
-
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  mainWindow.setAlwaysOnTop(true)
 
-  mainWindow.on('close', function () {
+  mainWindow.on('close', function (event) {
     rawLog('Main window: on close')
 
-    foregroundMode = false
-    updateContextMenu()
+    if (isQuitting) return;
+
+    event.preventDefault();
+
+    hideApp()
   })
 
   mainWindow.on('closed', function () {
     mainWindow = null
-  })
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    if (foregroundMode) {
-      showWindowOnScreen();
-    }
+    app.quit()
   })
 
   mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
@@ -341,9 +374,83 @@ function createMainWindow() {
   });
 }
 
+function createExtendedToolbarWindow() {
+  let hasDevTools = false
+
+  if (isDevelopment) {
+    hasDevTools = true
+  }
+
+  extendedToolbarWindow = new BrowserWindow({
+    show: false,
+    width: EXTENDED_TOOLBAR_WINDOW_WIDTH,
+    height: EXTENDED_TOOLBAR_WINDOW_HEIGHT,
+    transparent: true,
+    backgroundColor: '#00000000', // 8-symbol ARGB
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    frame: false,
+    hasShadow: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    opacity: 0.9999999, // Fix transparency rendering artifacts
+    autoHideMenuBar: true,
+    webPreferences: {
+      devTools: hasDevTools,
+      nodeIntegration: false,
+      preload: EXTENDED_TOOLBAR_WINDOW_PRELOAD_WEBPACK_ENTRY,
+    }
+  })
+
+  extendedToolbarWindow.loadURL(EXTENDED_TOOLBAR_WINDOW_WEBPACK_ENTRY)
+  extendedToolbarWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  extendedToolbarWindow.setAlwaysOnTop(true)
+
+  extendedToolbarWindow.on('close', function (event) {
+    rawLog('Extended toolbar window: on close')
+
+    if (isQuitting) return;
+
+    event.preventDefault();
+
+    hideApp()
+  })
+
+  extendedToolbarWindow.on('closed', () => {
+    if (extendedToolbarPositionStoreTimeout) {
+      clearTimeout(extendedToolbarPositionStoreTimeout)
+      extendedToolbarPositionStoreTimeout = null
+    }
+
+    extendedToolbarWindow = null
+
+    app.quit()
+  })
+
+  extendedToolbarWindow.on('moved', () => {
+    scheduleStoreToolbarPositionFromExtendedWindow()
+  })
+
+  extendedToolbarWindow.webContents.on('did-finish-load', () => {
+    if (startAsHidden) return;
+
+    enablePointerMode()
+  })
+
+  extendedToolbarWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  extendedToolbarWindow.webContents.on('before-input-event', (event, input) => {
+    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
+      event.preventDefault();
+    }
+  });
+}
+
 function showAboutWindow() {
   withThrottle(() => {
-    hideDrawWindow()
+    if (drawingMode) {
+      enablePointerMode()
+    }
 
     if (aboutWindow) {
       aboutWindow.focus();
@@ -367,6 +474,7 @@ function createAboutWindow() {
     height: 250,
     resizable: false,
     minimizable: false,
+    maximizable: false,
     autoHideMenuBar: true,
     webPreferences: {
       devTools: hasDevTools,
@@ -406,7 +514,9 @@ function createAboutWindow() {
 
 function showSettingsWindow() {
   withThrottle(() => {
-    hideDrawWindow()
+    if (drawingMode) {
+      enablePointerMode()
+    }
 
     if (settingsWindow) {
       settingsWindow.focus();
@@ -432,6 +542,7 @@ function createSettingsWindow() {
     height: 500,
     resizable: false,
     minimizable: false,
+    maximizable: false,
     autoHideMenuBar: true,
     webPreferences: {
       devTools: hasDevTools,
@@ -470,7 +581,9 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on('second-instance', () => {
-  showDrawWindow();
+  if (!mainWindow) return
+
+  enableDrawMode()
 });
 
 app.commandLine.appendSwitch('disable-pinch');
@@ -478,10 +591,12 @@ app.commandLine.appendSwitch('disable-pinch');
 app.whenReady().then(() => {
   launchTracker()
 
-  preCheck()
-
   hideDock()
+
+  startAsHiddenCheck()
+
   createMainWindow()
+  createExtendedToolbarWindow()
 
   tray = new Tray(getTrayIconPath())
   updateContextMenu()
@@ -491,7 +606,14 @@ app.whenReady().then(() => {
 
   updateApp()
   setApplicationName()
+
+  screen.on('display-removed', hideApp)
+  screen.on('display-metrics-changed', hideApp)
 })
+
+app.on('before-quit', () => {
+  isQuitting = true;
+});
 
 app.on('will-quit', () => {
   rawLog('Will quit app... (Unregister all shortcuts)')
@@ -502,16 +624,19 @@ app.on('will-quit', () => {
 app.on('window-all-closed', () => {
   rawLog('All windows closed.')
 
-  // Empty handler to prevent app from quitting
+  app.quit()
 })
 
-function preCheck() {
+function startAsHiddenCheck() {
   if (safeWasOpenedAtLogin()) {
-    foregroundMode = false
+    startAsHidden = true
     return
   }
 
-  foregroundMode = !store.get('starts_hidden')
+  if (store.get('starts_hidden')) {
+    startAsHidden = true
+    return
+  }
 }
 
 function hideDock() {
@@ -543,6 +668,7 @@ ipcMain.handle('get_settings', () => {
     tool_bar_active_weight_index: store.get('tool_bar_active_weight_index'),
     tool_bar_default_brush: store.get('tool_bar_default_brush'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
+    tool_bar_collapsed: store.get('tool_bar_collapsed'),
     swap_colors_indexes: store.get('swap_colors_indexes'),
     fade_disappear_after_ms: store.get('fade_disappear_after_ms'),
     fade_out_duration_time_ms: store.get('fade_out_duration_time_ms'),
@@ -557,20 +683,21 @@ ipcMain.handle('get_settings', () => {
 });
 
 ipcMain.handle('set_settings', (_event, newSettings) => {
-  const needUpdateMenu = shouldUpdateMenu(newSettings) // Roundtrip request updates store value
+  rawLog('Updating settings from Renderer:')
 
   store.set({ ...store.store, ...newSettings })
-
-  if (needUpdateMenu) {
-    rawLog('Update Menu (settings changed)...')
-    updateContextMenu()
-  }
 
   return null
 });
 
-ipcMain.handle('hide_app', () => {
-  hideDrawWindow()
+ipcMain.handle('close_app', () => {
+  hideApp();
+
+  return null
+});
+
+ipcMain.handle('toggle_draw_or_pointer_window', () => {
+  toggleDrawOrPointerMode()
 
   return null
 });
@@ -589,10 +716,10 @@ ipcMain.handle('make_screenshot', () => {
 
 ipcMain.handle('open_notification', (_event, info) => {
   if (info.action === 'open_screenshot') {
+    enablePointerMode()
+
     const desktop = app.getPath('desktop')
     const filePath = path.join(desktop, info.data)
-
-    hideDrawWindow()
 
     if (fs.existsSync(filePath)) {
       shell.showItemInFolder(filePath)
@@ -604,7 +731,7 @@ ipcMain.handle('open_notification', (_event, info) => {
   }
 
   if (info.action === 'open_security_preferences') {
-    hideDrawWindow()
+    enablePointerMode()
 
     if (isMac) {
       shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture');
@@ -638,6 +765,7 @@ ipcMain.handle('get_configuration', () => {
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
     starts_hidden:                            store.get('starts_hidden'),
+    disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -700,9 +828,7 @@ ipcMain.handle('set_shortcut', (_event, key, value) => {
   registerGlobalShortcuts();
   updateContextMenu()
 
-  if (mainWindow) {
-    mainWindow.reload()
-  }
+  mainWindow.reload()
 
   return null
 });
@@ -760,9 +886,7 @@ ipcMain.handle('set_fade_disappear_after_ms', (_event, value) => {
 
   store.set('fade_disappear_after_ms', value)
 
-  if (mainWindow) {
-    mainWindow.reload()
-  }
+  mainWindow.reload()
 
   return null
 });
@@ -772,9 +896,7 @@ ipcMain.handle('set_fade_out_duration_time_ms', (_event, value) => {
 
   store.set('fade_out_duration_time_ms', value)
 
-  if (mainWindow) {
-    mainWindow.reload()
-  }
+  mainWindow.reload()
 
   return null
 });
@@ -784,9 +906,7 @@ ipcMain.handle('set_laser_time', (_event, value) => {
 
   store.set('laser_time', value)
 
-  if (mainWindow) {
-    mainWindow.reload()
-  }
+  mainWindow.reload()
 
   return null
 });
@@ -808,21 +928,36 @@ ipcMain.handle('set_drawing_monitor', (_event, value) => {
   return null
 });
 
+ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
+  rawLog('Setting disable toolbar in pointer mode:', value)
+
+  store.set('disable_toolbar_in_pointer_mode', value)
+
+  updateExternalToolbarVisibility()
+
+  return null
+});
+
 function refreshSettingsInRenderer() {
-  if (mainWindow) {
-    mainWindow.webContents.send('refresh_settings', {
-      show_drawing_border: store.get('show_drawing_border'),
-      show_cute_cursor:    store.get('show_cute_cursor'),
-      swap_colors_indexes: store.get('swap_colors_indexes'),
-    })
-  }
+  mainWindow.webContents.send('refresh_settings', {
+    show_drawing_border: store.get('show_drawing_border'),
+    show_cute_cursor:    store.get('show_cute_cursor'),
+    swap_colors_indexes: store.get('swap_colors_indexes'),
+  })
+}
+
+function updateToolbarPositionInRenderer() {
+  mainWindow.webContents.send('update_toolbar_position', {
+    tool_bar_x:          store.get('tool_bar_x'),
+    tool_bar_y:          store.get('tool_bar_y'),
+  })
 }
 
 function registerGlobalShortcuts() {
   rawLog('REGISTER global shortcuts...')
 
   const keyApp = store.get('key_binding_show_hide_app')
-  safeRegisterGlobalShortcut(keyApp, toggleDrawWindow)
+  safeRegisterGlobalShortcut(keyApp, toggleDrawOrPointerMode)
 }
 
 function unRegisterGlobalShortcuts() {
@@ -841,53 +976,69 @@ function withThrottle(callback) {
   callback();
 }
 
-function toggleDrawWindow() {
+function toggleDrawOrPointerMode() {
   withThrottle(() => {
-    rawLog('Toggling draw window...')
+    rawLog('Toggling draw mode...')
 
-    if (foregroundMode) {
-      hideDrawWindow()
+    if (drawingMode) {
+      enablePointerMode()
     } else {
-      showDrawWindow()
+      enableDrawMode()
     }
   });
 }
 
-function showDrawWindow() {
-  rawLog('Showing draw window...')
+function enableDrawMode() {
+  rawLog('Enable drawing mode...')
 
-  if (!mainWindow) {
-    rawLog('Main window not found, creating...')
-    createMainWindow()
-  }
+  showMainWindow()
+  hideWindow(extendedToolbarWindow)
 
-  showWindowOnScreen()
-
-  foregroundMode = true
+  drawingMode = true
   updateContextMenu()
 }
 
-function hideDrawWindow() {
-  if (!mainWindow) return
+function enablePointerMode() {
+  rawLog('Enable pointer mode...')
 
-  rawLog('Hiding draw window...')
+  showExtendedToolbarWindow()
+  hideWindow(mainWindow)
 
-  mainWindow.hide()
-  foregroundMode = false
+  drawingMode = false
   updateContextMenu()
+}
+
+function hideApp() {
+  rawLog('Hiding app...')
+
+  hideWindow(mainWindow)
+  hideWindow(extendedToolbarWindow)
+
+  drawingMode = false
+  updateContextMenu()
+}
+
+function updateExternalToolbarVisibility() {
+  if (drawingMode) return;
+
+  if (store.get('disable_toolbar_in_pointer_mode')) {
+    hideWindow(extendedToolbarWindow)
+    return
+  }
+
+  if (store.get('show_tool_bar')) {
+    showExtendedToolbarWindow()
+  } else {
+    hideWindow(extendedToolbarWindow)
+  }
 }
 
 function toggleToolbar() {
   withThrottle(() => {
     rawLog('Toggling toolbar...')
 
-    if (mainWindow) {
-      mainWindow.webContents.send('toggle_toolbar')
-      // Roundtrip request updates store value
-    } else {
-      store.set('show_tool_bar', !store.get('show_tool_bar'));
-      updateContextMenu()
-    }
+    store.set('show_tool_bar', !store.get('show_tool_bar'));
+    mainWindow.webContents.send('toggle_toolbar') // Roundtrip request ...
   });
 }
 
@@ -895,13 +1046,8 @@ function toggleWhiteboard() {
   withThrottle(() => {
     rawLog('Toggling whiteboard...')
 
-    if (mainWindow) {
-      mainWindow.webContents.send('toggle_whiteboard')
-      // Roundtrip request updates store value
-    } else {
-      store.set('show_whiteboard', !store.get('show_whiteboard'));
-      updateContextMenu()
-    }
+    store.set('show_whiteboard', !store.get('show_whiteboard'));
+    mainWindow.webContents.send('toggle_whiteboard') // Roundtrip request ...
   });
 }
 
@@ -927,7 +1073,7 @@ function resetApp() {
 
     tray.setImage(getTrayIconPath())
 
-    showDrawWindow()
+    enablePointerMode()
 
     if (settingsWindow) {
       settingsWindow.reload()
@@ -939,9 +1085,7 @@ function resetScreen() {
   withThrottle(() => {
     rawLog('Resetting screen...')
 
-    if (mainWindow) {
-      mainWindow.webContents.send('reset_screen');
-    }
+    mainWindow.webContents.send('reset_screen');
   });
 }
 
@@ -981,10 +1125,8 @@ function screenshotFilename(withUniqSuffix = false) {
 }
 
 async function makeScreenshot() {
-  if (!mainWindow) return
-
-  if (!foregroundMode) {
-    showDrawWindow()
+  if (!drawingMode) {
+    enableDrawMode()
   }
 
   try {
@@ -1005,7 +1147,7 @@ async function makeScreenshot() {
       }
     }
 
-    const activeMonitor = getActiveDisplay()
+    const activeMonitor = getLockedMonitor() || getActiveMonitor() || getUnderCursorMonitor()
 
     const thumbnailSize = {
       width: Math.round(activeMonitor.size.width * (activeMonitor.scaleFactor || 1)),
@@ -1061,20 +1203,76 @@ async function makeScreenshot() {
 }
 
 function sendNotification(data) {
-  if (mainWindow) {
-    mainWindow.webContents.send('show_notification', data);
+  mainWindow.webContents.send('show_notification', data);
+}
+
+function hideWindow(targetWindow) {
+  targetWindow.setOpacity(0)
+  try {
+    targetWindow.hide()
+  } finally {
+    targetWindow.setOpacity(1)
   }
 }
 
-function showWindowOnScreen() {
-  const currentDisplay = getDrawingDisplay()
+function showWindow(targetWindow) {
+  targetWindow.setOpacity(0)
 
-  if (store.get('active_monitor_id') === currentDisplay.id) {
-    mainWindow.show()
+  try {
+    targetWindow.show()
+    targetWindow.moveTop()
+  } finally {
+    targetWindow.setOpacity(1)
+  }
+}
+
+function storeToolbarPositionFromExtendedWindow() {
+  const currentDisplay = getLockedMonitor() || getUnderToolbarMonitor()
+  if (!currentDisplay) return;
+
+  const { x: displayX, y: displayY } = currentDisplay.workArea
+  const { x: extToolBarX, y: extToolBarY } = extendedToolbarWindow.getBounds()
+
+  const toolBarX = extToolBarX - displayX + EXTENDED_TOOLBAR_WINDOW_MARGIN
+  const toolBarY = extToolBarY - displayY + EXTENDED_TOOLBAR_WINDOW_MARGIN
+
+  rawLog(`Update Toolbar: display: ${currentDisplay.id}, toolBarX: ${toolBarX}, toolBarY: ${toolBarY}`)
+
+  store.set({
+    tool_bar_x: toolBarX,
+    tool_bar_y: toolBarY,
+  });
+
+  updateMainWindowPosition(currentDisplay)
+}
+
+function scheduleStoreToolbarPositionFromExtendedWindow() {
+  if (extendedToolbarPositionStoreTimeout) {
+    clearTimeout(extendedToolbarPositionStoreTimeout)
+  }
+
+  extendedToolbarPositionStoreTimeout = setTimeout(() => {
+    extendedToolbarPositionStoreTimeout = null
+    storeToolbarPositionFromExtendedWindow()
+  }, updateStoreDelay)
+}
+
+// - Enable Draw Mode (Click by Main Button or from Tray)
+function showMainWindow() {
+  const currentDisplay = getLockedMonitor() || getUnderToolbarMonitor() || getUnderCursorMonitor()
+
+  updateMainWindowPosition(currentDisplay)
+
+  showWindow(mainWindow)
+}
+
+function updateMainWindowPosition(display) {
+  if (store.get('active_monitor_id') === display.id) {
+    updateToolbarPositionInRenderer()
     return
   }
 
-  mainWindow.setBounds(currentDisplay.workArea)
+  mainWindow.setBounds(display.workArea)
 
   if (isDevelopment) {
     mainWindow.setBounds({
@@ -1083,36 +1281,60 @@ function showWindowOnScreen() {
     })
   }
 
-  store.set('active_monitor_id', currentDisplay.id)
-  store.reset('tool_bar_x')
-  store.reset('tool_bar_y')
   mainWindow.reload()
-  mainWindow.show()
+
+  store.set('active_monitor_id', display.id)
 }
 
-function getActiveDisplay() {
+// - Cold Start
+// - Enable Toolbar from Tray
+// - Enable Pointer Mode (Click by Main Button or from Tray)
+function showExtendedToolbarWindow() {
+  if (store.get('disable_toolbar_in_pointer_mode')) return;
+  if (!store.get('show_tool_bar')) return;
+
+  const currentDisplay = getLockedMonitor() || getActiveMonitor() || getUnderCursorMonitor()
+
+  updateExtendedToolbarWindowPosition(currentDisplay)
+
+  showWindow(extendedToolbarWindow)
+}
+
+function updateExtendedToolbarWindowPosition(display) {
+  const { x: displayX, y: displayY } = display.workArea
+
+  extendedToolbarWindow.setBounds({
+    x: displayX + store.get('tool_bar_x') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
+    y: displayY + store.get('tool_bar_y') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
+  })
+}
+
+function getLockedMonitor() {
+  const drawingMonitorOptions = store.get('drawing_monitor')
+
+  if (drawingMonitorOptions.mode === 'fixed') {
+    return screen.getAllDisplays().find(display => String(display.id) === drawingMonitorOptions.display_id)
+  }
+
+  return null
+}
+
+function getActiveMonitor() {
   const activeMonitorId = store.get('active_monitor_id')
 
-  const matchedMonitor = screen.getAllDisplays().find(display => display.id === activeMonitorId)
-  if (matchedMonitor) {
-    return matchedMonitor
-  }
-
-  return getDrawingDisplay()
+  return screen.getAllDisplays().find(display => display.id === activeMonitorId)
 }
 
-function getDrawingDisplay() {
-  const drawingMonitor = store.get('drawing_monitor')
+function getUnderCursorMonitor() {
+  return screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+}
 
-  if (drawingMonitor.mode === 'fixed') {
-    const fixedDisplay = screen.getAllDisplays().find(display => String(display.id) === drawingMonitor.display_id)
-
-    if (fixedDisplay) {
-      return fixedDisplay
-    }
+function getUnderToolbarMonitor() {
+  if (!extendedToolbarWindow.isVisible()) {
+    return null
   }
 
-  return screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  return screen.getDisplayMatching(extendedToolbarWindow.getBounds())
 }
 
 function getAllDisplaysInfo() {
@@ -1141,20 +1363,6 @@ function deNormalizeAcceleratorFromUI(value) {
 
   const target = (isMac) ? 'Meta' : 'Control';
   return value.replace(target, 'CmdOrCtrl');
-}
-
-function shouldUpdateMenu(newSettings) {
-  function valueChanged(key) {
-    return (key in store.store) &&
-           (key in newSettings) &&
-           store.store[key] !== newSettings[key]
-  }
-
-  if (valueChanged('show_whiteboard') || valueChanged('show_tool_bar')) {
-    return true;
-  }
-
-  return false;
 }
 
 function safeRegisterGlobalShortcut(accelerator, callback) {
@@ -1249,3 +1457,13 @@ function rawLog(message, ...args) {
 
   console.log(message, ...args);
 }
+
+process.on('uncaughtException', (error) => {
+  console.log('[DRAWPEN:FATAL] uncaughtException', error)
+  app.quit();
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.log('[DRAWPEN:FATAL] unhandledRejection', reason)
+  app.quit();
+})

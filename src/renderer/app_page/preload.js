@@ -4,7 +4,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer -> Main
-  invokeHideApp: () => ipcRenderer.invoke('hide_app'),
+  invokeCloseApp: () => ipcRenderer.invoke('close_app'),
+  invokePointerMode: () => ipcRenderer.invoke('toggle_draw_or_pointer_window'),
   invokeOpenSettings: () => ipcRenderer.invoke('open_settings'),
   invokeMakeScreenshot: () => ipcRenderer.invoke('make_screenshot'),
   invokeOpenNotification: (info) => ipcRenderer.invoke('open_notification', info),
@@ -16,5 +17,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onToggleToolbar: (callback) => ipcRenderer.on('toggle_toolbar', callback),
   onToggleWhiteboard: (callback) => ipcRenderer.on('toggle_whiteboard', callback),
   onRefreshSettings: (callback) => ipcRenderer.on('refresh_settings', callback),
+  onUpdateToolbarPosition: (callback) => ipcRenderer.on('update_toolbar_position', callback),
   onShowNotification: (callback) => ipcRenderer.on('show_notification', callback),
 });

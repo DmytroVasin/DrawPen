@@ -1,7 +1,7 @@
 {
   "name": "drawpen",
   "productName": "DrawPen",
-  "version": "0.0.43",
+  "version": "0.0.45",
   "description": "DrawPen is a screen annotation tool built with web technology",
   "appId": "dmytro.vasin.drawpen",
   "author": {
@@ -57,7 +57,7 @@
     "posthog-node": "^5.21.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-icons": "^5.2.1",
+    "react-icons": "5.5.0",
     "update-electron-app": "^3.0.0"
   },
   "browserslist": {

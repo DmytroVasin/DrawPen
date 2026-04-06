@@ -15,9 +15,6 @@
 
   --shadow-ambient: rgba(0, 0, 0, 0.1);
 
-  --toolbar-width: calc(20px + 9*36px + 2*10px + 30px);
-  --toolbar-height: 44px;
-
   --border-size: 5px; // Equals to ZONE_BORDER
   --border-color: #B2F2BB;
 
@@ -59,9 +56,9 @@ body {
         z-index: -1;
 
         /* https://www.magicpattern.design/tools/css-backgrounds */
-        background-color: #f5faff;
-        background-image: radial-gradient(#9d9d9d 0.8px, #f5faff 0.8px);
-        background-size: 16px 16px;
+        background-color: #F5FAFF;
+        background-image: radial-gradient(#9d9d9d 1px, #F5FAFF 1px);
+        background-size: 20px 20px;
       }
 
       #zone_borders {

@@ -1,21 +1,72 @@
-#toolbar {
-  width: var(--toolbar-width);
-  height: var(--toolbar-height);
-  display: flex;
-  position: absolute;
-  top: 5px;
-  left: calc(50% - calc(var(--toolbar-width) / 2));
-  background-color: rgba(230, 230, 230, 0.95);
-  border-radius: 10px;
-  border: 1px solid #666666;
-  overflow: hidden;
+:root {
+  --toolbar-height: 44px;
+  --toolbar-background-color: #FFFFFF;
+  --toolbar-border-color: #020202;
+  --toolbar-width--full: calc(10px + 9*36px + 2*9px + 10px);
+  --toolbar-width--mini: calc(10px + 36px + 10px);
+  --toolbar-switch-duration: 0.3s;
+}
 
+#toolbar {
+  position: absolute;
+  top: var(--border-size);
+  left: var(--border-size);
+
+  .toolbar__slider {
+    height: var(--toolbar-height);
+  }
+
+  .toolbar__container {
+    width: var(--toolbar-width--full);
+    height: var(--toolbar-height);
+    transition: width var(--toolbar-switch-duration);
+
+    .toolbar__panels-track {
+      display: flex;
+      height: 100%;
+      width: calc(var(--toolbar-width--full) + var(--toolbar-width--mini));
+      transition: transform var(--toolbar-switch-duration);
+      transform: translateX(0);
+
+      .toolbar__panel--full {
+        width: var(--toolbar-width--full);
+      }
+
+      .toolbar__panel--mini {
+        width: var(--toolbar-width--mini);
+      }
+    }
+  }
+
+  &.toolbar--collapsed {
+    .toolbar__container {
+      width: var(--toolbar-width--mini);
+
+      .toolbar__panels-track {
+        transform: translateX(calc(-1 * var(--toolbar-width--full)));
+      }
+    }
+  }
+}
+
+// Trick to support 'stairs' nature of the ToolBar
+#toolbar {
+  pointer-events: none;
+
+  .toolbar__close,
+  .toolbar__mode-switcher,
+  .toolbar__container,
+  .toolbar__slider {
+    pointer-events: auto;
+  }
+}
+
+// Reset button behavior
+#toolbar {
   button {
     background: none;
     border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 0;
     cursor: inherit;
 
     svg {
@@ -26,49 +77,96 @@
       outline: none;
     }
   }
+}
 
-  .toolbar__buttons {
-    display: flex;
-    flex-direction: column;
+#toolbar {
+  display: flex;
+
+  .toolbar__close {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    z-index: 1;
+    background-color: var(--toolbar-background-color);
+    border: 1px solid var(--toolbar-border-color);
+    border-radius: 15px;
 
     button {
+      display: flex;
       padding: 2px;
-      width: 20px;
-      height: 20px;
-    }
+      justify-content: center;
+      align-items: center;
 
-    .toolbar__buttons_dragger {
-      flex-grow: 1;
-      cursor: move;
+      svg {
+        width: 12px;
+        height: 12px;
+      }
     }
   }
 
-  .toolbar__draglines {
+  .toolbar__mode-switcher {
     display: flex;
-    padding: 0 10px;
-    align-items: center;
-    cursor: move;
+    background-color: var(--toolbar-background-color);
+    border-radius: 10px;
+    border: 1px solid var(--toolbar-border-color);
 
-    .draglines {
-      display: grid;
-      grid-template-columns: repeat(2, min-content);
-      row-gap: 2px;
-      column-gap: 4px;
+    .toolbar__main-button {
+      display: flex;
+      padding: 10px 0;
 
-      div {
-        border-radius: 50%;
-        width: 3px;
-        height: 3px;
-        background-image: radial-gradient(circle at 50% 0, #C6C6C6, #666666);
+      button {
+        display: flex;
+        align-self: center;
+        cursor: pointer;
+
+        svg {
+          width: 50px;
+          height: 50px;
+        }
+      }
+    }
+
+    .toolbar__draglines {
+      display: flex;
+      padding: 0 4px;
+      align-items: center;
+      cursor: move;
+
+      .draglines {
+        display: grid;
+        row-gap: 2px;
+        column-gap: 2px;
+        grid-template-columns: repeat(2, min-content);
+
+        div {
+          width: 2px;
+          height: 2px;
+          border-radius: 50%;
+          background-color: var(--toolbar-border-color);
+        }
       }
     }
   }
 
   .toolbar__container {
-    display: flex;
     position: relative;
-    width: 100%;
-    justify-content: center;
+    background-color: var(--toolbar-background-color);
+    display: flex;
+    align-self: center;
+    overflow: hidden;
+    border-top: 1px solid var(--toolbar-border-color);
+    border-bottom: 1px solid var(--toolbar-border-color);
+    box-sizing: border-box;
+
+    .toolbar__panel {
+      position: relative;
+    }
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
     .toolbar__body,
     .side-view-body {
@@ -76,9 +174,9 @@
       display: flex;
       width: 100%;
       height: 100%;
-      transition: .3s;
       justify-content: center;
       align-items: center;
+      transition: top var(--toolbar-switch-duration);
     }
 
     .toolbar__body {
@@ -91,11 +189,11 @@
     }
 
     .toolbar__items {
+      position: relative;
       display: flex;
       margin: 0;
       padding: 0;
       align-items: center;
-      flex-direction: row;
 
       li {
         display: flex;
@@ -109,17 +207,15 @@
         cursor: pointer;
 
         button {
-          padding: 0;
-
           svg {
             width: 20px;
             height: 20px;
-            pointer-events: none;
           }
         }
 
         &.active {
-          border: 1px solid #666666;
+          // background-color: #EEEEEF;
+          border: 1px solid var(--toolbar-border-color);
           border-radius: 5px;
           overflow: auto;
 
@@ -141,62 +237,41 @@
 
         &.cross-line {
           border: none;
-          background-color: #666666;
-          height: 26px;
-          width: 2px;
+          background-color: var(--toolbar-border-color);
+          height: 20px;
+          width: 1px;
           margin: 2px 4px;
           padding: 0;
           cursor: default;
         }
       }
 
-      .toolbar__width-button {
+      .toolbar__width-picker,
+      .toolbar__color-picker {
         width: 24px;
         height: 24px;
-        border-radius: 50%;
         border: 2px solid #000;
+        box-sizing: border-box;
+        border-radius: 5px;
+      }
 
+      .toolbar__width-picker {
         div {
           height: 15px;
           background-color: #000;
           transform: rotate(45deg);
-
-          &.thin { width: 2px; }
-          &.light { width: 4px; }
-          &.medium { width: 6px; }
-          &.bold { width: 8px; }
         }
+
+        &.thin { div { width: 2px; }}
+        &.light { div { width: 4px; }}
+        &.medium { div { width: 6px; }}
+        &.bold { div { width: 8px; }}
       }
 
       .toolbar__color-picker {
-        position: relative;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        border: none;
-
-        &::before {
-          position: absolute;
-          content: "";
-          top: 50%;
-          left: 50%;
-          width: 16px;
-          height: 16px;
-          background: inherit;
-          border-radius: 50%;
-          border: 2px solid #FFFFFF;
-          transform: translate(-50%, -50%);
-        }
-
-        &.color_white {
-          &::before { border-color: #D9D9D9; }
-        }
-
         &.color_tool_laser,
         &.color_tool_eraser {
           cursor: default;
-
-          &::before { border-color: #FFFFFF; }
         }
 
         &.color_rainbow { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
@@ -204,25 +279,80 @@
         &.color_red { background-color: var(--color-picker-red); }
         &.color_green { background-color: var(--color-picker-green); }
         &.color_orange { background-color: var(--color-picker-orange); }
-        &.color_black { background-color: var(--color-picker-black); }
         &.color_white { background-color: var(--color-picker-white); }
+        &.color_black { background-color: var(--color-picker-black); }
         &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
         &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
       }
+
+      .toolbar__color-hint-wrapper {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+
+        .toolbar__color-hint {
+          position: absolute;
+          top: -6px;
+          left: -6px;
+
+          transform: translate(-50%, -50%);
+
+          border: 1px solid var(--toolbar-border-color);
+          border-radius: 50%;
+
+          cursor: pointer;
+          aspect-ratio: 1;
+
+          &.color_rainbow { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
+          &.color_blue { background-color: var(--color-picker-blue); }
+          &.color_red { background-color: var(--color-picker-red); }
+          &.color_green { background-color: var(--color-picker-green); }
+          &.color_orange { background-color: var(--color-picker-orange); }
+          &.color_white { background-color: var(--color-picker-white); }
+          &.color_black { background-color: var(--color-picker-black); }
+          &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
+          &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
+
+          &.thin { width: 8px; }
+          &.light { width: 10px; }
+          &.medium { width: 12px; }
+          &.bold { width: 14px; }
+        }
+      }
+    }
+  }
+
+  .toolbar__slider {
+    display: flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+    border: 1px solid var(--toolbar-border-color);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    background-color: var(--toolbar-background-color);
+    cursor: pointer;
+
+    svg {
+      width: 16px;
+      height: 16px;
     }
   }
 }
 
-#toolbar.tool-slide .toolbar__body,
-#toolbar.brush-slide .toolbar__body,
-#toolbar.color-slide .toolbar__body,
-#toolbar.width-slide .toolbar__body {
+#toolbar.tool-slide .toolbar__panel--full .toolbar__body,
+#toolbar.brush-slide .toolbar__panel--full .toolbar__body,
+#toolbar.color-slide .toolbar__panel--full .toolbar__body,
+#toolbar.width-slide .toolbar__panel--full .toolbar__body {
   top: -70px;
 }
 
-#toolbar.tool-slide .tool-group,
-#toolbar.brush-slide .brush-group,
-#toolbar.color-slide .color-group,
-#toolbar.width-slide .width-group {
+#toolbar.tool-slide .toolbar__panel--full .tool-group,
+#toolbar.brush-slide .toolbar__panel--full .brush-group,
+#toolbar.color-slide .toolbar__panel--full .color-group,
+#toolbar.width-slide .toolbar__panel--full .width-group {
   top: 0;
 }
