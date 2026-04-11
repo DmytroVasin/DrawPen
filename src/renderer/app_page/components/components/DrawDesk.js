@@ -1,7 +1,7 @@
 import './DrawDesk.scss';
 
 import React, { useEffect, useRef } from 'react';
-import { colorList, PALM_MIN_CONTACT_SIZE } from '../constants.js'
+import { colorList, palmMinContactArea, palmMinContactLength } from '../constants.js'
 import { getMouseCoordinates } from '../utils/general.js';
 import {
   drawPen,
@@ -172,14 +172,14 @@ const DrawDesk = ({
     })
   };
 
-  const isPenEraser = (event) => {
-    return (event.pointerType === 'pen' && event.button === 5) ||
-           (event.pointerType === 'mouse' && event.button === 1);
-  }
+  const isTemporaryEraser = (event) => {
+    const contactLength = Math.max(event.width, event.height);
+    const contactArea = event.width * event.height;
+    const isPalm = contactLength >= palmMinContactLength && contactArea >= palmMinContactArea;
 
-  const isPalmTouch = (event) => {
-    return event.pointerType === 'touch' &&
-           (event.width > PALM_MIN_CONTACT_SIZE || event.height > PALM_MIN_CONTACT_SIZE);
+    return (event.pointerType === 'pen' && event.button === 5) ||
+           (event.pointerType === 'mouse' && event.button === 1) ||
+           (event.pointerType === 'touch' && isPalm);
   }
 
   const onPointerDown = (event) => {
@@ -187,17 +187,8 @@ const DrawDesk = ({
 
     if(event.pointerType === 'mouse' && event.button === 2) return;
 
-    if (isPenEraser(event) && activeTool !== 'eraser') {
+    if (isTemporaryEraser(event) && activeTool !== 'eraser') {
       // Hard Trick! Rethink!
-      prevToolRef.current = activeTool;
-      simulateKeyDown.current = true;
-
-      handleChangeTool('eraser');
-      return
-    }
-
-    // Palm/fist eraser: large touch contact area triggers eraser
-    if (isPalmTouch(event) && activeTool !== 'eraser') {
       prevToolRef.current = activeTool;
       simulateKeyDown.current = true;
 

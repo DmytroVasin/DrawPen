@@ -20,8 +20,8 @@ export const SNAP_ANGLE = Math.PI / 12; // 45°
 export const highlighterAlpha = 0.35;
 export const eraserAlpha = 0.5;
 
-// Palm eraser: minimum touch contact size (width/height in px) to detect a palm/fist
-export const PALM_MIN_CONTACT_SIZE = 50;
+export const palmMinContactLength = 35; // Min touch contact length to detect a palm/fist
+export const palmMinContactArea = 2000;
 
 export const brushList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'oval', 'line'];
