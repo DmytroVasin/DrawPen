@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.46] - 2026-04-11
+### Features:
+- Added palm touch detection for temporary eraser activation (Touch devices only)
+
 ## [0.0.45] - 2026-03-12
 ### Features:
 - Added "Hide Extended Toolbar" option
