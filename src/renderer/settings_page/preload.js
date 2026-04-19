@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setStartsHidden: (value) => ipcRenderer.invoke('set_starts_hidden', value),
   resetToOriginals: () => ipcRenderer.invoke('reset_to_originals'),
   setShowDrawingBorder: (value) => ipcRenderer.invoke('set_show_drawing_border', value),
+  setWhiteboardColor: (value) => ipcRenderer.invoke('set_whiteboard_color', value),
+  setWhiteboardSizePercent: (value) => ipcRenderer.invoke('set_whiteboard_size_percent', value),
   setShowCuteCursor: (value) => ipcRenderer.invoke('set_show_cute_cursor', value),
   setLaserTimeMs: (value) => ipcRenderer.invoke('set_laser_time', value),
   setAppIconColor: (value) => ipcRenderer.invoke('set_app_icon_color', value),

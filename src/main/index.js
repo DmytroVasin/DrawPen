@@ -44,6 +44,14 @@ const schema = {
     type: 'boolean',
     default: false
   },
+  whiteboard_color: {
+    type: 'string',
+    default: 'white'
+  },
+  whiteboard_size_percent: {
+    type: 'number',
+    default: 80
+  },
   show_tool_bar: {
     type: 'boolean',
     default: true
@@ -539,7 +547,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     show: false,
     width: 800,
-    height: 500,
+    height: 600,
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -658,6 +666,8 @@ ipcMain.handle('get_app_version', () => {
 ipcMain.handle('get_settings', () => {
   return {
     show_whiteboard: store.get('show_whiteboard'),
+    whiteboard_color: store.get('whiteboard_color'),
+    whiteboard_size_percent: store.get('whiteboard_size_percent'),
     show_tool_bar: store.get('show_tool_bar'),
     show_drawing_border: store.get('show_drawing_border'),
     show_cute_cursor: store.get('show_cute_cursor'),
@@ -753,6 +763,8 @@ ipcMain.handle('get_configuration', () => {
   return {
     app_version:                              app.getVersion(),
 
+    whiteboard_color:                         store.get('whiteboard_color'),
+    whiteboard_size_percent:                  store.get('whiteboard_size_percent'),
     show_drawing_border:                      store.get('show_drawing_border'),
     show_cute_cursor:                         store.get('show_cute_cursor'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
@@ -861,6 +873,26 @@ ipcMain.handle('set_show_drawing_border', (_event, value) => {
   return null;
 });
 
+ipcMain.handle('set_whiteboard_color', (_event, value) => {
+  rawLog('Setting whiteboard color:', value)
+
+  store.set('whiteboard_color', value)
+
+  refreshSettingsInRenderer()
+
+  return null;
+});
+
+ipcMain.handle('set_whiteboard_size_percent', (_event, value) => {
+  rawLog('Setting whiteboard size percent:', value)
+
+  store.set('whiteboard_size_percent', value)
+
+  refreshSettingsInRenderer()
+
+  return null;
+});
+
 ipcMain.handle('set_show_cute_cursor', (_event, value) => {
   rawLog('Setting cute cursor:', value)
 
@@ -940,9 +972,11 @@ ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
 
 function refreshSettingsInRenderer() {
   mainWindow.webContents.send('refresh_settings', {
-    show_drawing_border: store.get('show_drawing_border'),
-    show_cute_cursor:    store.get('show_cute_cursor'),
-    swap_colors_indexes: store.get('swap_colors_indexes'),
+    whiteboard_color:        store.get('whiteboard_color'),
+    whiteboard_size_percent: store.get('whiteboard_size_percent'),
+    show_drawing_border:     store.get('show_drawing_border'),
+    show_cute_cursor:        store.get('show_cute_cursor'),
+    swap_colors_indexes:     store.get('swap_colors_indexes'),
   })
 }
 

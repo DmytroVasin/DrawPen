@@ -52,6 +52,8 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
 };
 
 const Settings = (config) => {
+  const [whiteboardColor, setWhiteboardColor] = useState(config.whiteboard_color);
+  const [whiteboardSizePercent, setWhiteboardSizePercent] = useState(config.whiteboard_size_percent);
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
   const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
@@ -181,6 +183,20 @@ const Settings = (config) => {
     setAppIconColor(iconColor);
 
     window.electronAPI.setAppIconColor(iconColor);
+  }
+
+  const selectWhiteboardColor = (event) => {
+    const nextColor = event.target.value;
+    setWhiteboardColor(nextColor);
+
+    window.electronAPI.setWhiteboardColor(nextColor);
+  }
+
+  const selectWhiteboardSizePercent = (event) => {
+    const nextSizePercent = Number(event.target.value);
+    setWhiteboardSizePercent(nextSizePercent);
+
+    window.electronAPI.setWhiteboardSizePercent(nextSizePercent);
   }
 
   const applyLaserTime = (value) => {
@@ -403,6 +419,61 @@ const Settings = (config) => {
                       className={`toggle ${disableToolbarInPointerMode ? 'active' : ''}`}
                       onClick={toggleDisableToolbarInPointerMode}
                     ></div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Whiteboard Theme</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={whiteboardColor}
+                        onChange={selectWhiteboardColor}
+                      >
+                        <option value="white">Light</option>
+                        <option value="cream">Cream</option>
+                        <option value="blue">Blue</option>
+                        <option value="black">Dark</option>
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="settings-item--nested">
+                  <div className="settings-item">
+                    <div className="settings-item--forward">
+                      <IoChevronForward className="icon" />
+                    </div>
+
+                    <div className="settings-item-info">
+                      <div className="settings-item-title">Whiteboard Size</div>
+                    </div>
+
+                    <div className="settings-item-control">
+                      <div className="selectbar-container">
+                        <select
+                          className="selectbar"
+                          value={whiteboardSizePercent}
+                          onChange={selectWhiteboardSizePercent}
+                        >
+                          <option value={80}>80%</option>
+                          <option value={90}>90%</option>
+                          <option value={100}>100%</option>
+                        </select>
+
+                        <div className="selectbar-arrow">
+                          <IoChevronDown className="icon" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

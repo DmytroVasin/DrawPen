@@ -75,6 +75,8 @@ const Application = (settings) => {
   const initialActiveWidth = settings.tool_bar_active_weight_index
   const initialShowToolbar = settings.show_tool_bar
   const initialShowWhiteboard = settings.show_whiteboard
+  const initialWhiteboardColor = settings.whiteboard_color
+  const initialWhiteboardSizePercent = settings.whiteboard_size_percent
   const initialShowDrawingBorder = settings.show_drawing_border
   const initialShowCuteCursor = settings.show_cute_cursor
   const initialToolbarDefaultBrush = settings.tool_bar_default_brush
@@ -119,6 +121,8 @@ const Application = (settings) => {
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
+  const [whiteboardColor, setWhiteboardColor] = useState(initialWhiteboardColor);
+  const [whiteboardSizePercent, setWhiteboardSizePercent] = useState(initialWhiteboardSizePercent);
   const [toolbarLastActiveBrush, setToolbarLastActiveBrush] = useState(initialToolbarDefaultBrush);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
   const [toolbarCollapsed, setToolbarCollapsed] = useState(initialToolbarCollapsed);
@@ -1321,6 +1325,8 @@ const Application = (settings) => {
   const handleRefreshSettings = (_, newSettings) => {
     console.log('Main -> Renderer: Refresh Settings');
 
+    setWhiteboardColor(newSettings.whiteboard_color);
+    setWhiteboardSizePercent(newSettings.whiteboard_size_percent);
     setShowDrawingBorder(newSettings.show_drawing_border);
     setShowCuteCursor(newSettings.show_cute_cursor);
     setMainColorIndex(newSettings.swap_colors_indexes[0]);
@@ -1418,6 +1424,11 @@ const Application = (settings) => {
     <div id="root_wrapper" className={manipulation} onPointerMove={handleMousePosition} onContextMenu={handleContextMenu}>
 
       {
+        showWhiteboard &&
+        <div id="whiteboard" className={`whiteboard--${whiteboardColor} whiteboard--size-${whiteboardSizePercent}`}></div>
+      }
+
+      {
         showDrawingBorder &&
         <div id="zone_borders"></div>
       }
@@ -1428,11 +1439,6 @@ const Application = (settings) => {
             info={toastInfo}
             handleToastClicked={handleToastClicked}
           />
-      }
-
-      {
-        showWhiteboard &&
-        <div id="whiteboard"></div>
       }
 
       {
