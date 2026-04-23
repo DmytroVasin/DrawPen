@@ -191,27 +191,27 @@ const ToolBar = ({
   const renderToolTitle = (tool) => {
     switch (tool) {
       case "pen":
-        return "Pen";
+        return "Pen (P)";
       case "fadepen":
-        return "Fade Pen";
+        return "Fade Pen (P)";
       case "arrow":
         return "Arrow";
       case "flat_arrow":
-        return "Flat Arrow";
+        return "Flat Arrow (A)";
       case "rectangle":
-        return "Rectangle";
+        return "Rectangle (R)";
       case "oval":
-        return "Oval";
+        return "Oval (C)";
       case "line":
-        return "Line";
+        return "Line (L)";
       case "text":
-        return "Text";
+        return "Text (T)";
       case "highlighter":
-        return "Highlighter";
+        return "Highlighter (H)";
       case "laser":
         return "Laser";
       case "eraser":
-        return "Eraser";
+        return "Eraser (E)";
       default:
         return "Tool";
     }
