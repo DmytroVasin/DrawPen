@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.48] - 2026-04-26
+### Features:
+- Update toolbar shortcut hints
+
 ## [0.0.47] - 2026-04-19
 ### Features:
 - Added Whiteboard Themes and Sizes
