@@ -296,6 +296,46 @@ const Application = (settings) => {
         }
         break;
       }
+      case 'p': {
+        if (activeTool === 'pen') {
+          handleChangeTool('fadepen');
+        } else {
+          handleChangeTool('pen');
+        }
+        break;
+      }
+      case 'a': {
+        if (activeTool === 'arrow') {
+          handleChangeTool('flat_arrow');
+        } else {
+          handleChangeTool('arrow');
+        }
+        break;
+      }
+      case 'r': {
+        handleChangeTool('rectangle');
+        break;
+      }
+      case 'o': {
+        handleChangeTool('oval');
+        break;
+      }
+      case 't': {
+        handleChangeTool('text');
+        break;
+      }
+      case 'h': {
+        handleChangeTool('highlighter');
+        break;
+      }
+      case 'l': {
+        handleChangeTool('laser');
+        break;
+      }
+      case 'e': {
+        handleChangeTool('eraser');
+        break;
+      }
       case 'arrowleft':
       case 'arrowright':
       case 'arrowup':
@@ -371,49 +411,6 @@ const Application = (settings) => {
           lastEscapeAtRef.current = now;
         }
 
-        break;
-      }
-      case 'p': {
-        // Shortcut: P = Pen tool (toggle between pen and fadepen)
-        if (activeTool === 'pen') {
-          handleChangeTool('fadepen');
-        } else {
-          handleChangeTool('pen');
-        }
-        break;
-      }
-      case 'r': {
-        // Shortcut: R = Rectangle tool
-        handleChangeTool('rectangle');
-        break;
-      }
-      case 'a': {
-        // Shortcut: A = Arrow tool (uniform width)
-        handleChangeTool('flat_arrow');
-        break;
-      }
-      case 'l': {
-        // Shortcut: L = Line tool
-        handleChangeTool('line');
-        break;
-      }
-      case 'o': {
-        // Shortcut: O = Oval tool
-        handleChangeTool('oval');
-        break;
-      }
-      case 'h': {
-        // Shortcut: H = Highlighter tool
-        handleChangeTool('highlighter');
-        break;
-      }
-      case 't': {
-        // Shortcut: T = Text tool
-        handleChangeTool('text');
-        break;
-      }
-      case 'e': {
-        handleChangeTool('eraser');
         break;
       }
       case 'x': {

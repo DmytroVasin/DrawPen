@@ -34,13 +34,13 @@ export const dotHoverColor = dotBorderColor + '99';
 export const dotTextMargin = 5;
 
 export const colorList = [
-  { color: '#000000', name: 'color_rainbow' },
-  { color: '#529BE0', name: 'color_blue' },
-  { color: '#E05252', name: 'color_red' },
-  { color: '#52E06C', name: 'color_green' },
-  { color: '#E0A552', name: 'color_orange' },
-  { color: '#FFFFFF', name: 'color_white' },
-  { color: '#1E1E1E', name: 'color_black' },
+  { color: '#000000', name: 'color_rainbow', title: 'Rainbow' },
+  { color: '#529BE0', name: 'color_blue',    title: 'Blue' },
+  { color: '#E05252', name: 'color_red',     title: 'Red' },
+  { color: '#52E06C', name: 'color_green',   title: 'Green' },
+  { color: '#E0A552', name: 'color_orange',  title: 'Orange' },
+  { color: '#FFFFFF', name: 'color_white',   title: 'White' },
+  { color: '#1E1E1E', name: 'color_black',   title: 'Black' },
 ];
 
 // - font_y_offset_compensation: Hack to make HTML similar to Canvas
@@ -50,10 +50,10 @@ export const colorList = [
 //   const offsetY = ((fontSize * lineHeightMultiplier) - fontSize) / 2;
 
 export const widthList = [
-  { pen_width: 4,  highlighter_width: 8,  rainbow_pen_width: 3,  laser_width: [2,   5],  figure_size: 4,  icon_size: 14, name: 'thin',   font_size: 20, font_y_offset_compensation: 4,   font_y_offset_compensation_retina: 4,   font_line_height_compensation: 2,    close_point_distance: 1 },
-  { pen_width: 8,  highlighter_width: 16, rainbow_pen_width: 4,  laser_width: [3,   8],  figure_size: 6,  icon_size: 16, name: 'light',  font_size: 28, font_y_offset_compensation: 5,   font_y_offset_compensation_retina: 5,   font_line_height_compensation: 3,    close_point_distance: 2 },
-  { pen_width: 12, highlighter_width: 24, rainbow_pen_width: 8,  laser_width: [4.5, 12], figure_size: 8,  icon_size: 18, name: 'medium', font_size: 42, font_y_offset_compensation: 6.5, font_y_offset_compensation_retina: 7.5, font_line_height_compensation: 5.25, close_point_distance: 3 },
-  { pen_width: 16, highlighter_width: 32, rainbow_pen_width: 12, laser_width: [6,   16], figure_size: 10, icon_size: 20, name: 'bold',   font_size: 56, font_y_offset_compensation: 9.5, font_y_offset_compensation_retina: 9.5, font_line_height_compensation: 7,    close_point_distance: 4 },
+  { pen_width: 4,  highlighter_width: 8,  rainbow_pen_width: 3,  laser_width: [2,   5],  figure_size: 4,  icon_size: 14, name: 'thin',   title: 'Thin',   font_size: 20, font_y_offset_compensation: 4,   font_y_offset_compensation_retina: 4,   font_line_height_compensation: 2,    close_point_distance: 1 },
+  { pen_width: 8,  highlighter_width: 16, rainbow_pen_width: 4,  laser_width: [3,   8],  figure_size: 6,  icon_size: 16, name: 'light',  title: 'Light',  font_size: 28, font_y_offset_compensation: 5,   font_y_offset_compensation_retina: 5,   font_line_height_compensation: 3,    close_point_distance: 2 },
+  { pen_width: 12, highlighter_width: 24, rainbow_pen_width: 8,  laser_width: [4.5, 12], figure_size: 8,  icon_size: 18, name: 'medium', title: 'Medium', font_size: 42, font_y_offset_compensation: 6.5, font_y_offset_compensation_retina: 7.5, font_line_height_compensation: 5.25, close_point_distance: 3 },
+  { pen_width: 16, highlighter_width: 32, rainbow_pen_width: 12, laser_width: [6,   16], figure_size: 10, icon_size: 20, name: 'bold',   title: 'Bold',   font_size: 56, font_y_offset_compensation: 9.5, font_y_offset_compensation_retina: 9.5, font_line_height_compensation: 7,    close_point_distance: 4 },
 ]
 
 export const erasedFigureColor = '#D3D3D3'; // lightgray

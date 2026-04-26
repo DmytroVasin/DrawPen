@@ -188,33 +188,49 @@ const ToolBar = ({
     setToolbarSlide("main-slide")
   };
 
-  const renderToolTitle = (tool) => {
-    switch (tool) {
-      case "pen":
-        return "Pen (P)";
-      case "fadepen":
-        return "Fade Pen (P)";
-      case "arrow":
-        return "Arrow";
-      case "flat_arrow":
-        return "Flat Arrow (A)";
-      case "rectangle":
-        return "Rectangle (R)";
-      case "oval":
-        return "Oval (C)";
-      case "line":
-        return "Line (L)";
-      case "text":
-        return "Text (T)";
-      case "highlighter":
-        return "Highlighter (H)";
-      case "laser":
-        return "Laser";
-      case "eraser":
-        return "Eraser (E)";
-      default:
-        return "Tool";
-    }
+  const renderShortcutTitle = (title, ...shortcuts) => {
+    const titleShortcuts = shortcuts.filter(Boolean);
+
+    return titleShortcuts.length ? `${title} — ${titleShortcuts.join(" or ")}` : title;
+  };
+
+  const renderToolTitle = (tool, ...shortcuts) => {
+    const toolTitles = {
+      pen:         ["Pen",         "P"],
+      fadepen:     ["Fade Pen",    "P"],
+      arrow:       ["Arrow",       "A"],
+      flat_arrow:  ["Flat Arrow",  "A"],
+      rectangle:   ["Rectangle",   "R"],
+      oval:        ["Oval",        "O"],
+      line:        ["Line"],
+      text:        ["Text",        "T"],
+      highlighter: ["Highlighter", "H"],
+      laser:       ["Laser",       "L"],
+      eraser:      ["Eraser",      "E"],
+    };
+
+    const [title, ...toolShortcuts] = toolTitles[tool] || ["Tool"];
+
+    return renderShortcutTitle(title, ...toolShortcuts, ...shortcuts);
+  };
+
+  const renderMainToolTitle = (tool) => {
+    if (brushList.includes(tool)) return renderToolTitle(tool, "1");
+    if (shapeList.includes(tool)) return renderToolTitle(tool, "2");
+    if (tool === "text") return renderToolTitle(tool, "3");
+    if (tool === "highlighter") return renderToolTitle(tool, "4");
+    if (tool === "laser") return renderToolTitle(tool, "5");
+    if (tool === "eraser") return renderToolTitle(tool, "6");
+
+    return renderToolTitle(tool);
+  };
+
+  const renderColorTitle = (color, index) => {
+    return renderShortcutTitle(color.title, String(index + 1));
+  };
+
+  const renderWidthTitle = (width, index) => {
+    return renderShortcutTitle(width.title, String(index + 1));
   };
 
   const pickFigureOrSwitchView = () => {
@@ -281,41 +297,41 @@ const ToolBar = ({
             <div className="toolbar__body">
               <ul className="toolbar__items">
                 <li className={brushList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickBrushOrSwitchView()}>
-                  <button tabIndex={-1} title={renderToolTitle(lastActiveBrush)}>
+                  <button tabIndex={-1} title={renderMainToolTitle(lastActiveBrush)}>
                     {allIcons[lastActiveBrush]}
                   </button>
                 </li>
                 <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickFigureOrSwitchView()}>
-                  <button tabIndex={-1} title={renderToolTitle(lastActiveFigure)}>
+                  <button tabIndex={-1} title={renderMainToolTitle(lastActiveFigure)}>
                     {allIcons[lastActiveFigure]}
                   </button>
                 </li>
                 <li className={activeTool === "text" ? "active" : undefined} onClick={() => handleChangeTool("text")}>
-                  <button tabIndex={-1} title={renderToolTitle("text")}>
+                  <button tabIndex={-1} title={renderMainToolTitle("text")}>
                     <Icons.Text />
                   </button>
                 </li>
                 <li className={activeTool === "highlighter" ? "active" : undefined} onClick={() => handleChangeTool("highlighter")}>
-                  <button tabIndex={-1} title={renderToolTitle("highlighter")}>
+                  <button tabIndex={-1} title={renderMainToolTitle("highlighter")}>
                     <Icons.Highlighter />
                   </button>
                 </li>
                 <li className={activeTool === "laser" ? "active" : undefined} onClick={() => handleChangeTool("laser")}>
-                  <button tabIndex={-1} title={renderToolTitle("laser")}>
+                  <button tabIndex={-1} title={renderMainToolTitle("laser")}>
                     <Icons.Laser />
                   </button>
                 </li>
                 <li className={activeTool === "eraser" ? "active" : undefined} onClick={() => handleChangeTool("eraser")}>
-                  <button tabIndex={-1} title={renderToolTitle("eraser")}>
+                  <button tabIndex={-1} title={renderMainToolTitle("eraser")}>
                     <Icons.Eraser />
                   </button>
                 </li>
                 <li className="cross-line"></li>
                 <li onClick={() => !isColorControlDisabled && setToolbarSlide("color-slide")}>
-                  <button tabIndex={-1} className={`toolbar__color-picker ${colorList[activeColorIndex].name} color_tool_${activeTool}`} title="Color" />
+                  <button tabIndex={-1} className={`toolbar__color-picker ${colorList[activeColorIndex].name} color_tool_${activeTool}`} title={isColorControlDisabled ? "Color" : renderShortcutTitle("Color", "7")} />
                 </li>
                 <li onClick={() => setToolbarSlide("width-slide")}>
-                  <button tabIndex={-1} className={`toolbar__width-picker ${widthList[activeWidthIndex].name}`} title="Brush Size">
+                  <button tabIndex={-1} className={`toolbar__width-picker ${widthList[activeWidthIndex].name}`} title={renderShortcutTitle("Brush Size", "8")}>
                     <div />
                   </button>
                 </li>
@@ -331,12 +347,12 @@ const ToolBar = ({
           <div className="side-view-body brush-group">
             <ul className="toolbar__items">
               <li className={activeTool === "pen" ? "active" : undefined} onClick={() => pickTool("pen")}>
-                <button tabIndex={-1} title={renderToolTitle("pen")}>
+                <button tabIndex={-1} title={renderToolTitle("pen", "1")}>
                   <Icons.Brush />
                 </button>
               </li>
               <li className={activeTool === "fadepen" ? "active" : undefined} onClick={() => pickTool("fadepen")}>
-                <button tabIndex={-1} title={renderToolTitle("fadepen")}>
+                <button tabIndex={-1} title={renderToolTitle("fadepen", "2")}>
                   <Icons.MagicBrush />
                 </button>
               </li>
@@ -346,27 +362,27 @@ const ToolBar = ({
           <div className="side-view-body tool-group">
             <ul className="toolbar__items">
               <li className={activeTool === "arrow" ? "active" : undefined} onClick={() => pickTool("arrow")}>
-                <button tabIndex={-1} title={renderToolTitle("arrow")}>
+                <button tabIndex={-1} title={renderToolTitle("arrow", "1")}>
                   <Icons.Arrow />
                 </button>
               </li>
               <li className={activeTool === "flat_arrow" ? "active" : undefined} onClick={() => pickTool("flat_arrow")}>
-                <button tabIndex={-1} title={renderToolTitle("flat_arrow")}>
+                <button tabIndex={-1} title={renderToolTitle("flat_arrow", "2")}>
                   <Icons.FlatArrow />
                 </button>
               </li>
               <li className={activeTool === "rectangle" ? "active" : undefined} onClick={() => pickTool("rectangle")}>
-                <button tabIndex={-1} title={renderToolTitle("rectangle")}>
+                <button tabIndex={-1} title={renderToolTitle("rectangle", "3")}>
                   <Icons.Rectangle />
                 </button>
               </li>
               <li className={activeTool === "oval" ? "active" : undefined} onClick={() => pickTool("oval")}>
-                <button tabIndex={-1} title={renderToolTitle("oval")}>
+                <button tabIndex={-1} title={renderToolTitle("oval", "4")}>
                   <Icons.Oval />
                 </button>
               </li>
               <li className={activeTool === "line" ? "active" : undefined} onClick={() => pickTool("line")}>
-                <button tabIndex={-1} title={renderToolTitle("line")}>
+                <button tabIndex={-1} title={renderToolTitle("line", "5")}>
                   <Icons.Line />
                 </button>
               </li>
@@ -381,7 +397,7 @@ const ToolBar = ({
                   className={activeColorIndex === index ? "active" : undefined}
                   onClick={() => onChangeColor(index)}
                 >
-                  <button tabIndex={-1} className={`toolbar__color-picker ${color.name}`} />
+                  <button tabIndex={-1} className={`toolbar__color-picker ${color.name}`} title={renderColorTitle(color, index)} />
                 </li>
               ))}
             </ul>
@@ -395,7 +411,7 @@ const ToolBar = ({
                   className={activeWidthIndex === index ? "active" : undefined}
                   onClick={() => onChangeWidth(index)}
                 >
-                  <button tabIndex={-1} className={`toolbar__width-picker ${width.name}`}>
+                  <button tabIndex={-1} className={`toolbar__width-picker ${width.name}`} title={renderWidthTitle(width, index)}>
                     <div />
                   </button>
                 </li>
@@ -408,7 +424,7 @@ const ToolBar = ({
             <div className="toolbar__body">
               <ul className="toolbar__items">
                 <li className="active" onClick={handleToggleCollapsed}>
-                  <button tabIndex={-1} title={renderToolTitle(activeTool)}>
+                  <button tabIndex={-1} title={renderMainToolTitle(activeTool)}>
                     {allIcons[activeTool]}
                   </button>
                 </li>
