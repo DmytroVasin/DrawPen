@@ -223,6 +223,7 @@
             position: relative;
 
             &::after {
+              pointer-events: none;
               content: "";
               position: absolute;
               bottom: 2px;
@@ -257,6 +258,7 @@
 
       .toolbar__width-picker {
         div {
+          pointer-events: none;
           height: 15px;
           background-color: #000;
           transform: rotate(45deg);
