@@ -25,6 +25,8 @@ export const palmMinContactArea = 2000;
 
 export const brushList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'oval', 'line'];
+export const penVariantList = ['pen', 'fadepen'];
+export const arrowVariantList = ['arrow', 'flat_arrow'];
 
 export const dotRadius = 5;
 export const dotStrokeWidth = 1;

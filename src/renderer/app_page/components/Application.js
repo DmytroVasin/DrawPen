@@ -40,6 +40,8 @@ import {
   eraserTime,
   brushList,
   shapeList,
+  penVariantList,
+  arrowVariantList,
   colorList,
   widthList,
   minObjectDistance,
@@ -87,6 +89,8 @@ const Application = (settings) => {
   const initialLaserTime = settings.laser_time
   const initialFadeDisappearAfterMs = settings.fade_disappear_after_ms
   const initialFadeOutDurationTimeMs = settings.fade_out_duration_time_ms
+  const initialLastActivePen = [initialActiveTool, initialToolbarDefaultBrush].find(tool => penVariantList.includes(tool)) || penVariantList[0]
+  const initialLastActiveArrow = [initialActiveTool, initialToolbarDefaultFigure].find(tool => arrowVariantList.includes(tool)) || arrowVariantList[0]
 
   const key_show_hide_toolbar       = settings.key_binding_show_hide_toolbar
   const key_show_hide_whiteboard    = settings.key_binding_show_hide_whiteboard
@@ -125,6 +129,8 @@ const Application = (settings) => {
   const [whiteboardSizePercent, setWhiteboardSizePercent] = useState(initialWhiteboardSizePercent);
   const [toolbarLastActiveBrush, setToolbarLastActiveBrush] = useState(initialToolbarDefaultBrush);
   const [toolbarLastActiveFigure, setToolbarLastActiveFigure] = useState(initialToolbarDefaultFigure);
+  const [lastActivePen, setLastActivePen] = useState(initialLastActivePen);
+  const [lastActiveArrow, setLastActiveArrow] = useState(initialLastActiveArrow);
   const [toolbarCollapsed, setToolbarCollapsed] = useState(initialToolbarCollapsed);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [toolbarSlide, setToolbarSlide] = useState('main-slide');
@@ -297,18 +303,24 @@ const Application = (settings) => {
         break;
       }
       case 'p': {
-        if (activeTool === 'pen') {
-          handleChangeTool('fadepen');
+        if (penVariantList.includes(activeTool)) {
+          const activePenIndex = penVariantList.indexOf(activeTool);
+          const nextPenIndex = (activePenIndex + 1) % penVariantList.length;
+
+          handleChangeTool(penVariantList[nextPenIndex]);
         } else {
-          handleChangeTool('pen');
+          handleChangeTool(lastActivePen);
         }
         break;
       }
       case 'a': {
-        if (activeTool === 'arrow') {
-          handleChangeTool('flat_arrow');
+        if (arrowVariantList.includes(activeTool)) {
+          const activeArrowIndex = arrowVariantList.indexOf(activeTool);
+          const nextArrowIndex = (activeArrowIndex + 1) % arrowVariantList.length;
+
+          handleChangeTool(arrowVariantList[nextArrowIndex]);
         } else {
-          handleChangeTool('arrow');
+          handleChangeTool(lastActiveArrow);
         }
         break;
       }
@@ -538,7 +550,7 @@ const Application = (settings) => {
         }
         break;
     }
-  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, lastActivePen, lastActiveArrow, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex]);
 
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toLowerCase();
@@ -828,6 +840,14 @@ const Application = (settings) => {
 
     if (shapeList.includes(toolName)) {
       setToolbarLastActiveFigure(toolName);
+    }
+
+    if (penVariantList.includes(toolName)) {
+      setLastActivePen(toolName);
+    }
+
+    if (arrowVariantList.includes(toolName)) {
+      setLastActiveArrow(toolName);
     }
   };
 
