@@ -456,16 +456,15 @@ function createExtendedToolbarWindow() {
 
 function showAboutWindow() {
   withThrottle(() => {
+    if (aboutWindow) {
+      aboutWindow.focus();
+    } else {
+      createAboutWindow();
+    }
+
     if (drawingMode) {
       enablePointerMode()
     }
-
-    if (aboutWindow) {
-      aboutWindow.focus();
-      return;
-    }
-
-    createAboutWindow();
   });
 }
 
@@ -522,16 +521,15 @@ function createAboutWindow() {
 
 function showSettingsWindow() {
   withThrottle(() => {
+    if (settingsWindow) {
+      settingsWindow.focus();
+    } else {
+      createSettingsWindow();
+    }
+
     if (drawingMode) {
       enablePointerMode()
     }
-
-    if (settingsWindow) {
-      settingsWindow.focus();
-      return;
-    }
-
-    createSettingsWindow();
   });
 }
 
@@ -1040,6 +1038,8 @@ function enablePointerMode() {
 
   drawingMode = false
   updateContextMenu()
+
+  releaseFocusBack()
 }
 
 function hideApp() {
@@ -1050,6 +1050,8 @@ function hideApp() {
 
   drawingMode = false
   updateContextMenu()
+
+  releaseFocusBack()
 }
 
 function updateExternalToolbarVisibility() {
@@ -1249,15 +1251,35 @@ function hideWindow(targetWindow) {
   }
 }
 
-function showWindow(targetWindow) {
+function showWindow(targetWindow, { inactive = false } = {}) {
   targetWindow.setOpacity(0)
 
   try {
-    targetWindow.show()
+    if (inactive) {
+      targetWindow.showInactive()
+    } else {
+      targetWindow.show()
+    }
     targetWindow.moveTop()
   } finally {
     targetWindow.setOpacity(1)
   }
+}
+
+function releaseFocusBack() {
+  if (!isMac) return;
+
+  if (settingsWindow) {
+    settingsWindow.focus()
+    return
+  }
+
+  if (aboutWindow) {
+    aboutWindow.focus()
+    return
+  }
+
+  app.hide()
 }
 
 function storeToolbarPositionFromExtendedWindow() {
@@ -1293,6 +1315,10 @@ function scheduleStoreToolbarPositionFromExtendedWindow() {
 
 // - Enable Draw Mode (Click by Main Button or from Tray)
 function showMainWindow() {
+  if (isMac && app.isHidden()) {
+    app.show()
+  }
+
   const currentDisplay = getLockedMonitor() || getUnderToolbarMonitor() || getUnderCursorMonitor()
 
   updateMainWindowPosition(currentDisplay)
@@ -1331,7 +1357,7 @@ function showExtendedToolbarWindow() {
 
   updateExtendedToolbarWindowPosition(currentDisplay)
 
-  showWindow(extendedToolbarWindow)
+  showWindow(extendedToolbarWindow, { inactive: true })
 }
 
 function updateExtendedToolbarWindowPosition(display) {
