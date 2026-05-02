@@ -169,6 +169,16 @@ const Application = (settings) => {
 
     const direction = shiftKey ? -1 : 1;
 
+    const getNextVariant = (variantList, activeVariant, direction = 1) => {
+      const activeVariantIndex = variantList.indexOf(activeVariant);
+
+      if (activeVariantIndex === -1) {
+        return variantList[0];
+      }
+
+      return variantList[(activeVariantIndex + direction + variantList.length) % variantList.length];
+    };
+
     if (textEditorContainer) {
       return
     }
@@ -304,10 +314,7 @@ const Application = (settings) => {
       }
       case 'p': {
         if (penVariantList.includes(activeTool)) {
-          const activePenIndex = penVariantList.indexOf(activeTool);
-          const nextPenIndex = (activePenIndex + 1) % penVariantList.length;
-
-          handleChangeTool(penVariantList[nextPenIndex]);
+          handleChangeTool(getNextVariant(penVariantList, activeTool));
         } else {
           handleChangeTool(lastActivePen);
         }
@@ -315,10 +322,7 @@ const Application = (settings) => {
       }
       case 'a': {
         if (arrowVariantList.includes(activeTool)) {
-          const activeArrowIndex = arrowVariantList.indexOf(activeTool);
-          const nextArrowIndex = (activeArrowIndex + 1) % arrowVariantList.length;
-
-          handleChangeTool(arrowVariantList[nextArrowIndex]);
+          handleChangeTool(getNextVariant(arrowVariantList, activeTool));
         } else {
           handleChangeTool(lastActiveArrow);
         }
@@ -450,10 +454,7 @@ const Application = (settings) => {
           let nextBrush = toolbarLastActiveBrush;
 
           if (activeTool === toolbarLastActiveBrush) {
-            const activeBrushIndex = brushList.indexOf(activeTool);
-            const nextBrushIndex = (activeBrushIndex + direction + brushList.length) % brushList.length;
-
-            nextBrush = brushList[nextBrushIndex];
+            nextBrush = getNextVariant(brushList, activeTool, direction);
           }
 
           handleChangeTool(nextBrush);
@@ -463,10 +464,7 @@ const Application = (settings) => {
           let nextShape = toolbarLastActiveFigure;
 
           if (activeTool === toolbarLastActiveFigure) {
-            const activeShapeIndex = shapeList.indexOf(activeTool);
-            const nextShapeIndex = (activeShapeIndex + direction + shapeList.length) % shapeList.length;
-
-            nextShape = shapeList[nextShapeIndex];
+            nextShape = getNextVariant(shapeList, activeTool, direction);
           }
 
           handleChangeTool(nextShape);
