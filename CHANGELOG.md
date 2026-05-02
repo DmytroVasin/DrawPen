@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.49] - 2026-05-02
+### Bug Fixes:
+- Fix macOS focus handoff when leaving draw mode
+- Track last pen/arrow picked variant
+
 ## [0.0.48] - 2026-04-26
 ### Features:
 - Update toolbar shortcut hints
