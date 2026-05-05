@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.0.50] - 2026-05-05
+### Bug Fixes:
+- Add active display reset on monitor hotplug
+
 ## [0.0.49] - 2026-05-02
 ### Bug Fixes:
 - Fix macOS focus handoff when leaving draw mode
