@@ -613,8 +613,9 @@ app.whenReady().then(() => {
   updateApp()
   setApplicationName()
 
-  screen.on('display-removed', hideApp)
-  screen.on('display-metrics-changed', hideApp)
+  screen.on('display-added', handleDisplayChange)
+  screen.on('display-removed', handleDisplayChange)
+  screen.on('display-metrics-changed', handleDisplayChange)
 })
 
 app.on('before-quit', () => {
@@ -1052,6 +1053,11 @@ function hideApp() {
   updateContextMenu()
 
   releaseFocusBack()
+}
+
+function handleDisplayChange() {
+  store.delete('active_monitor_id')
+  hideApp()
 }
 
 function updateExternalToolbarVisibility() {
