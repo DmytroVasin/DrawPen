@@ -9,6 +9,9 @@ export const fadeDisappearAfterMax = 15000;
 export const fadeOutDurationTimeMsMin = 300;
 export const fadeOutDurationTimeMsMax = 5000;
 export const fadeOutDestroyAfterMs = 300;
+// export const stylusRevertGrace = 500; // schema.stylus_revert_grace_ms.default
+export const stylusRevertGraceMin = 100;
+export const stylusRevertGraceMax = 5000;
 
 export const eraserTime = 100;
 export const rainbowScaleFactor = 0.03;
@@ -24,6 +27,45 @@ export const minWhiteboardHeight = 350;
 
 export const palmMinContactLength = 35; // Min touch contact length to detect a palm/fist
 export const palmMinContactArea = 2000;
+
+export const STYLUS_TOOL_OPTIONS = [
+  { value: 'none',        label: 'None' },
+  { value: 'pen',         label: 'Pen' },
+  { value: 'fadepen',     label: 'Fading Pen' },
+  { value: 'highlighter', label: 'Highlighter' },
+  { value: 'laser',       label: 'Laser' },
+  { value: 'arrow',       label: 'Arrow' },
+  { value: 'flat_arrow',  label: 'Flat Arrow' },
+  { value: 'rectangle',   label: 'Rectangle' },
+  { value: 'oval',        label: 'Oval' },
+  { value: 'line',        label: 'Line' },
+];
+
+export const TOUCH_TOOL_OPTIONS = [
+  { value: 'none',        label: 'None' },
+  { value: 'pen',         label: 'Pen' },
+  { value: 'fadepen',     label: 'Fading Pen' },
+  { value: 'highlighter', label: 'Highlighter' },
+  { value: 'laser',       label: 'Laser' },
+  { value: 'arrow',       label: 'Arrow' },
+  { value: 'flat_arrow',  label: 'Flat Arrow' },
+  { value: 'rectangle',   label: 'Rectangle' },
+  { value: 'oval',        label: 'Oval' },
+  { value: 'line',        label: 'Line' },
+];
+
+export const STYLUS_ERASER_TOOL_OPTIONS = [
+  { value: 'eraser',      label: 'Eraser' },
+  { value: 'pen',         label: 'Pen' },
+  { value: 'fadepen',     label: 'Fading Pen' },
+  { value: 'highlighter', label: 'Highlighter' },
+  { value: 'laser',       label: 'Laser' },
+  { value: 'arrow',       label: 'Arrow' },
+  { value: 'flat_arrow',  label: 'Flat Arrow' },
+  { value: 'rectangle',   label: 'Rectangle' },
+  { value: 'oval',        label: 'Oval' },
+  { value: 'line',        label: 'Line' },
+];
 
 export const brushList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'oval', 'line'];

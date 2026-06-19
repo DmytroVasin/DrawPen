@@ -1,14 +1,24 @@
 require('dotenv').config();
 
+const fs = require('fs');
 const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
 
 const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
 
+// koffi is a native addon kept out of the webpack bundle (externals in
+// tools/webpack/main.js). The webpack plugin packages only `.webpack/`, so we
+// must copy koffi into the packaged app's node_modules ourselves and unpack its
+// prebuilt `.node` binary from the asar so it can be loaded at runtime.
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      // koffi's JS loader + its platform binary package (@koromix/koffi-*) both
+      // need to be real files on disk (the .node can't be loaded from inside an
+      // asar), so unpack them.
+      unpack: '**/node_modules/{koffi,@koromix}/**',
+    },
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
@@ -152,6 +162,26 @@ module.exports = {
       }
     }
   ],
+  hooks: {
+    // Copy the koffi native module into the packaged app's node_modules so the
+    // webpack-externalized `require('koffi')` resolves in built installers.
+    // (forge-externals-plugin can't be used: it fails to resolve koffi's
+    // package.json because koffi restricts its "exports" field.)
+    packageAfterCopy: async (_forgeConfig, buildPath) => {
+      // koffi 3.x ships its native binary in a separate, platform-specific
+      // package (@koromix/koffi-<platform>-<arch>) that koffi requires at
+      // runtime. Copy koffi AND the whole @koromix scope so the binary is present.
+      const copyModule = async (relName) => {
+        const src = path.join(rootDir, 'node_modules', relName);
+        if (!fs.existsSync(src)) return;
+        const dest = path.join(buildPath, 'node_modules', relName);
+        await fs.promises.cp(src, dest, { recursive: true });
+      };
+
+      await copyModule('koffi');
+      await copyModule('@koromix');
+    },
+  },
   publishers: [
     {
       name: '@electron-forge/publisher-github',

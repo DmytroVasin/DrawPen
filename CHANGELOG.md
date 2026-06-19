@@ -1,5 +1,11 @@
 # Change Log
 
+## [Unreleased]
+### Features:
+- Add "Tool on stylus movement" setting (Windows): moving a stylus auto-activates the chosen drawing tool; moving the mouse switches back
+- Add "Tool on stylus eraser" setting: remap the tool used by the pen's eraser end
+- Add "Mouse recovery delay" setting: configurable delay before reverting to pointer mode after mouse movement
+
 ## [0.0.52] - 2026-06-07
 ### Features:
 - Add configurable pen stroke smoothing

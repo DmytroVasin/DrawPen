@@ -38,12 +38,14 @@ const DrawDesk = ({
   updateRainbowColorDeg,
   activeTool,
   handleChangeTool,
+  stylusEraserTool,
 }) => {
 
   const canvasRef = useRef(null);
   const offscreenCanvasRef = useRef(null);
 
   const prevToolRef = useRef(null);
+  const tempToolRef = useRef(null);
   const simulateKeyDown = useRef(false);
 
   const dpr = window.devicePixelRatio || 1;
@@ -172,14 +174,18 @@ const DrawDesk = ({
     })
   };
 
-  const isTemporaryEraser = (event) => {
+  // Returns the tool to temporarily activate for a "hold-to-use" gesture, or null.
+  // The pen's eraser end (button 5) maps to the configurable stylusEraserTool;
+  // palm-touch and mouse-middle keep mapping to the eraser.
+  const temporaryToolFor = (event) => {
     const contactLength = Math.max(event.width, event.height);
     const contactArea = event.width * event.height;
     const isPalm = contactLength >= palmMinContactLength && contactArea >= palmMinContactArea;
 
-    return (event.pointerType === 'pen' && event.button === 5) ||
-           (event.pointerType === 'mouse' && event.button === 1) ||
-           (event.pointerType === 'touch' && isPalm);
+    if (event.pointerType === 'pen' && event.button === 5) return stylusEraserTool || 'eraser';
+    if (event.pointerType === 'mouse' && event.button === 1) return 'eraser';
+    if (event.pointerType === 'touch' && isPalm) return 'eraser';
+    return null;
   }
 
   const onPointerDown = (event) => {
@@ -187,12 +193,14 @@ const DrawDesk = ({
 
     if(event.pointerType === 'mouse' && event.button === 2) return;
 
-    if (isTemporaryEraser(event) && activeTool !== 'eraser') {
+    const tempTool = temporaryToolFor(event);
+    if (tempTool && activeTool !== tempTool) {
       // Hard Trick! Rethink!
       prevToolRef.current = activeTool;
+      tempToolRef.current = tempTool;
       simulateKeyDown.current = true;
 
-      handleChangeTool('eraser');
+      handleChangeTool(tempTool);
       return
     }
 
@@ -203,7 +211,7 @@ const DrawDesk = ({
   }
 
   const onPointerMove = (event) => {
-    if (simulateKeyDown.current && activeTool === 'eraser') {
+    if (simulateKeyDown.current && activeTool === tempToolRef.current) {
       simulateKeyDown.current = false;
 
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -231,6 +239,7 @@ const DrawDesk = ({
       handleChangeTool(prevToolRef.current);
 
       prevToolRef.current = null;
+      tempToolRef.current = null;
       simulateKeyDown.current = false;
     }
   }

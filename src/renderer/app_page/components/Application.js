@@ -86,6 +86,7 @@ const Application = (settings) => {
   const initialShowDrawingBorder = settings.show_drawing_border
   const initialShowCuteCursor = settings.show_cute_cursor
   const initialPenSmoothing = settings.pen_smoothing
+  const initialStylusEraserTool = settings.stylus_eraser_tool
   const initialToolbarDefaultBrush = settings.tool_bar_default_brush
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarCollapsed = settings.tool_bar_collapsed
@@ -152,6 +153,7 @@ const Application = (settings) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(initialShowDrawingBorder);
   const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
   const [penSmoothing, setPenSmoothing] = useState(initialPenSmoothing);
+  const [stylusEraserTool, setStylusEraserTool] = useState(initialStylusEraserTool || 'eraser');
   const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
   const [secondaryColorIndex, setSecondaryColorIndex] = useState(initialSecondaryColorIndex);
   const [toastInfo, setToastInfo] = useState(null);
@@ -164,6 +166,9 @@ const Application = (settings) => {
     window.electronAPI.onRefreshSettings(handleRefreshSettings);
     window.electronAPI.onUpdateToolbarPosition(handleUpdateToolbarPosition);
     window.electronAPI.onShowNotification(handleShowNotification);
+    window.electronAPI.onForceTool((_event, toolName) => {
+      handleChangeToolRef.current(toolName);
+    });
   }, []);
 
   const lastPasteAtRef = useRef(0);
@@ -859,6 +864,9 @@ const Application = (settings) => {
     }
   };
 
+  const handleChangeToolRef = useRef(handleChangeTool);
+  handleChangeToolRef.current = handleChangeTool;
+
   const moveFigureToTop = (figureId) => {
     setAllFigures(figures => {
       const target = figures.find(figure => figure.id === figureId);
@@ -1397,6 +1405,7 @@ const Application = (settings) => {
     setShowDrawingBorder(newSettings.show_drawing_border);
     setShowCuteCursor(newSettings.show_cute_cursor);
     setPenSmoothing(newSettings.pen_smoothing);
+    setStylusEraserTool(newSettings.stylus_eraser_tool);
     setMainColorIndex(newSettings.swap_colors_indexes[0]);
     setSecondaryColorIndex(newSettings.swap_colors_indexes[1]);
   };
@@ -1589,6 +1598,7 @@ const Application = (settings) => {
         updateRainbowColorDeg={updateRainbowColorDeg}
         activeTool={activeTool}
         handleChangeTool={handleChangeTool}
+        stylusEraserTool={stylusEraserTool}
       />
 
       {

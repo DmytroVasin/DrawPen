@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import electronSquirrelStartup from 'electron-squirrel-startup';
+import { createStylusWatcher } from './stylus';
 
 if (electronSquirrelStartup) {
   app.quit();
@@ -26,6 +27,14 @@ const KEY_SETTINGS             = 'CmdOrCtrl+,'
 const KEY_MAKE_SCREENSHOT      = 'CmdOrCtrl+Shift+P'
 const KEY_Q                    = 'CmdOrCtrl+Q'
 const KEY_NULL                 = '[NULL]'
+
+const STYLUS_TOOL_VALUES = ['none', 'pen', 'fadepen', 'highlighter', 'laser', 'arrow', 'flat_arrow', 'rectangle', 'oval', 'line']
+const TOUCH_TOOL_VALUES = ['none', 'pen', 'fadepen', 'highlighter', 'laser', 'arrow', 'flat_arrow', 'rectangle', 'oval', 'line']
+const STYLUS_ERASER_TOOL_VALUES = ['eraser', 'pen', 'fadepen', 'highlighter', 'laser', 'arrow', 'flat_arrow', 'rectangle', 'oval', 'line']
+
+const STYLUS_REVERT_GRACE_MIN   = 100
+const STYLUS_REVERT_GRACE_MAX   = 5000
+const STYLUS_MANUAL_SUPPRESS_MS = 1500
 
 const EXTENDED_TOOLBAR_WINDOW_MARGIN = 10
 const EXTENDED_TOOLBAR_WINDOW_WIDTH  = EXTENDED_TOOLBAR_WINDOW_MARGIN+80+17+5
@@ -176,6 +185,22 @@ const schema = {
       label: null,
     }
   },
+  stylus_tool: {
+    type: 'string',
+    default: 'none'
+  },
+  touch_tool: {
+    type: 'string',
+    default: 'none'
+  },
+  stylus_eraser_tool: {
+    type: 'string',
+    default: 'eraser'
+  },
+  stylus_revert_grace_ms: {
+    type: 'number',
+    default: 500
+  },
 };
 
 // rawLog('[STORE PATH]:', app.getPath('userData') + '/config.json');
@@ -208,6 +233,12 @@ let settingsWindow
 let isQuitting = false
 let startAsHidden = false
 let drawingMode = false
+
+let autoStylusActive = false
+let penContact = false
+let manualSuppressUntil = 0
+let stylusRevertTimer = null
+let stylusWatcher = null
 
 let extendedToolbarPositionStoreTimeout = null
 
@@ -634,6 +665,8 @@ app.whenReady().then(() => {
   updateApp()
   setApplicationName()
 
+  reconfigureStylusWatcher()
+
   screen.on('display-added', handleDisplayChange)
   screen.on('display-removed', handleDisplayChange)
   screen.on('display-metrics-changed', handleDisplayChange)
@@ -647,6 +680,13 @@ app.on('will-quit', () => {
   rawLog('Will quit app... (Unregister all shortcuts)')
 
   unRegisterGlobalShortcuts()
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
+
+  stylusWatcher?.stop()
 });
 
 app.on('window-all-closed', () => {
@@ -695,6 +735,8 @@ ipcMain.handle('get_settings', () => {
     show_drawing_border: store.get('show_drawing_border'),
     show_cute_cursor: store.get('show_cute_cursor'),
     pen_smoothing: store.get('pen_smoothing'),
+    stylus_eraser_tool: store.get('stylus_eraser_tool'),
+    touch_tool: store.get('touch_tool'),
     tool_bar_x: store.get('tool_bar_x'),
     tool_bar_y: store.get('tool_bar_y'),
     tool_bar_active_tool: store.get('tool_bar_active_tool'),
@@ -801,6 +843,10 @@ ipcMain.handle('get_configuration', () => {
     launch_on_login:                          store.get('launch_on_login'),
     starts_hidden:                            store.get('starts_hidden'),
     disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
+    stylus_tool:                              store.get('stylus_tool'),
+    touch_tool:                               store.get('touch_tool'),
+    stylus_eraser_tool:                       store.get('stylus_eraser_tool'),
+    stylus_revert_grace_ms:                   store.get('stylus_revert_grace_ms'),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -983,6 +1029,52 @@ ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
   return null
 });
 
+ipcMain.handle('set_stylus_tool', (_event, value) => {
+  const validated = STYLUS_TOOL_VALUES.includes(value) ? value : 'none'
+
+  rawLog('[STYLUS] Setting stylus tool:', validated)
+
+  store.set('stylus_tool', validated)
+
+  reconfigureStylusWatcher()
+
+  return null
+});
+
+ipcMain.handle('set_touch_tool', (_event, value) => {
+  const validated = TOUCH_TOOL_VALUES.includes(value) ? value : 'none'
+
+  rawLog('[STYLUS] Setting touch tool:', validated)
+
+  store.set('touch_tool', validated)
+
+  reconfigureStylusWatcher()
+
+  return null
+});
+
+ipcMain.handle('set_stylus_eraser_tool', (_event, value) => {
+  const validated = STYLUS_ERASER_TOOL_VALUES.includes(value) ? value : 'eraser'
+
+  rawLog('[STYLUS] Setting stylus eraser tool:', validated)
+
+  store.set('stylus_eraser_tool', validated)
+
+  refreshSettingsInRenderer()
+
+  return null
+});
+
+ipcMain.handle('set_stylus_revert_grace_ms', (_event, value) => {
+  const ms = Math.min(STYLUS_REVERT_GRACE_MAX, Math.max(STYLUS_REVERT_GRACE_MIN, Number(value) || 0))
+
+  rawLog('[STYLUS] Setting stylus revert grace ms:', ms)
+
+  store.set('stylus_revert_grace_ms', ms)
+
+  return null
+});
+
 function refreshSettingsInRenderer() {
   mainWindow.webContents.send('refresh_settings', {
     whiteboard_color:        store.get('whiteboard_color'),
@@ -994,6 +1086,7 @@ function refreshSettingsInRenderer() {
     show_cute_cursor:        store.get('show_cute_cursor'),
     pen_smoothing:           store.get('pen_smoothing'),
     swap_colors_indexes:     store.get('swap_colors_indexes'),
+    stylus_eraser_tool:      store.get('stylus_eraser_tool'),
   })
 }
 
@@ -1031,6 +1124,8 @@ function toggleDrawOrPointerMode() {
   withThrottle(() => {
     rawLog('Toggling draw mode...')
 
+    manualSuppressUntil = Date.now() + STYLUS_MANUAL_SUPPRESS_MS
+
     if (drawingMode) {
       enablePointerMode()
     } else {
@@ -1039,8 +1134,10 @@ function toggleDrawOrPointerMode() {
   });
 }
 
-function enableDrawMode() {
+function enableDrawMode({ auto = false } = {}) {
   rawLog('Enable drawing mode...')
+
+  autoStylusActive = auto
 
   showMainWindow()
   hideWindow(extendedToolbarWindow)
@@ -1052,6 +1149,13 @@ function enableDrawMode() {
 function enablePointerMode() {
   rawLog('Enable pointer mode...')
 
+  autoStylusActive = false
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
+
   showExtendedToolbarWindow()
   hideWindow(mainWindow)
 
@@ -1061,8 +1165,104 @@ function enablePointerMode() {
   releaseFocusBack()
 }
 
+// - Stylus auto-tool coordinator -------------------------------------------
+
+function onPenActivity({ contact }) {
+  penContact = contact
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
+
+  if (store.get('stylus_tool') === 'none') return;
+  if (Date.now() < manualSuppressUntil) return;
+
+  if (!drawingMode) {
+    enableDrawMode({ auto: true })
+
+    const tool = store.get('stylus_tool')
+    rawLog('[STYLUS] Pen activity -> auto draw mode with tool:', tool)
+
+    if (mainWindow) {
+      mainWindow.webContents.send('force_tool', tool)
+    }
+  }
+  // else: already in an auto session -> keep alive (no-op)
+}
+
+function onTouchActivity({ contact }) {
+  penContact = contact
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
+
+  if (store.get('touch_tool') === 'none') return;
+  if (Date.now() < manualSuppressUntil) return;
+
+  if (!drawingMode) {
+    enableDrawMode({ auto: true })
+
+    const tool = store.get('touch_tool')
+    rawLog('[STYLUS] Touch activity -> auto draw mode with tool:', tool)
+
+    if (mainWindow) {
+      mainWindow.webContents.send('force_tool', tool)
+    }
+  }
+  // else: already in an auto session -> keep alive (no-op)
+}
+
+function onMouseActivity() {
+  if (!autoStylusActive) return;
+  if (penContact) return;
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
+
+  stylusRevertTimer = setTimeout(() => {
+    stylusRevertTimer = null
+
+    if (autoStylusActive && !penContact) {
+      rawLog('[STYLUS] Mouse activity -> revert to pointer mode')
+      enablePointerMode()
+    }
+  }, store.get('stylus_revert_grace_ms'))
+}
+
+function reconfigureStylusWatcher() {
+  if (isWin && (store.get('stylus_tool') !== 'none' || store.get('touch_tool') !== 'none')) {
+    if (!stylusWatcher) {
+      stylusWatcher = createStylusWatcher({ onPenActivity, onTouchActivity, onMouseActivity })
+    }
+
+    if (stylusWatcher.isSupported) {
+      rawLog('[STYLUS] Starting stylus watcher')
+      stylusWatcher.start()
+    }
+
+    return
+  }
+
+  if (stylusWatcher) {
+    rawLog('[STYLUS] Stopping stylus watcher')
+    stylusWatcher.stop()
+  }
+}
+
 function hideApp() {
   rawLog('Hiding app...')
+
+  autoStylusActive = false
+
+  if (stylusRevertTimer) {
+    clearTimeout(stylusRevertTimer)
+    stylusRevertTimer = null
+  }
 
   hideWindow(mainWindow)
   hideWindow(extendedToolbarWindow)

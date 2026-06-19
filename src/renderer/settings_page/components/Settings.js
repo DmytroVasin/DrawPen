@@ -10,6 +10,11 @@ import {
   fadeDisappearAfterMax,
   fadeOutDurationTimeMsMin,
   fadeOutDurationTimeMsMax,
+  stylusRevertGraceMin,
+  stylusRevertGraceMax,
+  STYLUS_TOOL_OPTIONS,
+  TOUCH_TOOL_OPTIONS,
+  STYLUS_ERASER_TOOL_OPTIONS,
 } from "../../app_page/components/constants.js";
 
 import {
@@ -20,6 +25,7 @@ import {
   IoChevronForward,
   IoColorPaletteOutline,
   IoApps,
+  IoBrushOutline,
 } from "react-icons/io5";
 import { HiSwitchHorizontal } from "react-icons/hi";
 import { FaRegKeyboard } from "react-icons/fa6";
@@ -71,6 +77,10 @@ const Settings = (config) => {
   const [mainColor, setMainColor]           = useState(config.swap_colors_indexes[0]);
   const [secondaryColor, setSecondaryColor] = useState(config.swap_colors_indexes[1]);
   const [drawingMonitor, setDrawingMonitor] = useState(config.drawing_monitor);
+  const [stylusTool, setStylusTool] = useState(config.stylus_tool || 'none');
+  const [touchTool, setTouchTool] = useState(config.touch_tool || 'none');
+  const [stylusEraserTool, setStylusEraserTool] = useState(config.stylus_eraser_tool || 'eraser');
+  const [stylusRevertGraceMs, setStylusRevertGraceMs] = useState(config.stylus_revert_grace_ms);
 
   const [activeTab, setActiveTab] = useState('shortcuts');
 
@@ -253,6 +263,33 @@ const Settings = (config) => {
     window.electronAPI.setDrawingMonitor(newMonitor);
   }
 
+  const selectStylusEraserTool = (event) => {
+    const value = event.target.value;
+    setStylusEraserTool(value);
+    window.electronAPI.setStylusEraserTool(value);
+  };
+
+  const applyStylusRevertGraceMs = (value) => {
+    const ms = Math.min(stylusRevertGraceMax, Math.max(stylusRevertGraceMin, Number(value)));
+
+    if (ms === stylusRevertGraceMs) return;
+
+    setStylusRevertGraceMs(ms);
+    window.electronAPI.setStylusRevertGraceMs(ms);
+  };
+
+  const selectStylusTool = (event) => {
+    const value = event.target.value;
+    setStylusTool(value);
+    window.electronAPI.setStylusTool(value);
+  };
+
+  const selectTouchTool = (event) => {
+    const value = event.target.value;
+    setTouchTool(value);
+    window.electronAPI.setTouchTool(value);
+  };
+
   return (
     <div className="settings-page">
       <div className="settings-sidebar-wrapper">
@@ -279,6 +316,14 @@ const Settings = (config) => {
           >
             <IoApps className="icon" />
             Application
+          </div>
+
+          <div
+            className={`settings-sidebar-item ${activeTab === 'stylus' ? 'active' : ''}`}
+            onClick={() => setActiveTab('stylus')}
+          >
+            <IoBrushOutline className="icon" />
+            Stylus & Touch
           </div>
 
           <div className="settings-sidebar-version">
@@ -598,6 +643,134 @@ const Settings = (config) => {
 
                   <div className="settings-item-control">
                     <button className="button" onClick={resetToOriginals}>Reset All</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'stylus' && (
+          <div className="settings-container">
+            <div className="settings-header">
+              <div className="settings-title">Stylus & Touch</div>
+            </div>
+
+            <div className="settings-content">
+              <div className="settings-section">
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Tool on stylus movement</div>
+                    <div className="settings-item-description">Move a stylus to auto-activate this tool; move the mouse to switch back.</div>
+                    {
+                      !window.electronAPI.isWin &&
+                        <div className="settings-item-description">Available on Windows only</div>
+                    }
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={stylusTool}
+                        onChange={selectStylusTool}
+                        disabled={!window.electronAPI.isWin}
+                      >
+                        {
+                          STYLUS_TOOL_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))
+                        }
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Tool on touch</div>
+                    <div className="settings-item-description">Touch the screen to auto-activate this tool; move the mouse to switch back.</div>
+                    {
+                      !window.electronAPI.isWin &&
+                        <div className="settings-item-description">Available on Windows only</div>
+                    }
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={touchTool}
+                        onChange={selectTouchTool}
+                        disabled={!window.electronAPI.isWin}
+                      >
+                        {
+                          TOUCH_TOOL_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))
+                        }
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Tool on stylus eraser</div>
+                    <div className="settings-item-description">Tool used while drawing with the stylus eraser end; releases back to the previous tool.</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={stylusEraserTool}
+                        onChange={selectStylusEraserTool}
+                      >
+                        {
+                          STYLUS_ERASER_TOOL_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))
+                        }
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Mouse recovery delay</div>
+                    <div className="settings-item-description">Delay before reverting to pointer mode after you move the mouse.</div>
+                    {
+                      !window.electronAPI.isWin &&
+                        <div className="settings-item-description">Available on Windows only</div>
+                    }
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div className="stepper-container">
+                      <div className="stepper-button" onClick={() => applyStylusRevertGraceMs(stylusRevertGraceMs - timeStep)}>
+                        <FaMinus className="stepper-button--icon" />
+                      </div>
+                      <div className="stepper-value">{stylusRevertGraceMs / 1000}s</div>
+                      <div className="stepper-button" onClick={() => applyStylusRevertGraceMs(stylusRevertGraceMs + timeStep)}>
+                        <FaPlus className="stepper-button--icon" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 

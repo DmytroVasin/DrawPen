@@ -21,6 +21,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDisableToolbarInPointerMode: (value) => ipcRenderer.invoke('set_disable_toolbar_in_pointer_mode', value),
   setFadeDisappearAfterMs: (value) => ipcRenderer.invoke('set_fade_disappear_after_ms', value),
   setFadeOutDurationTimeMs: (value) => ipcRenderer.invoke('set_fade_out_duration_time_ms', value),
+  setStylusTool: (value) => ipcRenderer.invoke('set_stylus_tool', value),
+  setTouchTool: (value) => ipcRenderer.invoke('set_touch_tool', value),
+  setStylusEraserTool: (value) => ipcRenderer.invoke('set_stylus_eraser_tool', value),
+  setStylusRevertGraceMs: (value) => ipcRenderer.invoke('set_stylus_revert_grace_ms', value),
 
   isMac: platform === 'darwin',
+  isWin: platform === 'win32',
 });

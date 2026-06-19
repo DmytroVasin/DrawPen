@@ -19,4 +19,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onRefreshSettings: (callback) => ipcRenderer.on('refresh_settings', callback),
   onUpdateToolbarPosition: (callback) => ipcRenderer.on('update_toolbar_position', callback),
   onShowNotification: (callback) => ipcRenderer.on('show_notification', callback),
+  onForceTool: (callback) => ipcRenderer.on('force_tool', callback),
 });
