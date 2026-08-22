@@ -1622,6 +1622,8 @@ const Application = (settings) => {
             setToolbarSlide={setToolbarSlide}
             isCollapsed={toolbarCollapsed}
             setIsCollapsed={setToolbarCollapsed}
+            shortcutHintsDisabled={Boolean(textEditorContainer)}
+            clearDeskShortcut={key_clear_desk}
             lastActiveBrush={toolbarLastActiveBrush}
             lastActiveFigure={toolbarLastActiveFigure}
             activeTool={activeTool}

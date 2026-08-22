@@ -196,6 +196,7 @@
       align-items: center;
 
       li {
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -213,11 +214,36 @@
           }
         }
 
+        .toolbar__shortcut-hint {
+          pointer-events: none;
+          position: absolute;
+          left: 50%;
+          bottom: -4px;
+          display: flex;
+          height: 16px;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          padding: 0 4px;
+          border: 1px solid var(--gray-500);
+          border-radius: 4px;
+          background-color: var(--gray-50);
+          color: var(--gray-600);
+          font-family: var(--font-primary);
+          font-size: 10px;
+          opacity: 0;
+          transform: translate(-50%, 4px) scale(0.95);
+          transform-origin: center bottom;
+          transition:
+            opacity 150ms ease-out,
+            transform 150ms ease-out;
+          user-select: none;
+        }
+
         &.active {
           // background-color: #EEEEEF;
           border: 1px solid var(--toolbar-border-color);
           border-radius: 5px;
-          overflow: auto;
 
           &.more_figures {
             position: relative;
@@ -329,6 +355,17 @@
     svg {
       width: 16px;
       height: 16px;
+    }
+  }
+
+  &.toolbar--shortcut-hints-visible {
+    .toolbar__items {
+      li {
+        .toolbar__shortcut-hint {
+          opacity: 1;
+          transform: translate(-50%, 0) scale(1);
+        }
+      }
     }
   }
 }
