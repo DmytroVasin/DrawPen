@@ -84,7 +84,7 @@ const Application = (settings) => {
   const initialWhiteboardStyle = settings.whiteboard_style
   const initialWhiteboardSpacing = settings.whiteboard_spacing
   const initialShowDrawingBorder = settings.show_drawing_border
-  const initialShowCuteCursor = settings.show_cute_cursor
+  const initialCuteCursorMode = settings.cute_cursor_mode
   const initialPenSmoothing = settings.pen_smoothing
   const initialClearDrawingsOnHide = settings.clear_drawings_on_hide
   const initialToolbarDefaultBrush = settings.tool_bar_default_brush
@@ -152,7 +152,8 @@ const Application = (settings) => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [isFadeDrawing, setIsFadeDrawing] = useState(false);
   const [showDrawingBorder, setShowDrawingBorder] = useState(initialShowDrawingBorder);
-  const [showCuteCursor, setShowCuteCursor] = useState(initialShowCuteCursor);
+  const [cuteCursorMode, setCuteCursorMode] = useState(initialCuteCursorMode);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const [penSmoothing, setPenSmoothing] = useState(initialPenSmoothing);
   const [clearDrawingsOnHide, setClearDrawingsOnHide] = useState(initialClearDrawingsOnHide);
   const [mainColorIndex, setMainColorIndex] = useState(initialMainColorIndex);
@@ -643,6 +644,18 @@ const Application = (settings) => {
   useEffect(() => {
     setToolbarSlide('main-slide');
   }, [activeTool, activeColorIndex, activeWidthIndex]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsDocumentVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const firstLaunch = useRef(true);
   useEffect(() => {
@@ -1413,7 +1426,7 @@ const Application = (settings) => {
     setWhiteboardPatternStyle(newSettings.whiteboard_style);
     setWhiteboardSpacing(newSettings.whiteboard_spacing);
     setShowDrawingBorder(newSettings.show_drawing_border);
-    setShowCuteCursor(newSettings.show_cute_cursor);
+    setCuteCursorMode(newSettings.cute_cursor_mode);
     setPenSmoothing(newSettings.pen_smoothing);
     setClearDrawingsOnHide(newSettings.clear_drawings_on_hide);
     setMainColorIndex(newSettings.swap_colors_indexes[0]);
@@ -1534,6 +1547,7 @@ const Application = (settings) => {
   }
 
   const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
+  const isCuteCursorVisible = cuteCursorMode !== 'hidden' && isDocumentVisible;
 
   return (
     <div id="root_wrapper" className={manipulation} onPointerMove={handleMousePosition} onContextMenu={handleContextMenu}>
@@ -1584,14 +1598,16 @@ const Application = (settings) => {
       }
 
       {
-        showCuteCursor &&
+        isCuteCursorVisible &&
           <CuteCursor
+            key={`${activeTool}:${activeColorIndex}:${activeWidthIndex}`}
             mouseCoordinates={mouseCoordinates}
             activeColorIndex={activeColorIndex}
             activeWidthIndex={activeWidthIndex}
             activeTool={activeTool}
             Icons={Icons}
             colorList={colorList}
+            fade={cuteCursorMode === 'fade'}
           />
       }
 

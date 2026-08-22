@@ -54,7 +54,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
 
 const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
-  const [showCuteCursor, setShowCuteCursor] = useState(config.show_cute_cursor);
+  const [cuteCursorMode, setCuteCursorMode] = useState(config.cute_cursor_mode);
   const [penSmoothing, setPenSmoothing] = useState(config.pen_smoothing);
   const [appIconColor, setAppIconColor] = useState(config.app_icon_color);
   const [fadeDisappearAfterMs, setFadeDisappearAfterMs] = useState(config.fade_disappear_after_ms);
@@ -169,11 +169,11 @@ const Settings = (config) => {
     window.electronAPI.setShowDrawingBorder(nextState);
   };
 
-  const toggleCuteCursor = () => {
-    const nextState = !showCuteCursor;
-    setShowCuteCursor(nextState);
+  const selectCuteCursorMode = (event) => {
+    const mode = event.target.value;
+    setCuteCursorMode(mode);
 
-    window.electronAPI.setShowCuteCursor(nextState);
+    window.electronAPI.setCuteCursorMode(mode);
   };
 
   const togglePenSmoothing = () => {
@@ -461,14 +461,25 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
-                    <div className="settings-item-title">Hide Cute Cursor</div>
+                    <div className="settings-item-title">Cute Cursor</div>
                   </div>
 
                   <div className="settings-item-control">
-                    <div
-                      className={`toggle ${showCuteCursor ? '' : 'active'}`}
-                      onClick={toggleCuteCursor}
-                    ></div>
+                    <div className="selectbar-container">
+                      <select
+                        className="selectbar"
+                        value={cuteCursorMode}
+                        onChange={selectCuteCursorMode}
+                      >
+                        <option value="permanent">Permanent</option>
+                        <option value="fade">Auto-Fade</option>
+                        <option value="hidden">Hidden</option>
+                      </select>
+
+                      <div className="selectbar-arrow">
+                        <IoChevronDown className="icon" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -514,7 +525,7 @@ const Settings = (config) => {
 
                 <div className="settings-item">
                   <div className="settings-item-info">
-                    <div className="settings-item-title">Fade start delay</div>
+                    <div className="settings-item-title">Fade Pen start delay</div>
                     <div className="settings-item-description">Press SPACE to pause the timer</div>
                   </div>
 

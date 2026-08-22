@@ -7,7 +7,16 @@
   pointer-events: none;
   user-select: none;
 
+  &.fade {
+    animation: cute-cursor-fade 1s linear 3s forwards;
+  }
+
   svg {
     display: block;
   }
+}
+
+@keyframes cute-cursor-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }

@@ -9,6 +9,7 @@ const CuteCursor = ({
   activeTool,
   Icons,
   colorList,
+  fade,
 }) => {
   if (mouseCoordinates.x === 0 && mouseCoordinates.y === 0) {
     return null;
@@ -76,8 +77,10 @@ const CuteCursor = ({
   let xPosition = mouseCoordinates.x + 15;
   let yPosition = mouseCoordinates.y - 25;
 
+  const fadeClassName = fade ? 'fade' : '';
+
   return (
-    <div id="cute_cursor" style={{ transform: `translate3d(${xPosition}px, ${yPosition}px, 0)` }}>
+    <div id="cute_cursor" className={fadeClassName} style={{ transform: `translate3d(${xPosition}px, ${yPosition}px, 0)` }}>
       <svg width="0" height="0">
         <linearGradient id="svg-gradient" gradientTransform="rotate(350)">
           <stop stopColor="red"    offset="0%" />

@@ -129,9 +129,10 @@ const schema = {
     type: 'boolean',
     default: true
   },
-  show_cute_cursor: {
-    type: 'boolean',
-    default: true
+  cute_cursor_mode: {
+    type: 'string',
+    enum: ['permanent', 'fade', 'hidden'],
+    default: 'fade' // TODO: change to 'permanent' after testing
   },
   pen_smoothing: {
     type: 'boolean',
@@ -718,7 +719,7 @@ ipcMain.handle('get_settings', () => {
     whiteboard_spacing: store.get('whiteboard_spacing'),
     show_tool_bar: store.get('show_tool_bar'),
     show_drawing_border: store.get('show_drawing_border'),
-    show_cute_cursor: store.get('show_cute_cursor'),
+    cute_cursor_mode: store.get('cute_cursor_mode'),
     pen_smoothing: store.get('pen_smoothing'),
     tool_bar_x: store.get('tool_bar_x'),
     tool_bar_y: store.get('tool_bar_y'),
@@ -815,7 +816,7 @@ ipcMain.handle('get_configuration', () => {
     app_version:                              app.getVersion(),
 
     show_drawing_border:                      store.get('show_drawing_border'),
-    show_cute_cursor:                         store.get('show_cute_cursor'),
+    cute_cursor_mode:                         store.get('cute_cursor_mode'),
     pen_smoothing:                            store.get('pen_smoothing'),
     tool_bar_color_palette:                   store.get('tool_bar_color_palette'),
     swap_colors_indexes:                      store.get('swap_colors_indexes'),
@@ -935,10 +936,10 @@ ipcMain.handle('set_show_drawing_border', (_event, value) => {
   return null;
 });
 
-ipcMain.handle('set_show_cute_cursor', (_event, value) => {
-  rawLog('Setting cute cursor:', value)
+ipcMain.handle('set_cute_cursor_mode', (_event, value) => {
+  rawLog('Setting cute cursor mode:', value)
 
-  store.set('show_cute_cursor', value)
+  store.set('cute_cursor_mode', value)
 
   refreshSettingsInRenderer();
 
@@ -1040,7 +1041,7 @@ function refreshSettingsInRenderer() {
     whiteboard_style:        store.get('whiteboard_style'),
     whiteboard_spacing:      store.get('whiteboard_spacing'),
     show_drawing_border:     store.get('show_drawing_border'),
-    show_cute_cursor:        store.get('show_cute_cursor'),
+    cute_cursor_mode:        store.get('cute_cursor_mode'),
     pen_smoothing:           store.get('pen_smoothing'),
     tool_bar_color_palette:  store.get('tool_bar_color_palette'),
     swap_colors_indexes:     store.get('swap_colors_indexes'),
