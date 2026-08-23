@@ -288,6 +288,10 @@ export const drawArrow = (ctx, figure, updateRainbowColorDeg, colorList) => {
   ctx.shadowOffsetX = shadowOffsetX;
   ctx.shadowOffsetY = shadowOffsetY;
 
+  if (figure.erased) {
+    ctx.shadowColor = 'transparent';
+  }
+
   ctx.beginPath();
   ctx.moveTo(...figurePoints[0]);
 
