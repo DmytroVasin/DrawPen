@@ -43,6 +43,7 @@ const ToolBar = ({
   handleChangeTool,
   handleClearDesk,
   handleEnablePointerMode,
+  handlePositionCommit,
   Icons,
   colorList,
 }) => {
@@ -196,8 +197,11 @@ const ToolBar = ({
   }, [dragging, offset, clampPosition, setPosition]);
 
   const onPointerUp = useCallback(() => {
+    if (!dragging) return;
+
+    handlePositionCommit(position);
     setDragging(false);
-  }, []);
+  }, [dragging, position, handlePositionCommit]);
 
   useEffect(() => {
     setPosition((prev) => clampPosition(prev.x, prev.y));

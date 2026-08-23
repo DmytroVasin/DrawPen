@@ -659,6 +659,7 @@ const Application = (settings) => {
 
   const firstLaunch = useRef(true);
   useEffect(() => {
+    // TODO:  - а нужен теперь вот етот трюк с firstLaunch?
     if (firstLaunch.current) {
       firstLaunch.current = false;
       return;
@@ -678,8 +679,6 @@ const Application = (settings) => {
         tool_bar_default_brush: toolbarLastActiveBrush,
         tool_bar_default_figure: toolbarLastActiveFigure,
         tool_bar_collapsed: toolbarCollapsed,
-        tool_bar_x: toolbarPosition.x,
-        tool_bar_y: toolbarPosition.y,
       });
     }, 300);
 
@@ -688,7 +687,7 @@ const Application = (settings) => {
     return () => {
       debouncedUpdateSettings.cancel();
     };
-  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarCollapsed, toolbarPosition]);
+  }, [showWhiteboard, showToolbar, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, toolbarCollapsed]);
 
   useEffect(() => {
     if (!activeFigureInfo) { return }
@@ -1462,6 +1461,15 @@ const Application = (settings) => {
     window.electronAPI.invokeSetSettings(settings);
   };
 
+  const invokeCommitToolbarPosition = useCallback((position) => {
+    console.log('Renderer -> Main: Invoke Commit Toolbar Position');
+
+    window.electronAPI.invokeCommitToolbarPosition({
+      tool_bar_x: position.x,
+      tool_bar_y: position.y,
+    });
+  }, []);
+
   const handleChangeWhiteboardTheme = (theme) => {
     setWhiteboardTheme(theme);
     invokeSetSettings({ whiteboard_color: theme });
@@ -1658,6 +1666,7 @@ const Application = (settings) => {
             handleChangeTool={handleChangeTool}
             handleClearDesk={handleReset}
             handleEnablePointerMode={handleEnablePointerMode}
+            handlePositionCommit={invokeCommitToolbarPosition}
             Icons={Icons}
             colorList={colorList}
           />

@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   invokeOpenNotification: (info) => ipcRenderer.invoke('open_notification', info),
   invokeGetSettings: () => ipcRenderer.invoke('get_settings'),
   invokeSetSettings: (settings) => ipcRenderer.invoke('set_settings', settings),
+  invokeCommitToolbarPosition: (position) => ipcRenderer.invoke('commit_toolbar_position', position),
 
   // Main -> Renderer
   onResetScreen: (callback) => ipcRenderer.on('reset_screen', callback),

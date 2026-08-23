@@ -758,6 +758,17 @@ ipcMain.handle('set_settings', (_event, newSettings) => {
   return null
 });
 
+ipcMain.handle('commit_toolbar_position', (_event, position) => {
+  rawLog('Committing toolbar position from Renderer:')
+
+  store.set({
+    tool_bar_x: position.tool_bar_x,
+    tool_bar_y: position.tool_bar_y,
+  })
+
+  return null
+});
+
 ipcMain.handle('close_app', () => {
   hideApp();
 
