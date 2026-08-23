@@ -171,6 +171,9 @@ html, body {
                 .settings-item-description {
                   margin: 3px 0 0 0;
                   color: var(--gray-600);
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
                 }
               }
 
@@ -343,7 +346,7 @@ html, body {
 
                   .record-block {
                     cursor: pointer;
-                    padding: 4px;
+                    padding: var(--space-sm);
                     border-radius: 5px;
                     color: var(--gray-500);
                     transition: background-color 0.3s ease;
@@ -372,7 +375,7 @@ html, body {
                     .hotkey-pill {
                       display: inline-flex;
                       align-items: center;
-                      gap: 4px;
+                      gap: var(--space-sm);
 
                       .key {
                         width: 22px;
@@ -400,7 +403,7 @@ html, body {
 
                 .color-swatches {
                   display: flex;
-                  gap: 4px;
+                  gap: var(--space-sm);
                   align-items: center;
 
                   .color-swatch {
@@ -414,6 +417,11 @@ html, body {
 
                     &.color-rainbow { background-image: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
                   }
+                }
+
+                .buttons-group {
+                  display: flex;
+                  gap: var(--space-sm);
                 }
               }
             }

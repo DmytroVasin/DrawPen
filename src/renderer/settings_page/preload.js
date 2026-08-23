@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDisableToolbarInPointerMode: (value) => ipcRenderer.invoke('set_disable_toolbar_in_pointer_mode', value),
   setFadeDisappearAfterMs: (value) => ipcRenderer.invoke('set_fade_disappear_after_ms', value),
   setFadeOutDurationTimeMs: (value) => ipcRenderer.invoke('set_fade_out_duration_time_ms', value),
+  chooseScreenshotDirectory: () => ipcRenderer.invoke('choose_screenshot_directory'),
+  resetScreenshotDirectory: () => ipcRenderer.invoke('reset_screenshot_directory'),
+  openScreenshotDirectory: () => ipcRenderer.invoke('open_screenshot_directory'),
 
   isMac: platform === 'darwin',
 });

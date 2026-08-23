@@ -64,6 +64,7 @@ const Settings = (config) => {
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
   const [clearDrawingsOnHide, setClearDrawingsOnHide] = useState(config.clear_drawings_on_hide);
   const [disableToolbarInPointerMode, setDisableToolbarInPointerMode] = useState(config.disable_toolbar_in_pointer_mode);
+  const [screenshotDirectory, setScreenshotDirectory] = useState({ path: config.screenshot_directory, isDefault: config.screenshot_directory_is_default });
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
   const [showHideToolbar, setShowHideToolbar]       = useState({ accelerator: config.key_binding_show_hide_toolbar,    init: config.key_binding_show_hide_toolbar_default });
@@ -278,6 +279,26 @@ const Settings = (config) => {
 
     setDrawingMonitor(newMonitor);
     window.electronAPI.setDrawingMonitor(newMonitor);
+  }
+
+  const resetScreenshotDirectory = async () => {
+    const directory = await window.electronAPI.resetScreenshotDirectory();
+    if (!directory) return;
+
+    const { path, isDefault } = directory;
+    setScreenshotDirectory({ path, isDefault });
+  }
+
+  const chooseScreenshotDirectory = async () => {
+    const directory = await window.electronAPI.chooseScreenshotDirectory();
+    if (!directory) return;
+
+    const { path, isDefault } = directory;
+    setScreenshotDirectory({ path, isDefault });
+  }
+
+  const openScreenshotDirectory = () => {
+    window.electronAPI.openScreenshotDirectory();
   }
 
   return (
@@ -685,6 +706,23 @@ const Settings = (config) => {
                       className={`toggle ${launchOnLogin ? 'active' : ''}`}
                       onClick={toggleLaunch}
                     ></div>
+                  </div>
+                </div>
+
+                <div className="settings-item settings-item--screenshot-directory">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Save screenshots to</div>
+                    <div className="settings-item-description" title={screenshotDirectory.path}>{screenshotDirectory.path}</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    {
+                      !screenshotDirectory.isDefault && <IoRefreshCircleOutline className="icon" title="Reset to default" onClick={resetScreenshotDirectory} />
+                    }
+                    <div className="buttons-group">
+                      <button className="button" onClick={openScreenshotDirectory}>Open</button>
+                      <button className="button" onClick={chooseScreenshotDirectory}>Choose…</button>
+                    </div>
                   </div>
                 </div>
 

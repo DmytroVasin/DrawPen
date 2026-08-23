@@ -1,4 +1,4 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer, autoUpdater } from 'electron';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer, autoUpdater, dialog } from 'electron';
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import { randomUUID } from 'crypto';
@@ -193,6 +193,10 @@ const schema = {
       display_id: null,
       label: null,
     }
+  },
+  screenshot_directory: {
+    type: 'string',
+    default: path.join(app.getPath('pictures'), 'drawpen'),
   },
 };
 
@@ -780,13 +784,13 @@ ipcMain.handle('open_notification', (_event, info) => {
   if (info.action === 'open_screenshot') {
     enablePointerMode()
 
-    const desktop = app.getPath('desktop')
-    const filePath = path.join(desktop, info.data)
+    const screenshotDirectory = store.get('screenshot_directory')
+    const filePath = path.join(screenshotDirectory, info.data)
 
     if (fs.existsSync(filePath)) {
       shell.showItemInFolder(filePath)
     } else {
-      shell.openPath(desktop)
+      shell.openPath(screenshotDirectory)
     }
 
     return null
@@ -832,6 +836,9 @@ ipcMain.handle('get_configuration', () => {
     clear_drawings_on_hide:                   store.get('clear_drawings_on_hide'),
     disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
 
+    screenshot_directory:                     store.get('screenshot_directory'),
+    screenshot_directory_is_default:          store.get('screenshot_directory') === schema.screenshot_directory.default,
+
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
 
@@ -844,6 +851,61 @@ ipcMain.handle('get_configuration', () => {
     key_binding_clear_desk:                   normalizeAcceleratorForUI(store.get('key_binding_clear_desk')),
     key_binding_clear_desk_default:           normalizeAcceleratorForUI(schema.key_binding_clear_desk.default),
   };
+});
+
+ipcMain.handle('choose_screenshot_directory', async () => {
+  const screenshotDirectory = store.get('screenshot_directory')
+  const fallbackDirrectory = app.getPath('pictures')
+  const dialogOptions = {
+    title: 'Choose screenshot folder',
+    buttonLabel: 'Choose',
+    properties: isMac ? ['openDirectory', 'createDirectory'] : ['openDirectory'],
+  }
+
+  if (fs.existsSync(screenshotDirectory)) {
+    dialogOptions.defaultPath = screenshotDirectory
+  } else if (fs.existsSync(fallbackDirrectory)) {
+    dialogOptions.defaultPath = fallbackDirrectory
+  }
+
+  try {
+    const result = await dialog.showOpenDialog(settingsWindow, dialogOptions)
+    if (result.canceled) return null
+
+    const selectedDirectory = result.filePaths[0]
+
+    store.set('screenshot_directory', selectedDirectory)
+
+    return {
+      path: selectedDirectory,
+      isDefault: selectedDirectory === schema.screenshot_directory.default,
+    }
+  } catch (error) {
+    dialog.showErrorBox('Unable to select screenshot folder', error.message)
+    return null
+  }
+});
+
+ipcMain.handle('reset_screenshot_directory', () => {
+  store.reset('screenshot_directory')
+
+  return {
+    path: store.get('screenshot_directory'),
+    isDefault: true,
+  }
+});
+
+ipcMain.handle('open_screenshot_directory', async () => {
+  try {
+    const screenshotDirectory = store.get('screenshot_directory')
+    await fs.promises.mkdir(screenshotDirectory, { recursive: true })
+
+    shell.openPath(screenshotDirectory)
+  } catch (error) {
+    dialog.showErrorBox('Unable to open screenshot folder', error.message)
+  }
+
+  return null
 });
 
 ipcMain.handle('can_register_shortcut', async (_event, value) => {
@@ -1303,19 +1365,25 @@ async function makeScreenshot() {
       throw new Error('Could not capture the screen.')
     }
 
-    let savePath = path.join(app.getPath('desktop'), screenshotFilename());
+    const screenshotDirectory = store.get('screenshot_directory')
+    await fs.promises.mkdir(screenshotDirectory, { recursive: true })
+
+    let screenshotName = screenshotFilename()
+    let savePath = path.join(screenshotDirectory, screenshotName)
+
     if (fs.existsSync(savePath)) {
-      savePath = path.join(app.getPath('desktop'), screenshotFilename(true));
+      screenshotName = screenshotFilename(true)
+      savePath = path.join(screenshotDirectory, screenshotName)
     }
 
-    await fs.promises.writeFile(savePath, image.toPNG());
+    await fs.promises.writeFile(savePath, image.toPNG())
 
     sendNotification({
       title: `Click to open ${isMac ? 'in Finder' : 'folder'}`,
       body: savePath,
       button_label: 'Open',
       button_action: 'open_screenshot',
-      button_data: path.basename(savePath),
+      button_data: screenshotName,
     });
   } catch (error) {
     sendNotification({
@@ -1606,6 +1674,8 @@ function launchTracker() {
       flushAt: 1
     })
 
+    const { screenshot_directory, ...analyticsConfig } = store.store
+
     posthog.capture({
       distinctId: store.get('user_id') || 'anonymous',
       event: 'app_launch',
@@ -1618,7 +1688,7 @@ function launchTracker() {
         os_release:  os.release(),
         arch:        os.arch(),
 
-        config: store.store,
+        config: analyticsConfig,
       }
     })
   } catch (_) {}
