@@ -1079,10 +1079,12 @@ const Application = (settings) => {
 
     if (activeTool === 'text') {
       if (!textEditorContainer) {
+        const [, height] = calculateCanvasTextWidth('', activeWidthIndex);
+
         const newTextEditor = {
           id: Date.now(),
           isActive: true,
-          startAt: [x, y],
+          startAt: [x, y - (height / 2)],
           colorIndex: activeColorIndex,
           widthIndex: activeWidthIndex,
           rainbowColorDeg: rainbowColorDeg,
