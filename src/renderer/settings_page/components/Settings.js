@@ -473,6 +473,7 @@ const Settings = (config) => {
                       >
                         <option value="permanent">Permanent</option>
                         <option value="fade">Auto-Fade</option>
+                        <option value="dot">Dot</option>
                         <option value="hidden">Hidden</option>
                       </select>
 

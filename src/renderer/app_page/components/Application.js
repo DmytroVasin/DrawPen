@@ -1547,7 +1547,11 @@ const Application = (settings) => {
   }
 
   const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
-  const isCuteCursorVisible = cuteCursorMode !== 'hidden' && isDocumentVisible;
+  const canvasCursorType = cuteCursorMode === 'dot' && cursorType === 'crosshair' ? 'default' : cursorType;
+  const isCuteCursorVisible =
+    isDocumentVisible &&
+    ['permanent', 'fade', 'dot'].includes(cuteCursorMode) &&
+    !(cuteCursorMode === 'dot' && canvasCursorType !== 'default');
 
   return (
     <div id="root_wrapper" className={manipulation} onPointerMove={handleMousePosition} onContextMenu={handleContextMenu}>
@@ -1607,7 +1611,8 @@ const Application = (settings) => {
             activeTool={activeTool}
             Icons={Icons}
             colorList={colorList}
-            fade={cuteCursorMode === 'fade'}
+            rainbowColorDeg={rainbowColorDeg}
+            cuteCursorMode={cuteCursorMode}
           />
       }
 
@@ -1618,7 +1623,7 @@ const Application = (settings) => {
         allEraserFigures={allEraserFigures}
         fadeOpacity={fadeOpacity}
         activeFigureInfo={activeFigureInfo}
-        cursorType={cursorType}
+        cursorType={canvasCursorType}
         handleMouseDown={handleMouseDown}
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}

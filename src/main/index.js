@@ -131,7 +131,7 @@ const schema = {
   },
   cute_cursor_mode: {
     type: 'string',
-    enum: ['permanent', 'fade', 'hidden'],
+    enum: ['permanent', 'fade', 'dot', 'hidden'],
     default: 'fade' // TODO: change to 'permanent' after testing
   },
   pen_smoothing: {

@@ -1,6 +1,13 @@
 import React from "react";
 import "./CuteCursor.scss";
-import { widthList } from "../constants.js"
+import {
+  eraserTailColor,
+  highlighterAlpha,
+  shapeList,
+  widthList,
+  brushList,
+} from "../constants.js";
+import { getCursorColor } from "./drawer/figures.js";
 
 const CuteCursor = ({
   mouseCoordinates,
@@ -9,11 +16,31 @@ const CuteCursor = ({
   activeTool,
   Icons,
   colorList,
-  fade,
+  rainbowColorDeg,
+  cuteCursorMode,
 }) => {
   if (mouseCoordinates.x === 0 && mouseCoordinates.y === 0) {
     return null;
   }
+
+  const getDotSize = () => {
+    const widthInfo = widthList[activeWidthIndex];
+
+    if (activeTool === 'highlighter') return widthInfo.highlighter_width;
+    if (activeTool === 'laser') return widthInfo.laser_width[1];
+    if (activeTool === 'eraser') return widthInfo.figure_size;
+    if (shapeList.includes(activeTool)) return widthInfo.figure_size;
+    if (brushList.includes(activeTool) && colorList[activeColorIndex].isRainbow) return widthInfo.rainbow_pen_width;
+
+    return widthInfo.pen_width;
+  };
+
+  const getDotColor = () => {
+    if (activeTool === 'laser') return '#EA3323CC';
+    if (activeTool === 'eraser') return eraserTailColor;
+
+    return getCursorColor(colorList, activeColorIndex, rainbowColorDeg);
+  };
 
   const renderIconByToolName = (toolName) => {
     const iconColor = colorList[activeColorIndex].color;
@@ -77,7 +104,27 @@ const CuteCursor = ({
   let xPosition = mouseCoordinates.x + 15;
   let yPosition = mouseCoordinates.y - 25;
 
-  const fadeClassName = fade ? 'fade' : '';
+  const fadeClassName = cuteCursorMode === 'fade' ? 'fade' : '';
+
+  if (cuteCursorMode === 'dot') {
+    const dotSize = getDotSize();
+    const dotColor = getDotColor();
+    const dotOpacity = activeTool === 'highlighter' ? highlighterAlpha : 1;
+
+    return (
+      <div
+        id="cute_cursor"
+        className="dot"
+        style={{
+          width: dotSize,
+          height: dotSize,
+          backgroundColor: dotColor,
+          opacity: dotOpacity,
+          transform: `translate3d(${mouseCoordinates.x}px, ${mouseCoordinates.y}px, 0)`,
+        }}
+      ></div>
+    );
+  }
 
   return (
     <div id="cute_cursor" className={fadeClassName} style={{ transform: `translate3d(${xPosition}px, ${yPosition}px, 0)` }}>

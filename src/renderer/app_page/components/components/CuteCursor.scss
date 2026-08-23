@@ -11,6 +11,11 @@
     animation: cute-cursor-fade 1s linear 3s forwards;
   }
 
+  &.dot {
+    translate: -50% -50%;
+    border-radius: 50%;
+  }
+
   svg {
     display: block;
   }
@@ -19,4 +24,8 @@
 @keyframes cute-cursor-fade {
   from { opacity: 1; }
   to   { opacity: 0; }
+}
+
+#root_wrapper:has(#toolbar:hover) #cute_cursor.dot {
+  display: none;
 }
