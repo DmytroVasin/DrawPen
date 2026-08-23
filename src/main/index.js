@@ -81,11 +81,11 @@ const schema = {
   },
   tool_bar_x: {
     type: 'number',
-    default: 5
+    default: 10
   },
   tool_bar_y: {
     type: 'number',
-    default: 5
+    default: 10
   },
   tool_bar_active_tool: {
     type: 'string',
@@ -667,10 +667,12 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  flushExtendedToolbarPosition()
 });
 
 autoUpdater.on('before-quit-for-update', () => {
   isQuitting = true;
+  flushExtendedToolbarPosition()
 });
 
 app.on('will-quit', () => {
@@ -1458,6 +1460,15 @@ function storeToolbarPositionFromExtendedWindow() {
   });
 
   updateMainWindowPosition(currentDisplay)
+}
+
+function flushExtendedToolbarPosition() {
+  if (!extendedToolbarPositionStoreTimeout) return;
+
+  clearTimeout(extendedToolbarPositionStoreTimeout)
+  extendedToolbarPositionStoreTimeout = null
+
+  storeToolbarPositionFromExtendedWindow()
 }
 
 function scheduleStoreToolbarPositionFromExtendedWindow() {
