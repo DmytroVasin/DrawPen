@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.scss";
-import { brushList, shapeList, shortcutHintHoldDelayMs, widthList } from "../constants.js";
+import { brushList, shapeList, widthList, shortcutHintHoldDelayMs, updateStoreDelay } from "../constants.js";
 
 const STICKY_DISTANCE = 15;
 const ZONE_BORDER = 10; // Equals to "--border-size"*2
@@ -87,6 +87,7 @@ const ToolBar = ({
 
   const toolbarRef = useRef();
   const shortcutHintTimerRef = useRef(null);
+  const positionCommitTimeoutRef = useRef(null);
 
   const clearShortcutHintTimer = useCallback(() => {
     if (!shortcutHintTimerRef.current) return;
@@ -118,7 +119,7 @@ const ToolBar = ({
     }
 
     clearShortcutHintTimer();
-    shortcutHintTimerRef.current = window.setTimeout(() => {
+    shortcutHintTimerRef.current = setTimeout(() => {
       shortcutHintTimerRef.current = null;
       setShortcutHintRevealCount((count) => count + 1);
       setShowShortcutHints(true);
@@ -199,6 +200,8 @@ const ToolBar = ({
   const onPointerUp = useCallback(() => {
     if (!dragging) return;
 
+    clearTimeout(positionCommitTimeoutRef.current);
+
     handlePositionCommit(position);
     setDragging(false);
   }, [dragging, position, handlePositionCommit]);
@@ -206,6 +209,20 @@ const ToolBar = ({
   useEffect(() => {
     setPosition((prev) => clampPosition(prev.x, prev.y));
   }, [position.x, position.y, clampPosition, setPosition]);
+
+  useEffect(() => {
+    clearTimeout(positionCommitTimeoutRef.current);
+
+    if (dragging) return;
+
+    positionCommitTimeoutRef.current = setTimeout(() => {
+      handlePositionCommit(position);
+    }, updateStoreDelay);
+
+    return () => {
+      clearTimeout(positionCommitTimeoutRef.current);
+    };
+  }, [position.x, position.y, dragging, handlePositionCommit]);
 
   useEffect(() => {
     const toolbarElement = toolbarRef.current;

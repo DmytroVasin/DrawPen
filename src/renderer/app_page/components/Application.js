@@ -48,7 +48,8 @@ import {
   minObjectDistance,
   pastCooldownMs,
   escDoubleTapMs,
-} from './constants.js'
+  updateStoreDelay,
+} from './constants.js';
 
 const Icons = {
   DrawModeEnabled: LuSquareMousePointer,
@@ -659,7 +660,6 @@ const Application = (settings) => {
 
   const firstLaunch = useRef(true);
   useEffect(() => {
-    // TODO:  - а нужен теперь вот етот трюк с firstLaunch?
     if (firstLaunch.current) {
       firstLaunch.current = false;
       return;
@@ -680,7 +680,7 @@ const Application = (settings) => {
         tool_bar_default_figure: toolbarLastActiveFigure,
         tool_bar_collapsed: toolbarCollapsed,
       });
-    }, 300);
+    }, updateStoreDelay);
 
     debouncedUpdateSettings();
 
