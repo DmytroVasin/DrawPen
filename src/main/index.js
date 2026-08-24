@@ -2,6 +2,7 @@ import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain,
 import { updateElectronApp } from 'update-electron-app';
 import Store from 'electron-store';
 import { randomUUID } from 'crypto';
+import { isDeepStrictEqual } from 'util';
 import { PostHog } from 'posthog-node'
 import fs from 'fs';
 import path from 'path';
@@ -216,8 +217,12 @@ store.onDidChange('show_whiteboard', (newValue, oldValue) => {
 if (isLoggingEnabled) {
   rawLog('Initial store: ', store.store)
 
-  store.onDidAnyChange((newStore, _oldStore) => {
-    rawLog('Updated store: ', newStore)
+  store.onDidAnyChange((newStore, oldStore) => {
+    const storeDiff = Object.fromEntries(
+      Object.entries(newStore).filter(([key, value]) => !isDeepStrictEqual(value, oldStore[key]))
+    )
+
+    rawLog('Updated store: ', storeDiff)
   })
 }
 
