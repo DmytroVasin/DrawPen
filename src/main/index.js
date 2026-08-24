@@ -1169,6 +1169,8 @@ function toggleDrawOrPointerMode() {
 function enableDrawMode() {
   rawLog('Enable drawing mode...')
 
+  flushExtendedToolbarPosition()
+
   showMainWindow()
   hideWindow(extendedToolbarWindow)
 
