@@ -1,5 +1,18 @@
 # Change Log
 
+## [0.0.57] - 2026-08-25
+### Features:
+- Add toolbar shortcut hints on CMD/CTRL hold
+- Add "Auto-Fade" and "Dot" modes for "Cute Cursor"
+- Add configurable screenshot directory (Default changes to "Pictures" folder)
+
+### Improvements:
+- Preserve toolbar position when switching between Draw and Pointer modes and when quitting
+- Change initial Text tool position
+
+### Bug Fixes:
+- Fix shadow rendering for erased arrows
+
 ## [0.0.56] - 2026-08-09
 ### Bug Fixes:
 - Restore the system tray icon and context menu on Linux by downgrading Electron from 43.3.0 to 40.4.0
