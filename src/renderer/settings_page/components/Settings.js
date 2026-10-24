@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './Settings.scss';
 import ShortcutRow from './ShortcutRow';
 import ColorPicker from './ColorPicker';
@@ -20,6 +20,7 @@ import {
   IoChevronForward,
   IoColorPaletteOutline,
   IoApps,
+  IoWarningOutline,
 } from "react-icons/io5";
 import { HiSwitchHorizontal } from "react-icons/hi";
 import { FaRegKeyboard } from "react-icons/fa6";
@@ -56,9 +57,23 @@ const Settings = (config) => {
   const secondaryColorInfo = colorList[secondaryColor];
 
   const [activeTab, setActiveTab] = useState('shortcuts');
+  const [toast, setToast] = useState(null);
+  const toastIdRef = useRef(0);
 
   const displays = config.displays || [];
   const appVersion = config.app_version;
+
+  const showToast = (message) => {
+    toastIdRef.current += 1;
+
+    setToast({ id: toastIdRef.current, message: message });
+  };
+
+  const handleToastAnimationEnd = (event) => {
+    if (event.animationName === 'settingsToastOut') {
+      setToast(null);
+    }
+  };
 
   const resetToOriginals = () => {
     window.electronAPI.resetToOriginals();
@@ -66,6 +81,7 @@ const Settings = (config) => {
 
   const selectTab = (tab) => {
     setEditingColorId(null);
+    setToast(null);
     setActiveTab(tab);
   }
 
@@ -284,6 +300,19 @@ const Settings = (config) => {
 
   return (
     <div className="settings-page">
+      {
+        toast && (
+          <div
+            key={toast.id}
+            className="settings-toast"
+            onAnimationEnd={handleToastAnimationEnd}
+          >
+            <IoWarningOutline className="icon" />
+            <div>{toast.message}</div>
+          </div>
+        )
+      }
+
       <div className="settings-sidebar-wrapper">
         <div className="settings-sidebar">
           <div
@@ -335,6 +364,7 @@ const Settings = (config) => {
                   onChange={(acc) => applyShortcut('key_binding_show_hide_app', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_app')}
                   onRemove={() => removeShortcut('key_binding_show_hide_app')}
+                  onError={showToast}
                 />
 
                 <ShortcutRow
@@ -345,6 +375,7 @@ const Settings = (config) => {
                   onChange={(acc) => applyShortcut('key_binding_show_hide_toolbar', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_toolbar')}
                   onRemove={() => removeShortcut('key_binding_show_hide_toolbar')}
+                  onError={showToast}
                 />
 
                 <ShortcutRow
@@ -355,6 +386,7 @@ const Settings = (config) => {
                   onChange={(acc) => applyShortcut('key_binding_show_hide_whiteboard', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_whiteboard')}
                   onRemove={() => removeShortcut('key_binding_show_hide_whiteboard')}
+                  onError={showToast}
                 />
 
                 <ShortcutRow
@@ -365,6 +397,7 @@ const Settings = (config) => {
                   onChange={(acc) => applyShortcut('key_binding_clear_desk', acc)}
                   onReset={() => resetShortcut('key_binding_clear_desk')}
                   onRemove={() => removeShortcut('key_binding_clear_desk')}
+                  onError={showToast}
                 />
 
                 <div className="settings-item">

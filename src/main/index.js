@@ -1011,7 +1011,7 @@ ipcMain.handle('can_register_shortcut', async (_event, key, value) => {
   const hasModifier = keys.some(key => modifiers.includes(key));
   const hasBaseKey = keys.some(key => !modifiers.includes(key));
 
-  if (!hasModifier || !hasBaseKey) return { success: false, message: 'Modifier and base key required' };
+  if (!hasModifier || !hasBaseKey) return { success: false, message: 'Use a shortcut like Ctrl+G' };
 
   const systemShortcuts = [
     // Render Window

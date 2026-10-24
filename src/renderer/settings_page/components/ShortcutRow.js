@@ -35,7 +35,7 @@ const HotkeyPill = ({ accelerator }) => {
   );
 };
 
-const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
+const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove, onError }) => {
   const KEY_NULL = '[NULL]';
   const isMac = window.electronAPI.isMac;
 
@@ -90,7 +90,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
     if (validateResult.success) {
       onChange(electronKey)
     } else {
-      console.log(validateResult.message)
+      onError(validateResult.message)
     }
 
     setIsRecording(false);
@@ -143,7 +143,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
     if (validateResult.success) {
       onReset()
     } else {
-      console.log(validateResult.message)
+      onError(validateResult.message)
     }
   };
 

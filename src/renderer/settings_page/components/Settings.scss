@@ -12,6 +12,7 @@
   --gray-700: #2E3439;
 
   --blue-500: #1D76DC;
+  --yellow-500: #E0A552;
 
   --shadow-ambient: rgba(0, 0, 0, 0.1);
   --shadow-ambient-strong: #BBBBBB;
@@ -45,6 +46,34 @@ html, body {
       height: 100%;
       width: 100%;
       display: flex;
+
+      .settings-toast {
+        position: absolute;
+        top: 5px;
+        right: 20px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        box-sizing: border-box;
+        padding: 0 10px;
+        border: 1px solid var(--gray-250);
+        border-right: 4px solid var(--yellow-500);
+        border-radius: 10px;
+        background-color: var(--gray-75);
+        color: var(--gray-600);
+        font-size: 13px;
+        animation:
+          settingsToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both,
+          settingsToastOut 0.2s ease-in 4s forwards;
+
+        .icon {
+          width: 16px;
+          height: 16px;
+          color: var(--yellow-500);
+        }
+      }
     }
 
     .settings-sidebar-wrapper {
@@ -532,4 +561,26 @@ html, body {
   font-weight: 700;
   font-style: normal;
   font-display: swap;
+}
+
+@keyframes settingsToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes settingsToastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
 }
