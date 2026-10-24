@@ -292,7 +292,7 @@ const Application = (settings) => {
       invokeMakeScreenshot();
       return
     }
-    if (ctrlOrMeta && !['v', 'c', 'z'].includes(eventKey)) {
+    if (ctrlOrMeta && !['v', 'c', 'd', 'z'].includes(eventKey)) {
       return
     }
 
@@ -318,6 +318,8 @@ const Application = (settings) => {
     switch (eventKey) {
       case 'v': {
         if (ctrlOrMeta) {
+          if (eventRepeat) break;
+
           if (clipboardFigure) {
             const now = Date.now();
             if (now - lastPasteAtRef.current < pastCooldownMs) return;
@@ -343,6 +345,8 @@ const Application = (settings) => {
       }
       case 'c': {
         if (ctrlOrMeta) {
+          if (eventRepeat) break;
+
           if (activeFigureInfo) {
             const activeFigure = findActiveFigure();
 
@@ -404,6 +408,36 @@ const Application = (settings) => {
         }
         break;
       }
+      case 'd': {
+        if (ctrlOrMeta) {
+          if (eventRepeat) break;
+
+          if (activeFigureInfo) {
+            const now = Date.now();
+            if (now - lastPasteAtRef.current < pastCooldownMs) return;
+            lastPasteAtRef.current = now;
+
+            const activeFigure = findActiveFigure();
+
+            const newFigure = {
+              ...activeFigure,
+              id: Date.now(),
+              points: activeFigure.points.map(([x, y]) => [x + 10, y + 10]),
+            };
+
+            setActiveFigureInfo({ id: newFigure.id });
+            setAllFigures(prevAllFigures => [...prevAllFigures, newFigure]);
+
+            setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [newFigure] }]);
+            setRedoStackFigures([]);
+          }
+
+          break;
+        }
+
+        handleChangeTool('diamond');
+        break;
+      }
       case 'b': {
         handleChangeTool('brush');
         break;
@@ -426,10 +460,6 @@ const Application = (settings) => {
       }
       case 'r': {
         handleChangeTool('rectangle');
-        break;
-      }
-      case 'd': {
-        handleChangeTool('diamond');
         break;
       }
       case 'o': {
