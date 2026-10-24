@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
 import {
+  IoRefreshCircleOutline,
+  IoCloseCircleOutline,
+  IoGlobeOutline,
+} from "react-icons/io5";
+import {
   MdKeyboardCommandKey,
   MdOutlineKeyboardControlKey,
   MdOutlineKeyboardOptionKey,
@@ -30,12 +35,16 @@ const HotkeyPill = ({ accelerator }) => {
   );
 };
 
-const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
+const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
+  const KEY_NULL = '[NULL]';
   const isMac = window.electronAPI.isMac;
 
   const [isRecording, setIsRecording] = useState(false);
   const [currentKeys, setCurrentKeys] = useState([]);
   const inputRef = useRef(null);
+
+  const canReset  = shortcut.init !== shortcut.accelerator;
+  const canRemove = shortcut.accelerator !== KEY_NULL;
 
   const codeToKey = (code) => {
     if (code.startsWith('Key') && code.length === 4) {
@@ -62,53 +71,6 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
     return null;
   };
 
-  const validateShortcut = (keys) => {
-    if (!keys) return true;
-
-    const modifiers = ['Meta', 'Control', 'Alt', 'Shift'];
-    const hasModifier = keys.some(part => modifiers.includes(part));
-    const hasNonModifier = keys.some(part => !modifiers.includes(part));
-
-    if (!hasModifier) {
-      return false;
-    }
-
-    if (!hasNonModifier) {
-      return false;
-    }
-
-    const systemShortcuts = [
-      // Render Window
-      'Meta+C',
-      'Control+C',
-      'Meta+D',
-      'Control+D',
-      'Meta+V',
-      'Control+V',
-      'Meta+X',
-      'Control+X',
-      'Meta+Z',
-      'Meta+Shift+Z',
-      'Control+Z',
-      'Control+Shift+Z',
-      // Settings
-      'Meta+,',
-      'Control+,',
-      // App Quit
-      'Meta+Q',
-      'Control+Q',
-      // Main Window
-      'Meta+W', // Close window
-      'Control+W',
-    ];
-
-    if (systemShortcuts.includes(keys.join('+'))) {
-      return false;
-    }
-
-    return true;
-  };
-
   const startRecording = () => {
     if (isRecording) return;
 
@@ -121,12 +83,14 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
   };
 
   const stopRecording = async (keys) => {
-    if (validateShortcut(keys)) {
-      const electronKey = keys.join('+')
+    const electronKey = keys.join('+')
 
-      if (await onCheck(electronKey)) {
-        onChange(electronKey)
-      }
+    const validateResult = await onCheck(electronKey)
+
+    if (validateResult.success) {
+      onChange(electronKey)
+    } else {
+      console.log(validateResult.message)
     }
 
     setIsRecording(false);
@@ -173,6 +137,16 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
     debouncedStopRecording(currentKeys);
   };
 
+  const handleReset = async () => {
+    const validateResult = await onCheck(shortcut.init)
+
+    if (validateResult.success) {
+      onReset()
+    } else {
+      console.log(validateResult.message)
+    }
+  };
+
   useEffect(() => {
     if (!isRecording) return;
 
@@ -193,31 +167,47 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
     ? <HotkeyPill accelerator={currentKeys} />
     : <div className="placeholder">Recording...</div>;
 
-  const idleContent = (!accelerator || accelerator === '[NULL]')
+  const idleContent = (!shortcut.accelerator || shortcut.accelerator === KEY_NULL)
     ? <div className="placeholder">Record shortcut</div>
-    : <HotkeyPill accelerator={accelerator.split('+')} />;
+    : <HotkeyPill accelerator={shortcut.accelerator.split('+')} />;
 
   return (
-    <div className="shortcut-recorder">
+    <div className="settings-item">
       {
-        isRecording && (
-          <input
-            ref={inputRef}
-            type="text"
-            onChange={() => {}}
-            onBlur={handleBlur}
-            className="shortcut-input"
-            readOnly
-            autoFocus
-          />
-        )
+        hint && <div className="settings-item-hint"><IoGlobeOutline className="icon" title={hint} /></div>
       }
 
-      <div onClick={startRecording} className={`record-block${isRecording ? ' recording' : ''}`}>
-        {isRecording ? recordingContent : idleContent}
+      <div className="settings-item-info">
+        <div className="settings-item-title">{title}</div>
+        <div className="settings-item-description">{description}</div>
+      </div>
+
+      <div className="settings-item-control">
+        { canReset && <IoRefreshCircleOutline className="icon" title="Reset to default" onClick={handleReset} /> }
+        { canRemove && <IoCloseCircleOutline className="icon" title="Remove shortcut" onClick={onRemove} /> }
+
+        <div className="shortcut-recorder">
+          {
+            isRecording && (
+              <input
+                ref={inputRef}
+                type="text"
+                onChange={() => {}}
+                onBlur={handleBlur}
+                className="shortcut-input"
+                readOnly
+                autoFocus
+              />
+            )
+          }
+
+          <div onClick={startRecording} className={`record-block${isRecording ? ' recording' : ''}`}>
+            {isRecording ? recordingContent : idleContent}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ShortcutRecorder;
+export default ShortcutRow;

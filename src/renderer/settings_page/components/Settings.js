@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Settings.scss';
-import ShortcutRecorder from './ShortcutRecorder';
+import ShortcutRow from './ShortcutRow';
 import ColorPicker from './ColorPicker';
 import {
   createApplicationColorList,
@@ -16,8 +16,6 @@ import {
 
 import {
   IoRefreshCircleOutline,
-  IoCloseCircleOutline,
-  IoGlobeOutline,
   IoChevronDown,
   IoChevronForward,
   IoColorPaletteOutline,
@@ -26,31 +24,6 @@ import {
 import { HiSwitchHorizontal } from "react-icons/hi";
 import { FaRegKeyboard } from "react-icons/fa6";
 import { FaPlus, FaMinus } from "react-icons/fa";
-
-const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove }) => {
-  const canReset  = !!shortcut.init && shortcut.init !== shortcut.accelerator;
-  const canRemove = (shortcut.accelerator || shortcut.init) && shortcut.accelerator !== '[NULL]';
-
-  return (
-    <div className="settings-item">
-      {
-        hint && <div className="settings-item-hint"><IoGlobeOutline className="icon" title={hint} /></div>
-      }
-
-      <div className="settings-item-info">
-        <div className="settings-item-title">{title}</div>
-        <div className="settings-item-description">{description}</div>
-      </div>
-
-      <div className="settings-item-control">
-        { canReset && <IoRefreshCircleOutline className="icon" title="Reset to default" onClick={onReset} /> }
-        { canRemove && <IoCloseCircleOutline className="icon" title="Remove shortcut" onClick={onRemove} /> }
-
-        <ShortcutRecorder accelerator={shortcut.accelerator} onCheck={onCheck} onChange={onChange} />
-      </div>
-    </div>
-  );
-};
 
 const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
@@ -103,8 +76,8 @@ const Settings = (config) => {
     window.electronAPI.setToolbarColor(colorId, color);
   }
 
-  const canRegisterShortcut = async (accelerator) => {
-    return await window.electronAPI.canRegisterShortcut(accelerator);
+  const canRegisterShortcut = async (key, accelerator) => {
+    return await window.electronAPI.canRegisterShortcut(key, accelerator);
   }
 
   const applyShortcut = (key, accelerator) => {
@@ -358,7 +331,7 @@ const Settings = (config) => {
                   description="Toggles the main application window"
                   hint="Global shortcut"
                   shortcut={showHideApp}
-                  onCheck={canRegisterShortcut}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_show_hide_app', acc)}
                   onChange={(acc) => applyShortcut('key_binding_show_hide_app', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_app')}
                   onRemove={() => removeShortcut('key_binding_show_hide_app')}
@@ -368,7 +341,7 @@ const Settings = (config) => {
                   title="Show/Hide Toolbar"
                   description="Toggles the floating toolbar"
                   shortcut={showHideToolbar}
-                  onCheck={canRegisterShortcut}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_show_hide_toolbar', acc)}
                   onChange={(acc) => applyShortcut('key_binding_show_hide_toolbar', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_toolbar')}
                   onRemove={() => removeShortcut('key_binding_show_hide_toolbar')}
@@ -378,7 +351,7 @@ const Settings = (config) => {
                   title="Show/Hide Whiteboard"
                   description="Toggles the whiteboard overlay"
                   shortcut={showHideWhiteboard}
-                  onCheck={canRegisterShortcut}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_show_hide_whiteboard', acc)}
                   onChange={(acc) => applyShortcut('key_binding_show_hide_whiteboard', acc)}
                   onReset={() => resetShortcut('key_binding_show_hide_whiteboard')}
                   onRemove={() => removeShortcut('key_binding_show_hide_whiteboard')}
@@ -388,7 +361,7 @@ const Settings = (config) => {
                   title="Clear Desk"
                   description="Clears all drawings from the whiteboard"
                   shortcut={clearDesk}
-                  onCheck={canRegisterShortcut}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_clear_desk', acc)}
                   onChange={(acc) => applyShortcut('key_binding_clear_desk', acc)}
                   onReset={() => resetShortcut('key_binding_clear_desk')}
                   onRemove={() => removeShortcut('key_binding_clear_desk')}

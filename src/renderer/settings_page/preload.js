@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer -> Main
   getConfiguration: () => ipcRenderer.invoke('get_configuration'),
   setShortcut: (key, value) => ipcRenderer.invoke('set_shortcut', key, value),
-  canRegisterShortcut: (accelerator) => ipcRenderer.invoke('can_register_shortcut', accelerator),
+  canRegisterShortcut: (key, accelerator) => ipcRenderer.invoke('can_register_shortcut', key, accelerator),
   setLaunchOnLogin: (value) => ipcRenderer.invoke('set_launch_on_login', value),
   setStartsHidden: (value) => ipcRenderer.invoke('set_starts_hidden', value),
   setClearDrawingsOnHide: (value) => ipcRenderer.invoke('set_clear_drawings_on_hide', value),

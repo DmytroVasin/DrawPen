@@ -1001,10 +1001,44 @@ ipcMain.handle('open_screenshot_directory', async () => {
   return null
 });
 
-ipcMain.handle('can_register_shortcut', async (_event, value) => {
-  rawLog('Checking shortcut registration:', value)
+ipcMain.handle('can_register_shortcut', async (_event, key, value) => {
+  rawLog('Checking shortcut:', key, value)
 
-  const accelerator = deNormalizeAcceleratorFromUI(value)
+  if (!value) return { success: false, message: 'Empty shortcut' };
+
+  const keys = value.split('+');
+  const modifiers = ['Meta', 'Control', 'Alt', 'Shift'];
+  const hasModifier = keys.some(key => modifiers.includes(key));
+  const hasBaseKey = keys.some(key => !modifiers.includes(key));
+
+  if (!hasModifier || !hasBaseKey) return { success: false, message: 'Modifier and base key required' };
+
+  const systemShortcuts = [
+    // Render Window
+    'Meta+C',
+    'Control+C',
+    'Meta+D',
+    'Control+D',
+    'Meta+V',
+    'Control+V',
+    'Meta+X',
+    'Control+X',
+    'Meta+Z',
+    'Meta+Shift+Z',
+    'Control+Z',
+    'Control+Shift+Z',
+    // Settings
+    'Meta+,',
+    'Control+,',
+    // App Quit
+    'Meta+Q',
+    'Control+Q',
+    // Main Window
+    'Meta+W', // Close window
+    'Control+W',
+  ];
+
+  if (systemShortcuts.includes(value)) return { success: false, message: 'Reserved app shortcut' };
 
   const shortcutsInUse = [
     store.get('key_binding_show_hide_app'),
@@ -1015,24 +1049,29 @@ ipcMain.handle('can_register_shortcut', async (_event, value) => {
     KEY_START_ZOOM,
   ].filter(s => s && s !== KEY_NULL)
 
-  if (shortcutsInUse.includes(accelerator)) {
-    return false;
-  }
+  const accelerator = deNormalizeAcceleratorFromUI(value)
 
-  if (globalShortcut.isRegistered(accelerator)) {
-    return false;
-  }
+  if (accelerator === store.get(key)) return { success: false, message: 'Shortcut unchanged' };
+  if (shortcutsInUse.includes(accelerator)) return { success: false, message: 'Shortcut already in use' };
 
-  try {
-    const success = globalShortcut.register(accelerator, () => {});
-    if (success) {
-      globalShortcut.unregister(accelerator);
+  if (key === 'key_binding_show_hide_app') {
+    if (globalShortcut.isRegistered(accelerator)) return { success: false, message: 'Already registered by DrawPen' };
+
+    try {
+      const success = globalShortcut.register(accelerator, () => {});
+      if (success) {
+        globalShortcut.unregister(accelerator);
+
+        return { success: true, message: 'Global registration available' };
+      }
+
+      return { success: false, message: 'Global shortcut unavailable' };
+    } catch {
+      return { success: false, message: 'Global shortcut check failed' };
     }
-
-    return success;
-  } catch {
-    return false;
   }
+
+  return { success: true, message: 'Local shortcut allowed' };
 });
 
 ipcMain.handle('set_shortcut', (_event, key, value) => {
