@@ -292,11 +292,11 @@ const Application = (settings) => {
       invokeMakeScreenshot();
       return
     }
-    if (ctrlOrMeta && !['v', 'c', 'd', 'z'].includes(eventKey)) {
+    if (ctrlOrMeta && !['c', 'v', 'z', 'd', 'x'].includes(eventKey)) {
       return
     }
 
-    if (eventCode === 'keyx') {
+    if (eventCode === 'keyx' && !ctrlOrMeta) {
       if (['eraser', 'laser'].includes(activeTool)) {
         return;
       }
@@ -347,14 +347,7 @@ const Application = (settings) => {
         if (ctrlOrMeta) {
           if (eventRepeat) break;
 
-          if (activeFigureInfo) {
-            const activeFigure = findActiveFigure();
-
-            setClipboardFigure({
-              ...activeFigure,
-              points: activeFigure.points.map(p => [...p]) // Avoid mutation
-            });
-          }
+          handleCopyActiveFigure();
         }
 
         break;
@@ -406,6 +399,16 @@ const Application = (settings) => {
             setRedoStackFigures(prevRedoStack => [...prevRedoStack, lastAction]);
           }
         }
+        break;
+      }
+      case 'x': {
+        if (ctrlOrMeta) {
+          if (eventRepeat) break;
+
+          handleCopyActiveFigure();
+          handleDeleteActiveFigure();
+        }
+
         break;
       }
       case 'd': {
@@ -969,6 +972,17 @@ const Application = (settings) => {
     activeFigure.edgeIndex = newEdgeIndex
 
     setAllFigures([...allFigures]);
+  };
+
+  const handleCopyActiveFigure = () => {
+    if (!activeFigureInfo) return;
+
+    const activeFigure = findActiveFigure()
+
+    setClipboardFigure({
+      ...activeFigure,
+      points: activeFigure.points.map(p => [...p]) // Avoid mutation
+    });
   };
 
   const handleDeleteActiveFigure = () => {

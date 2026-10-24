@@ -1037,6 +1037,7 @@ ipcMain.handle('can_register_shortcut', async (_event, value) => {
 
 ipcMain.handle('set_shortcut', (_event, key, value) => {
   rawLog('Setting shortcut:', key, value)
+
   const accelerator = deNormalizeAcceleratorFromUI(value)
 
   unRegisterGlobalShortcuts()

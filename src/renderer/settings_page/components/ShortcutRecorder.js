@@ -81,8 +81,12 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
       // Render Window
       'Meta+C',
       'Control+C',
+      'Meta+D',
+      'Control+D',
       'Meta+V',
       'Control+V',
+      'Meta+X',
+      'Control+X',
       'Meta+Z',
       'Meta+Shift+Z',
       'Control+Z',
@@ -128,6 +132,7 @@ const ShortcutRecorder = ({ accelerator, onCheck, onChange }) => {
     setIsRecording(false);
     setCurrentKeys([]);
   };
+
   const debouncedStopRecording = useRef(
     debounce((keys) => stopRecording(keys), 200)
   ).current;
