@@ -139,6 +139,8 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
   };
 
   const handleReset = async () => {
+    if (isRecording) return;
+
     const validateResult = await onCheck(shortcut.init)
 
     if (validateResult.success) {
@@ -146,6 +148,12 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
     } else {
       onError(validateResult.message)
     }
+  };
+
+  const handleRemove = () => {
+    if (isRecording) return;
+
+    onRemove();
   };
 
   useEffect(() => {
@@ -185,7 +193,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
 
       <div className="settings-item-control">
         { canReset && <IoRefreshCircleOutline className="icon" title="Reset to default" onClick={handleReset} /> }
-        { canRemove && <IoCloseCircleOutline className="icon" title="Remove shortcut" onClick={onRemove} /> }
+        { canRemove && <IoCloseCircleOutline className="icon" title="Remove shortcut" onClick={handleRemove} /> }
 
         <div className="shortcut-recorder">
           {
