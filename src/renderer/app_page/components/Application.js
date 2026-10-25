@@ -693,6 +693,27 @@ const Application = (settings) => {
       mainKey = `DIGIT${mainKey}`;
     }
 
+    if (mainKey.length === 1 && mainKey >= 'A' && mainKey <= 'Z') {
+      mainKey = `KEY${mainKey}`;
+    }
+
+    const punctuation = {
+      '-': 'MINUS',
+      '=': 'EQUAL',
+      '[': 'BRACKETLEFT',
+      ']': 'BRACKETRIGHT',
+      ';': 'SEMICOLON',
+      "'": 'QUOTE',
+      '`': 'BACKQUOTE',
+      ',': 'COMMA',
+      '.': 'PERIOD',
+      '/': 'SLASH',
+    };
+
+    if (punctuation[mainKey]) {
+      mainKey = punctuation[mainKey];
+    }
+
     return {
       wantMeta: keyParts.includes('Meta'),
       wantCtrl: keyParts.includes('Control'),
@@ -703,8 +724,8 @@ const Application = (settings) => {
   }
 
   const eventMatches = (event, shortcut) => {
-    const eventKey = (event.key || '').toUpperCase()
     const eventCode = (event.code || '').toUpperCase()
+
     const ctrlKey = event.ctrlKey
     const metaKey = event.metaKey
     const shiftKey = event.shiftKey
@@ -715,10 +736,8 @@ const Application = (settings) => {
     const accelOptions = parseAccelerator(shortcut);
     if (!accelOptions) return false;
 
-    const pressedKey = eventCode.startsWith('DIGIT') ? eventCode : eventKey;
-
     return (
-      (accelOptions.mainKey === pressedKey) &&
+      (accelOptions.mainKey === eventCode) &&
       (accelOptions.wantMeta === metaKey) &&
       (accelOptions.wantCtrl === ctrlKey) &&
       (accelOptions.wantShift === shiftKey) &&
