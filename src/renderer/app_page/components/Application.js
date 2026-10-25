@@ -225,6 +225,7 @@ const Application = (settings) => {
     const eventKey = (event.key || '').toUpperCase();
     const eventCode = (event.code || '').toUpperCase();
     const ctrlOrMeta = event.ctrlKey || event.metaKey;
+    const altKey = event.altKey;
     const shiftKey = event.shiftKey;
     const eventRepeat = event.repeat;
 
@@ -483,6 +484,25 @@ const Application = (settings) => {
       }
       case 'KEYE': {
         handleChangeTool('eraser');
+        break;
+      }
+      case 'BRACKETLEFT':
+      case 'BRACKETRIGHT': {
+        if (altKey || shiftKey) break;
+
+        const activeFigure = activeFigureInfo && findActiveFigure();
+        const widthIndex = activeFigure ? activeFigure.widthIndex : activeWidthIndex;
+        const direction = eventCode === 'BRACKETLEFT' ? -1 : 1;
+        const nextWidthIndex = Math.min(Math.max(widthIndex + direction, 0), widthList.length - 1);
+
+        if (nextWidthIndex === widthIndex) break;
+
+        if (activeFigure) {
+          handleChangeFigureWidth(nextWidthIndex);
+          break;
+        }
+
+        handleChangeWidth(nextWidthIndex);
         break;
       }
     }
