@@ -449,11 +449,7 @@ function createMainWindow() {
   })
 
   mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
-      event.preventDefault();
-    }
-  });
+  mainWindow.webContents.on('before-input-event', preventBrowserZoom);
   mainWindow.webContents.on('did-start-loading', () => {
     zoomModeStarting = false
     zoomMode = false
@@ -529,11 +525,7 @@ function createExtendedToolbarWindow() {
   })
 
   extendedToolbarWindow.webContents.setVisualZoomLevelLimits(1, 1);
-  extendedToolbarWindow.webContents.on('before-input-event', (event, input) => {
-    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
-      event.preventDefault();
-    }
-  });
+  extendedToolbarWindow.webContents.on('before-input-event', preventBrowserZoom);
 }
 
 function showAboutWindow() {
@@ -597,11 +589,7 @@ function createAboutWindow() {
   })
 
   aboutWindow.webContents.setVisualZoomLevelLimits(1, 1);
-  aboutWindow.webContents.on('before-input-event', (event, input) => {
-    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
-      event.preventDefault();
-    }
-  });
+  aboutWindow.webContents.on('before-input-event', preventBrowserZoom);
 }
 
 function showSettingsWindow() {
@@ -661,11 +649,7 @@ function createSettingsWindow() {
   })
 
   settingsWindow.webContents.setVisualZoomLevelLimits(1, 1);
-  settingsWindow.webContents.on('before-input-event', (event, input) => {
-    if ((input.control || input.meta) && ['+', '=', '-', '0', 'numadd', 'numsub'].includes(input.key.toLowerCase())) {
-      event.preventDefault();
-    }
-  });
+  settingsWindow.webContents.on('before-input-event', preventBrowserZoom);
 }
 
 // Must be before "app.whenReady()"
@@ -1916,6 +1900,15 @@ function logDisplays() {
       displayFrequency: display.displayFrequency,
     })
   })
+}
+
+function preventBrowserZoom(event, input) {
+  const eventKey = (input.key || '').toUpperCase();
+  const ctrlOrMeta = input.control || input.meta;
+
+  if (ctrlOrMeta && ['+', '=', '-', '0'].includes(eventKey)) {
+    event.preventDefault();
+  }
 }
 
 function normalizeAcceleratorForUI(value) {
