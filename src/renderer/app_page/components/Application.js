@@ -222,8 +222,8 @@ const Application = (settings) => {
       return;
     }
 
-    const eventKey = (event.key || '').toLowerCase();
-    const eventCode = (event.code || '').toLowerCase();
+    const eventKey = (event.key || '').toUpperCase();
+    const eventCode = (event.code || '').toUpperCase();
     const ctrlOrMeta = event.ctrlKey || event.metaKey;
     const shiftKey = event.shiftKey;
     const eventRepeat = event.repeat;
@@ -244,11 +244,11 @@ const Application = (settings) => {
       return
     }
 
-    if (eventKey === 'shift' && !eventRepeat) {
+    if (eventKey === 'SHIFT' && !eventRepeat) {
       setIsShiftPressed(true);
     }
 
-    if (eventCode === 'space' && !eventRepeat) {
+    if (eventCode === 'SPACE' && !eventRepeat) {
       setIsSpacePressed(true);
     }
 
@@ -292,11 +292,11 @@ const Application = (settings) => {
       invokeMakeScreenshot();
       return
     }
-    if (ctrlOrMeta && !['c', 'v', 'z', 'd', 'x'].includes(eventKey)) {
+    if (ctrlOrMeta && !['KEYC', 'KEYV', 'KEYZ', 'KEYD', 'KEYX'].includes(eventCode)) {
       return
     }
 
-    if (eventCode === 'keyx' && !ctrlOrMeta) {
+    if (eventCode === 'KEYX' && !ctrlOrMeta) {
       if (['eraser', 'laser'].includes(activeTool)) {
         return;
       }
@@ -315,8 +315,8 @@ const Application = (settings) => {
     }
 
     // Static keyboard shortcuts
-    switch (eventKey) {
-      case 'v': {
+    switch (eventCode) {
+      case 'KEYV': {
         if (ctrlOrMeta) {
           if (eventRepeat) break;
 
@@ -343,7 +343,7 @@ const Application = (settings) => {
 
         break;
       }
-      case 'c': {
+      case 'KEYC': {
         if (ctrlOrMeta) {
           if (eventRepeat) break;
 
@@ -352,7 +352,7 @@ const Application = (settings) => {
 
         break;
       }
-      case 'z': {
+      case 'KEYZ': {
         if (ctrlOrMeta) {
           if (activeFigureInfo) {
             setActiveFigureInfo(null);
@@ -401,7 +401,7 @@ const Application = (settings) => {
         }
         break;
       }
-      case 'x': {
+      case 'KEYX': {
         if (ctrlOrMeta) {
           if (eventRepeat) break;
 
@@ -411,7 +411,7 @@ const Application = (settings) => {
 
         break;
       }
-      case 'd': {
+      case 'KEYD': {
         if (ctrlOrMeta) {
           if (eventRepeat) break;
 
@@ -441,11 +441,11 @@ const Application = (settings) => {
         handleChangeTool('diamond');
         break;
       }
-      case 'b': {
+      case 'KEYB': {
         handleChangeTool('brush');
         break;
       }
-      case 'p': {
+      case 'KEYP': {
         if (penVariantList.includes(activeTool)) {
           handleChangeTool(getNextVariant(penVariantList, activeTool));
         } else {
@@ -453,7 +453,7 @@ const Application = (settings) => {
         }
         break;
       }
-      case 'a': {
+      case 'KEYA': {
         if (arrowVariantList.includes(activeTool)) {
           handleChangeTool(getNextVariant(arrowVariantList, activeTool));
         } else {
@@ -461,34 +461,37 @@ const Application = (settings) => {
         }
         break;
       }
-      case 'r': {
+      case 'KEYR': {
         handleChangeTool('rectangle');
         break;
       }
-      case 'o': {
+      case 'KEYO': {
         handleChangeTool('oval');
         break;
       }
-      case 't': {
+      case 'KEYT': {
         handleChangeTool('text');
         break;
       }
-      case 'h': {
+      case 'KEYH': {
         handleChangeTool('highlighter');
         break;
       }
-      case 'l': {
+      case 'KEYL': {
         handleChangeTool('laser');
         break;
       }
-      case 'e': {
+      case 'KEYE': {
         handleChangeTool('eraser');
         break;
       }
-      case 'arrowleft':
-      case 'arrowright':
-      case 'arrowup':
-      case 'arrowdown': {
+    }
+
+    switch (eventKey) {
+      case 'ARROWLEFT':
+      case 'ARROWRIGHT':
+      case 'ARROWUP':
+      case 'ARROWDOWN': {
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
 
@@ -496,10 +499,10 @@ const Application = (settings) => {
           if (shiftKey) { offset *= 5 }
 
           const directionMap = {
-            arrowleft:  [-offset, 0],
-            arrowright: [offset, 0],
-            arrowup:    [0, -offset],
-            arrowdown:  [0, offset],
+            ARROWLEFT:  [-offset, 0],
+            ARROWRIGHT: [offset, 0],
+            ARROWUP:    [0, -offset],
+            ARROWDOWN:  [0, offset],
           };
 
           const [dx, dy] = directionMap[eventKey];
@@ -513,12 +516,12 @@ const Application = (settings) => {
         }
         break;
       }
-      case 'delete':
-      case 'backspace': {
+      case 'DELETE':
+      case 'BACKSPACE': {
         handleDeleteActiveFigure();
         break;
       }
-      case 'enter': {
+      case 'ENTER': {
         if (activeFigureInfo) {
           const activeFigure = findActiveFigure()
 
@@ -530,7 +533,7 @@ const Application = (settings) => {
         }
         break;
       }
-      case 'escape': {
+      case 'ESCAPE': {
         if (eventRepeat) break;
 
         if (activeFigureInfo) {
@@ -563,7 +566,7 @@ const Application = (settings) => {
 
     if (toolbarSlide === 'main-slide') {
       switch (eventCode) {
-        case 'digit1': {
+        case 'DIGIT1': {
           let nextBrush = toolbarLastActiveBrush;
 
           if (activeTool === toolbarLastActiveBrush) {
@@ -573,7 +576,7 @@ const Application = (settings) => {
           handleChangeTool(nextBrush);
           break;
         }
-        case 'digit2': {
+        case 'DIGIT2': {
           let nextShape = toolbarLastActiveFigure;
 
           if (activeTool === toolbarLastActiveFigure) {
@@ -583,23 +586,23 @@ const Application = (settings) => {
           handleChangeTool(nextShape);
           break;
         }
-        case 'digit3': {
+        case 'DIGIT3': {
           handleChangeTool('text');
           break;
         }
-        case 'digit4': {
+        case 'DIGIT4': {
           handleChangeTool('highlighter');
           break;
         }
-        case 'digit5': {
+        case 'DIGIT5': {
           handleChangeTool('laser');
           break;
         }
-        case 'digit6': {
+        case 'DIGIT6': {
           handleChangeTool('eraser');
           break;
         }
-        case 'digit7': {
+        case 'DIGIT7': {
           if (['eraser', 'laser'].includes(activeTool)) {
             break;
           }
@@ -608,7 +611,7 @@ const Application = (settings) => {
           handleChangeColor(nextColorIndex);
           break;
         }
-        case 'digit8': {
+        case 'DIGIT8': {
           const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
 
           handleChangeWidth(nextWidthIndex);
@@ -620,15 +623,15 @@ const Application = (settings) => {
     }
 
     let digitIndex = null;
-    if (eventCode === 'digit1') digitIndex = 0;
-    if (eventCode === 'digit2') digitIndex = 1;
-    if (eventCode === 'digit3') digitIndex = 2;
-    if (eventCode === 'digit4') digitIndex = 3;
-    if (eventCode === 'digit5') digitIndex = 4;
-    if (eventCode === 'digit6') digitIndex = 5;
-    if (eventCode === 'digit7') digitIndex = 6;
-    if (eventCode === 'digit8') digitIndex = 7;
-    if (eventCode === 'digit9') digitIndex = 8;
+    if (eventCode === 'DIGIT1') digitIndex = 0;
+    if (eventCode === 'DIGIT2') digitIndex = 1;
+    if (eventCode === 'DIGIT3') digitIndex = 2;
+    if (eventCode === 'DIGIT4') digitIndex = 3;
+    if (eventCode === 'DIGIT5') digitIndex = 4;
+    if (eventCode === 'DIGIT6') digitIndex = 5;
+    if (eventCode === 'DIGIT7') digitIndex = 6;
+    if (eventCode === 'DIGIT8') digitIndex = 7;
+    if (eventCode === 'DIGIT9') digitIndex = 8;
     if (digitIndex === null) return;
 
     switch (toolbarSlide) {
@@ -664,18 +667,18 @@ const Application = (settings) => {
   }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, lastActivePen, lastActiveArrow, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex, colorList, zoomInfo]);
 
   const handleKeyUp = useCallback((event) => {
-    const eventKey = (event.key || '').toLowerCase();
-    const eventCode = (event.code || '').toLowerCase();
+    const eventKey = (event.key || '').toUpperCase();
+    const eventCode = (event.code || '').toUpperCase();
 
     if (textEditorContainer) {
       return
     }
 
-    if (eventKey === 'shift') {
+    if (eventKey === 'SHIFT') {
       setIsShiftPressed(false);
     }
 
-    if (eventCode === 'space') {
+    if (eventCode === 'SPACE') {
       setIsSpacePressed(false);
 
       event.preventDefault();
