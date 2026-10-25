@@ -705,6 +705,7 @@ const Application = (settings) => {
       '=': 'EQUAL',
       '[': 'BRACKETLEFT',
       ']': 'BRACKETRIGHT',
+      '\\': 'BACKSLASH',
       ';': 'SEMICOLON',
       "'": 'QUOTE',
       '`': 'BACKQUOTE',

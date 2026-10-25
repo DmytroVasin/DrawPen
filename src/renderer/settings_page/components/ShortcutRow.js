@@ -60,9 +60,11 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
       Equal: '=',
       BracketLeft: '[',
       BracketRight: ']',
+      Backslash: '\\',
       Semicolon: ';',
       Quote: "'",
       Backquote: '`',
+      Comma: ',',
       Period: '.',
       Slash: '/',
     };
@@ -106,13 +108,12 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
     event.stopPropagation();
 
     if (event.repeat) return;
-    if (event.key === 'Dead') return;
 
     const modifiers = [];
 
     if (isMac) {
       if (event.metaKey) modifiers.push('Meta');
-      if (event.ctrlKey && !event.metaKey) modifiers.push('Control');
+      if (event.ctrlKey) modifiers.push('Control');
     } else {
       if (event.ctrlKey) modifiers.push('Control');
     }
