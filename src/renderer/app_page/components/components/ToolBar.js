@@ -59,6 +59,7 @@ const ToolBar = ({
     diamond:     { title: "Diamond",     alias: "D", mainPanel: "2", subPanel: "4" },
     oval:        { title: "Oval",        alias: "O", mainPanel: "2", subPanel: "5" },
     line:        { title: "Line",                    mainPanel: "2", subPanel: "6" },
+    stamp:       { title: "Stamp",       alias: "S", mainPanel: "2", subPanel: "7" },
     text:        { title: "Text",        alias: "T", mainPanel: "3" },
     highlighter: { title: "Highlighter", alias: "H", mainPanel: "4" },
     laser:       { title: "Laser",       alias: "L", mainPanel: "5" },
@@ -78,6 +79,7 @@ const ToolBar = ({
     diamond: <Icons.Diamond />,
     oval: <Icons.Oval />,
     line: <Icons.Line />,
+    stamp: <Icons.Stamp />,
     text: <Icons.Text />,
     highlighter: <Icons.Highlighter />,
     laser: <Icons.Laser />,
@@ -546,6 +548,12 @@ const ToolBar = ({
                   <Icons.Line />
                 </button>
                 <div className="toolbar__shortcut-hint">{renderToolShortcutHint("line", "subPanel")}</div>
+              </li>
+              <li className={activeTool === "stamp" ? "active" : undefined} onClick={() => pickTool("stamp")}>
+                <button tabIndex={-1} title={renderToolTitle("stamp", "subPanel")}>
+                  <Icons.Stamp />
+                </button>
+                <div className="toolbar__shortcut-hint">{renderToolShortcutHint("stamp", "subPanel")}</div>
               </li>
             </ul>
           </div>

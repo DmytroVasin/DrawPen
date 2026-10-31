@@ -62,7 +62,7 @@ const drawDot = (ctx, point, isHovered) => {
   ctx.stroke();
 }
 
-const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg, scale) => {
+export const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg, scale) => {
   const [distance, hslStops] = hslTextGradientStops(pointA, pointB, rainbowColorDeg, scale)
 
   if (hslStops.length === 1) {
@@ -348,6 +348,12 @@ export const drawFlatArrowActive = (ctx, figure, hoveredDot) => {
 
   drawTwoDots(ctx, pointA, pointB, hoveredDot)
 }
+
+export const drawStampActive = (ctx, figure, hoveredDot) => {
+  const [, pointB] = figure.points;
+
+  drawDot(ctx, pointB, hoveredDot === 'pointB');
+};
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg, colorList) => {
   const { points: [pointA, pointB] } = figure

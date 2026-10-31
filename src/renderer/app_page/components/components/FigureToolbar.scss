@@ -59,6 +59,13 @@
         height: 20px;
       }
 
+      &.toolbar__stamp-style-picker {
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+
       &.toolbar__delete-button {
         svg {
           width: 16px;
@@ -69,7 +76,8 @@
   }
 
   .toolbar__width-picker,
-  .toolbar__color-picker {
+  .toolbar__color-picker,
+  .toolbar__stamp-style-picker {
     display: flex;
     width: 20px;
     height: 20px;

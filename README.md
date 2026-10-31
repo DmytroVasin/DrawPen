@@ -55,7 +55,7 @@ On some Linux setups running **Wayland** (e.g. [Fedora KDE Plasma](https://githu
 | Enable Draw/Pointer Mode                   | <kbd>CMD/CTRL + SHIFT + A</kbd>                          | Global shortcut   |
 | Activate Brush                             | <kbd>B</kbd> or <kbd>1</kbd>                             |                   |
 | Activate Pen (Fade Pen)                    | <kbd>P</kbd>                                             |                   |
-| Activate/Switch Shapes (Arrow/Square/etc.) | <kbd>A</kbd>, <kbd>R</kbd>, <kbd>O</kbd> or <kbd>2</kbd> |                   |
+| Activate/Switch Shapes (Arrow/Square/etc.) | <kbd>A, R, D, O, S...</kbd> or <kbd>2</kbd>              |                   |
 | Activate Text                              | <kbd>T</kbd> or <kbd>3</kbd>                             |                   |
 | Activate Highlighter                       | <kbd>H</kbd> or <kbd>4</kbd>                             |                   |
 | Activate Laser                             | <kbd>L</kbd> or <kbd>5</kbd>                             |                   |

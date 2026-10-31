@@ -35,6 +35,7 @@ import {
   resizeFigure,
   moveToCoordinates,
   calculateAspectRatio,
+  calculateStampArrowPoint,
 } from './utils/figureDetection.js';
 import { FaPaintBrush, FaPencilAlt, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
@@ -44,6 +45,7 @@ import { FaFont } from "react-icons/fa6";
 import { LuSquareMousePointer } from "react-icons/lu";
 import FaMagicPencilAlt from "./components/icons/FaMagicPencilAlt.js";
 import FaRegDiamond from "./components/icons/FaRegDiamond.js";
+import StampIcon from "./components/icons/StampIcon.js";
 
 import {
   fadeOutDestroyAfterMs,
@@ -73,6 +75,7 @@ const Icons = {
   Diamond: FaRegDiamond,
   Oval: FaRegCircle,
   Line: AiOutlineLine,
+  Stamp: StampIcon,
   Text: FaFont,
   Highlighter: FaHighlighter,
   Laser: GiLaserburn,
@@ -128,6 +131,11 @@ const Application = (settings) => {
       { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1, strokeIndex: 1 },
       { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 3, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
       { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
+      { id: Date.now() + 5, type: 'stamp',     colorIndex: 0, widthIndex: 0, points: [[90, 475],  [126, 475]], rainbowColorDeg: 0 },
+      { id: Date.now() + 6, type: 'stamp',     colorIndex: 1, widthIndex: 1, points: [[170, 475], [215, 475]], rainbowColorDeg: 0 },
+      { id: Date.now() + 7, type: 'stamp',     colorIndex: 2, widthIndex: 2, points: [[250, 475], [304, 475]], rainbowColorDeg: 0 },
+      { id: Date.now() + 8, type: 'stamp',     colorIndex: 3, widthIndex: 3, points: [[330, 475], [393, 475]], rainbowColorDeg: 0 },
+      { id: Date.now() + 9, type: 'stamp',     colorIndex: 4, widthIndex: 4, points: [[410, 475], [482, 475]], rainbowColorDeg: 0 },
     ]
   }
 
@@ -200,7 +208,6 @@ const Application = (settings) => {
   const lastPasteAtRef = useRef(0);
   const lastEscapeAtRef = useRef(0);
   const lastZoomShortcutAtRef = useRef(0);
-
   useEffect(() => {
     if (zoomInfo.status !== 'capturing') return;
 
@@ -472,6 +479,10 @@ const Application = (settings) => {
       }
       case 'KEYT': {
         handleChangeTool('text');
+        break;
+      }
+      case 'KEYS': {
+        handleChangeTool('stamp');
         break;
       }
       case 'KEYH': {
@@ -989,10 +1000,17 @@ const Application = (settings) => {
           };
         }
 
-        return {
+        const updatedFigure = {
           ...figure,
-          widthIndex: newWidthIndex
+          widthIndex: newWidthIndex,
+          points: [...figure.points],
         };
+
+        if (figure.type === 'stamp') {
+          updatedFigure.points[1] = calculateStampArrowPoint(updatedFigure);
+        }
+
+        return updatedFigure;
       });
     });
   };
@@ -1013,6 +1031,16 @@ const Application = (settings) => {
     const activeFigure = findActiveFigure()
 
     activeFigure.edgeIndex = newEdgeIndex
+
+    setAllFigures([...allFigures]);
+  };
+
+  const handleChangeFigureStampStyle = (newStampStyle) => {
+    if (!activeFigureInfo) return;
+
+    const activeFigure = findActiveFigure();
+
+    activeFigure.stampStyle = newStampStyle;
 
     setAllFigures([...allFigures]);
   };
@@ -1089,7 +1117,7 @@ const Application = (settings) => {
   }
 
   const getResizeCursorByFigure = (figure, resizingDotName) => {
-    if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
+    if (['line', 'arrow', 'flat_arrow', 'stamp'].includes(figure.type)) {
       return 'pointer';
     }
 
@@ -1539,6 +1567,10 @@ const Application = (settings) => {
           currentFigure.ratio = calculateAspectRatio(currentFigure);
         }
 
+        if (['stamp'].includes(currentFigure.type)) {
+          currentFigure.points[1] = calculateStampArrowPoint(currentFigure);
+        }
+
         if (shapeDistance < minObjectDistance) {
           setAllFigures(allFigures => allFigures.slice(0, -1));
         } else {
@@ -1555,6 +1587,12 @@ const Application = (settings) => {
       if (activeFigureInfo.resizing) {
         if (['rectangle', 'diamond', 'oval'].includes(activeFigure.type)) {
           activeFigure.ratio = calculateAspectRatio(activeFigure);
+
+          setAllFigures([...allFigures]);
+        }
+
+        if (['stamp'].includes(activeFigure.type)) {
+          activeFigure.points[1] = calculateStampArrowPoint(activeFigure);
 
           setAllFigures([...allFigures]);
         }
@@ -2085,6 +2123,7 @@ const Application = (settings) => {
             onChangeWidth={handleChangeFigureWidth}
             onChangeStroke={handleChangeFigureStroke}
             onChangeEdges={handleChangeFigureEdges}
+            onChangeStampStyle={handleChangeFigureStampStyle}
             onDelete={handleDeleteActiveFigure}
             Icons={Icons}
           />

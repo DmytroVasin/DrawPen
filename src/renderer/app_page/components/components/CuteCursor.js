@@ -94,6 +94,8 @@ const CuteCursor = ({
         return <Icons.Oval {...iconProps} />;
       case "line":
         return <Icons.Line {...iconProps} />;
+      case "stamp":
+        return <Icons.Stamp {...iconProps} />;
       case "text":
         return <Icons.Text {...iconProps} />;
       case "highlighter":

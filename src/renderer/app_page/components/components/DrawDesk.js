@@ -20,10 +20,12 @@ import {
   drawDiamondActive,
   drawOval,
   drawOvalActive,
+  drawStampActive,
   drawLaser,
   drawEraserTail,
   drawText,
 } from './drawer/figures.js';
+import { drawStamp } from './drawer/stamp.js';
 
 const DrawDesk = ({
   allFigures,
@@ -148,6 +150,14 @@ const DrawDesk = ({
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawOvalActive(ctx, figure, activeFigureInfo.hoveredDotName)
+        }
+      }
+
+      if (figure.type === 'stamp') {
+        drawStamp(ctx, offscreenCanvas, figure, updateRainbowColorDeg, colorList);
+
+        if (activeFigureInfo && figure.id === activeFigureInfo.id && !activeFigureInfo.resizing) {
+          drawStampActive(ctx, figure, activeFigureInfo.hoveredDotName);
         }
       }
 

@@ -3,7 +3,9 @@ import './FigureToolbar.scss';
 import { MdRoundedCorner } from 'react-icons/md';
 import MdSharpCorner from './icons/MdSharpCorner.js';
 import { TbLineDashed, TbLineDotted, TbMinus } from 'react-icons/tb';
+import { FaXmark, FaExclamation, FaQuestion, FaCheck } from 'react-icons/fa6';
 import { toolbarViewportMargin, widthList } from '../constants.js';
+import { getFigureBounds } from '../utils/figureDetection.js';
 
 const strokeStyleFigureTypes = ['flat_arrow', 'rectangle', 'diamond', 'oval', 'line'];
 const edgeStyleFigureTypes = ['rectangle', 'diamond'];
@@ -15,29 +17,24 @@ const clamp = (value, min, max) => {
   );
 };
 
-const getFigureBounds = (figure) => {
-  if (figure.type === 'text') {
-    const [x, y] = figure.points[0];
-
-    return {
-      left:   x,
-      top:    y,
-      right:  x + figure.width * figure.scale,
-      bottom: y + figure.height * figure.scale,
-    };
+const getWidthTitle = (figureType) => {
+  switch (figureType) {
+    case 'text':
+      return 'Text size';
+    case 'stamp':
+      return 'Stamp size';
+    case 'arrow':
+    case 'flat_arrow':
+      return 'Arrow width';
+    case 'rectangle':
+    case 'diamond':
+    case 'oval':
+      return 'Border width';
+    case 'line':
+      return 'Line width';
+    default:
+      return 'Stroke width';
   }
-
-  const { points: [pointA, pointB] } = figure;
-
-  const [startX, startY] = pointA;
-  const [endX, endY] = pointB;
-
-  return {
-    left:   Math.min(startX, endX),
-    top:    Math.min(startY, endY),
-    right:  Math.max(startX, endX),
-    bottom: Math.max(startY, endY),
-  };
 };
 
 const FigureToolbar = ({
@@ -47,17 +44,20 @@ const FigureToolbar = ({
   onChangeWidth,
   onChangeStroke,
   onChangeEdges,
+  onChangeStampStyle,
   onDelete,
   Icons,
 }) => {
-  const figureType        = figure.type;
-  const figureColorIndex  = figure.colorIndex;
-  const figureWidthIndex  = figure.widthIndex;
-  const figureEdgeIndex   = figure.edgeIndex ?? 1;
-  const figureStrokeIndex = figure.strokeIndex ?? 0;
+  const figureType         = figure.type;
+  const figureColorIndex   = figure.colorIndex;
+  const figureWidthIndex   = figure.widthIndex;
+  const figureEdgeIndex    = figure.edgeIndex ?? 1;
+  const figureStrokeIndex  = figure.strokeIndex ?? 0;
+  const figureStampStyle   = figure.stampStyle ?? 'cross';
 
   const figureHasEdgeStyle   = edgeStyleFigureTypes.includes(figureType);
   const figureHasStrokeStyle = strokeStyleFigureTypes.includes(figureType);
+  const figureIsStamp        = figureType === 'stamp'
 
   const [openMenu, setOpenMenu] = useState(null);
   const [position, setPosition] = useState({ left: 0, top: 0, placement: 'bottom' });
@@ -195,6 +195,36 @@ const FigureToolbar = ({
     );
   };
 
+  const renderStampStyleSubmenu = () => {
+    return (
+      <div className="figure-sub-toolbar">
+        <div className="figure-sub-item">
+          <button tabIndex={-1} className="toolbar__stamp-style-picker" title="Cross" onClick={() => onChangeStampStyle('cross')}>
+            <FaXmark />
+          </button>
+        </div>
+
+        <div className="figure-sub-item">
+          <button tabIndex={-1} className="toolbar__stamp-style-picker" title="Exclamation" onClick={() => onChangeStampStyle('exclamation')}>
+            <FaExclamation />
+          </button>
+        </div>
+
+        <div className="figure-sub-item">
+          <button tabIndex={-1} className="toolbar__stamp-style-picker" title="Question" onClick={() => onChangeStampStyle('question')}>
+            <FaQuestion />
+          </button>
+        </div>
+
+        <div className="figure-sub-item">
+          <button tabIndex={-1} className="toolbar__stamp-style-picker" title="Check" onClick={() => onChangeStampStyle('check')}>
+            <FaCheck />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderStrokeSubmenu = () => {
     return (
       <div className="figure-sub-toolbar">
@@ -245,7 +275,7 @@ const FigureToolbar = ({
         <button
           tabIndex={-1}
           className={`toolbar__width-picker ${widthList[figureWidthIndex].name}`}
-          title={figureType === 'text' ? 'Text size' : 'Line width'}
+          title={getWidthTitle(figureType)}
           onClick={() => toggleMenu('width')}
         >
           <div />
@@ -285,6 +315,26 @@ const FigureToolbar = ({
             </button>
 
             {openMenu === 'stroke' && renderStrokeSubmenu()}
+          </div>
+        )
+      }
+
+      {
+        figureIsStamp && (
+          <div className={`figure-sub-item ${openMenu === 'stamp-style' ? 'active' : ''}`}>
+            <button
+              tabIndex={-1}
+              className="toolbar__stamp-style-picker"
+              title="Marker type"
+              onClick={() => toggleMenu('stamp-style')}
+            >
+              {figureStampStyle === 'cross' && <FaXmark />}
+              {figureStampStyle === 'exclamation' && <FaExclamation />}
+              {figureStampStyle === 'question' && <FaQuestion />}
+              {figureStampStyle === 'check' && <FaCheck />}
+            </button>
+
+            {openMenu === 'stamp-style' && renderStampStyleSubmenu()}
           </div>
         )
       }

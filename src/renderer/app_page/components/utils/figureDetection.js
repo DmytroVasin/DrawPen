@@ -1,5 +1,6 @@
 import {
   pointToSegmentDistance,
+  distanceBetweenPoints,
   segmentsIntersect,
   applySoftSnap,
   applyAspectRatioLock,
@@ -11,6 +12,7 @@ import {
   getTextAutoResizeHandle,
 } from './general.js';
 
+import { stampSVG, getStampParts } from '../components/drawer/stamp.js';
 import {
   dotTextMargin,
   figureMinScale,
@@ -317,6 +319,16 @@ const isOverText = (x, y, figure) => {
   return false
 }
 
+const isOnOneDot = (x, y, figure) => {
+  const [, pointB] = figure.points;
+
+  const inRadius = withinRadius(x, y)
+
+  if (inRadius(pointB)) return 'pointB'
+
+  return null
+}
+
 const isOnTwoDots = (x, y, figure) => {
   const [pointA, pointB] = figure.points;
 
@@ -421,6 +433,8 @@ export const isOnFigure = (x, y, figure) => {
       return isOnOval(x, y, figure)
     case 'line':
       return isOnLine(x, y, figure)
+    case 'stamp':
+      return isOverStamp(x, y, figure);
     case 'text':
       return isOverText(x, y, figure)
     default:
@@ -469,6 +483,17 @@ const isOverOval = (x, y, figure) => {
   return ellipseValue <= 1;
 }
 
+const isOverStamp = (x, y, figure) => {
+  const { center, radius, arrowStampPoints } = getStampParts(figure);
+
+  const [centerX, centerY] = center;
+
+  const overStampCircle = Math.hypot(x - centerX, y - centerY) <= radius + sideHoverTolerance;
+  const overStampArrow  = isOnPolygon(x, y, arrowStampPoints);
+
+  return overStampCircle || overStampArrow;
+};
+
 export const isOverFigure = (x, y, figure) => {
   switch (figure.type) {
     case 'rectangle':
@@ -477,6 +502,8 @@ export const isOverFigure = (x, y, figure) => {
       return isOverDiamond(x, y, figure)
     case 'oval':
       return isOverOval(x, y, figure)
+    case 'stamp':
+      return isOverStamp(x, y, figure);
     case 'text':
       return isOverText(x, y, figure)
     default:
@@ -501,6 +528,16 @@ const isSegmentIntersectCurve = (segmentPoints, points) => {
   }
 
   return false;
+}
+
+const isSegmentIntersectCircle = (segmentPoints, center, radius) => {
+  if (segmentPoints.length < 2) {
+    return false
+  }
+
+  const [startAt, endAt] = segmentPoints.slice(-2);
+
+  return pointToSegmentDistance(...center, startAt, endAt) <= radius;
 }
 
 const isSegmentTouchCurve = (segmentPoints, figure) => {
@@ -638,6 +675,19 @@ const isSegmentTouchDiamond = (segmentPoints, figure) => {
   return isSegmentIntersectCurve(segmentPoints, diamondPoints)
 }
 
+const isSegmentTouchStamp = (segmentPoints, figure) => {
+  const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
+
+  if (isOverStamp(eraseAtX, eraseAtY, figure)) {
+    return true;
+  }
+
+  const { center, radius, arrowStampPoints } = getStampParts(figure);
+
+  return isSegmentIntersectCircle(segmentPoints, center, radius + sideHoverTolerance) ||
+         isSegmentIntersectCurve(segmentPoints, arrowStampPoints);
+}
+
 export const areFiguresIntersecting = (eraserFigure, figure) => {
   switch (figure.type) {
     case 'brush':
@@ -657,6 +707,8 @@ export const areFiguresIntersecting = (eraserFigure, figure) => {
       return isSegmentTouchOval(eraserFigure.points, figure)
     case 'line':
       return isSegmentTouchLine(eraserFigure.points, figure)
+    case 'stamp':
+      return isSegmentTouchStamp(eraserFigure.points, figure);
     case 'text':
       return isSegmentTouchText(eraserFigure.points, figure)
     default:
@@ -674,6 +726,8 @@ export const getDotNameOnFigure = (x, y, figure) => {
     case 'diamond':
     case 'oval':
       return isOnFourDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
+    case 'stamp':
+      return isOnOneDot(x, y, figure) // ['pointB', null]
     case 'text':
       return isOnTextDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
     default:
@@ -695,7 +749,7 @@ export const getSideNameOnFigure = (x, y, figure) => {
 };
 
 const getDotCoordinates = (figure, dotName) => {
-  if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
+  if (['line', 'arrow', 'flat_arrow', 'stamp'].includes(figure.type)) {
     if (dotName === 'pointA') return figure.points[0];
     if (dotName === 'pointB') return figure.points[1];
   }
@@ -933,6 +987,10 @@ const resizeShapeByDots = (figure, activeFigureInfo, { x, y, isShiftPressed }) =
   }
 }
 
+const resizeStampByDot = (figure, { x, y }) => {
+  figure.points[1] = [x, y];
+}
+
 const resizeTextByDots = (figure, activeFigureInfo, { x, y, isShiftPressed }) => {
   const { resizingDotName } = activeFigureInfo;
 
@@ -1006,6 +1064,11 @@ const resizeFigureByDot = (figure, activeFigureInfo, { x, y, isShiftPressed }) =
 
   if (['rectangle', 'diamond', 'oval'].includes(figure.type)) {
     resizeShapeByDots(figure, activeFigureInfo, { x, y, isShiftPressed });
+    return;
+  }
+
+  if (['stamp'].includes(figure.type)) {
+    resizeStampByDot(figure, { x, y });
     return;
   }
 
@@ -1155,6 +1218,10 @@ export const resizeFigure = (figure, activeFigureInfo, { x, y, isShiftPressed })
 }
 
 const getPointsCenter = (figure) => {
+  if (figure.type === 'stamp') {
+    return figure.points[0];
+  }
+
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -1194,3 +1261,83 @@ export function calculateAspectRatio(figure) {
 
   return Math.min(Math.max(Math.abs(dx / dy), 0.02), 50);
 }
+
+const calculateStampAngle = (figure) => {
+  const [pointA, pointB] = figure.points;
+  const dx = pointB[0] - pointA[0];
+  const dy = pointB[1] - pointA[1];
+
+  return Math.atan2(dy, dx);
+};
+
+export const calculateStampArrowPoint = (figure) => {
+  const { points: [pointA, pointB], widthIndex } = figure;
+
+  const radius = widthList[widthIndex].stamp_radius;
+  const angle = calculateStampAngle(figure);
+  const isPointerVisible = distanceBetweenPoints(pointA, pointB) > radius + 1;
+
+  let distance = radius;
+
+  if (isPointerVisible) {
+    distance = radius * stampSVG.arrowPointRatio;
+  }
+
+  return [
+    pointA[0] + Math.cos(angle) * distance,
+    pointA[1] + Math.sin(angle) * distance,
+  ];
+};
+
+export const getFigureBounds = (figure) => {
+  if (figure.type === 'stamp') {
+    return getStampBounds(figure);
+  }
+
+  if (figure.type === 'text') {
+    const [x, y] = figure.points[0];
+
+    return {
+      left:   x,
+      top:    y,
+      right:  x + figure.width * figure.scale,
+      bottom: y + figure.height * figure.scale,
+    };
+  }
+
+  const { points: [pointA, pointB] } = figure;
+
+  const [startX, startY] = pointA;
+  const [endX, endY] = pointB;
+
+  return {
+    left:   Math.min(startX, endX),
+    top:    Math.min(startY, endY),
+    right:  Math.max(startX, endX),
+    bottom: Math.max(startY, endY),
+  };
+};
+
+const getStampBounds = (figure) => {
+  const { center, radius, arrowStampPoints } = getStampParts(figure);
+  const [centerX, centerY] = center;
+
+  let minX = centerX - radius;
+  let minY = centerY - radius;
+  let maxX = centerX + radius;
+  let maxY = centerY + radius;
+
+  for (const [x, y] of arrowStampPoints) {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+
+  return {
+    left:   minX,
+    top:    minY,
+    right:  maxX,
+    bottom: maxY,
+  };
+};
