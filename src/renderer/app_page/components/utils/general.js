@@ -285,27 +285,33 @@ export const segmentsIntersect = (p1, p2, q1, q2) => {
   return (o1 * o2 < 0) && (o3 * o4 < 0);
 }
 
-export function applySoftSnap(startX, startY, x, y) {
+export function calculateAngleSnap(startX, startY, x, y, angleStep = SNAP_ANGLE) {
   const dx = x - startX;
   const dy = y - startY;
-
-  const dist = Math.hypot(dx, dy);
-  if (dist < 30) { // Minimum distance to apply snapping
-    return { x, y }
-  }
-
+  const distance = Math.hypot(dx, dy);
   const angle = Math.atan2(dy, dx);
-  const nearest = Math.round(angle / SNAP_ANGLE) * SNAP_ANGLE;
-  const diff = Math.abs(angle - nearest);
-
-  if (diff >= 0.15) { // ~9°
-    return { x, y }
-  }
+  const nearest = Math.round(angle / angleStep) * angleStep;
 
   return {
-    x: startX + dist * Math.cos(nearest),
-    y: startY + dist * Math.sin(nearest),
+    x: startX + distance * Math.cos(nearest),
+    y: startY + distance * Math.sin(nearest),
+    distance: distance,
+    angleDifference: Math.abs(angle - nearest),
   };
+}
+
+export function applySoftSnap(startX, startY, x, y) {
+  const result = calculateAngleSnap(startX, startY, x, y);
+
+  if (result.distance < 30) { // Minimum distance to apply snapping
+    return { x: x, y: y }
+  }
+
+  if (result.angleDifference >= 0.15) { // ~9°
+    return { x: x, y: y }
+  }
+
+  return { x: result.x, y: result.y };
 }
 
 export function applyAspectRatioLock(startX, startY, x, y, ratio) {

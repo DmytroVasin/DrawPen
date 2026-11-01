@@ -101,7 +101,10 @@ const detectStampColors = (ctx, figure, updateRainbowColorDeg, colorList) => {
     const endAt   = [stampSVG.arrowLength, 0];
     const gradientScale = stampSVG.outerCircleRadius / radius;
 
-    color = createGradient(ctx, startAt, endAt, rainbowColorDeg, updateRainbowColorDeg, gradientScale);
+    const [gradientColor, distance] = createGradient(ctx, startAt, endAt, rainbowColorDeg, gradientScale);
+    color = gradientColor;
+
+    updateRainbowColorDeg(currentDeg => Math.max(currentDeg, rainbowColorDeg + distance));
   }
 
   if (erased) {

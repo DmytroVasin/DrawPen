@@ -62,11 +62,11 @@ const drawDot = (ctx, point, isHovered) => {
   ctx.stroke();
 }
 
-export const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg, scale) => {
+export const createGradient = (ctx, pointA, pointB, rainbowColorDeg, scale) => {
   const [distance, hslStops] = hslTextGradientStops(pointA, pointB, rainbowColorDeg, scale)
 
   if (hslStops.length === 1) {
-    return hslStops[0]
+    return [hslStops[0], distance];
   }
 
   const gradient = ctx.createLinearGradient(...pointA, ...pointB);
@@ -75,8 +75,7 @@ export const createGradient = (ctx, pointA, pointB, rainbowColorDeg, updateRainb
     gradient.addColorStop(index / (hslStops.length - 1), color)
   })
 
-  updateRainbowColorDeg(currentDeg => Math.max(currentDeg, rainbowColorDeg + distance))
-  return gradient
+  return [gradient, distance];
 }
 
 export const hslTextGradientStops = (pointA, pointB, colorDeg, scale) => {
@@ -107,7 +106,10 @@ const detectColorAndWidth = (ctx, figure, updateRainbowColorDeg, colorList) => {
   const width = widthList[widthIndex].figure_width
 
   if (colorList[colorIndex].isRainbow) {
-    color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg)
+    const [gradientColor, distance] = createGradient(ctx, pointA, pointB, rainbowColorDeg);
+    color = gradientColor;
+
+    updateRainbowColorDeg(currentDeg => Math.max(currentDeg, rainbowColorDeg + distance));
   }
 
   if (erased) {
@@ -132,7 +134,10 @@ const detectColorAndFontSize = (ctx, figure, updateRainbowColorDeg, colorList) =
   if (colorList[colorIndex].isRainbow) {
     const pointB = [pointA[0], pointA[1] + height * scale] // Vertical Gradient
 
-    color = createGradient(ctx, pointA, pointB, rainbowColorDeg, updateRainbowColorDeg, scale)
+    const [gradientColor, distance] = createGradient(ctx, pointA, pointB, rainbowColorDeg, scale);
+    color = gradientColor;
+
+    updateRainbowColorDeg(currentDeg => Math.max(currentDeg, rainbowColorDeg + distance));
   }
 
   if (erased) {
@@ -175,6 +180,7 @@ export const drawPen = (ctx, figure, colorList, options = {}) => {
     strokeOptions.size = widthInfo.pen_fixed_width;
     strokeOptions.simulatePressure = false;
     strokeOptions.thinning = 0.0;
+    strokeOptions.last = true;
   }
 
   const path2DData = getPerfectPath2D(points, strokeOptions);
@@ -223,8 +229,11 @@ const drawLazyRainbowLine = (ctx, figure, updateRainbowColorDeg, width) => {
     let color
     if (erased) {
       color = erasedFigureColor
-    } else  {
+    } else if (distance < 0.5) { // Less than 0.5° hue change (~17 px between points).
       color = hslColor(colorDeg + distance / 2);
+    } else  {
+      const [gradientColor, _distance] = createGradient(ctx, pointA, pointB, colorDeg);
+      color = gradientColor;
     }
 
     ctx.beginPath()

@@ -18,6 +18,7 @@ import {
   distanceBetweenPoints,
   calculateCanvasTextWidth,
   calculateCanvasWrappedTextHeight,
+  calculateAngleSnap,
   applySoftSnap,
   applyAspectRatioLock,
 } from './utils/general.js';
@@ -1398,6 +1399,20 @@ const Application = (settings) => {
     setIsDrawing(true);
   };
 
+  const updatePenStrokeEnd = (figure, { x, y }) => {
+    if (figure.points.length === 1) {
+      figure.points = [...figure.points, [...figure.points[0]]];
+    }
+
+    const fromPoint = figure.points.at(-2);
+    const toPoint = figure.points.at(-1);
+
+    const result = calculateAngleSnap(fromPoint[0], fromPoint[1], x, y, Math.PI / 4);
+
+    toPoint[0] = result.x;
+    toPoint[1] = result.y;
+  };
+
   const handleMouseMove = ({ x, y }) => {
     if (isActiveFigureMoving()) {
       const activeFigure = findActiveFigure()
@@ -1417,7 +1432,7 @@ const Application = (settings) => {
 
     if (isDrawing) {
       if (activeTool === 'laser') {
-        const currentLaser = allLaserFigures[allLaserFigures.length - 1];
+        const currentLaser = allLaserFigures.at(-1);
 
         currentLaser.points = [...currentLaser.points, [x, y]];
 
@@ -1427,7 +1442,7 @@ const Application = (settings) => {
       }
 
       if (activeTool === 'eraser') {
-        const currentEraser = allEraserFigures[allEraserFigures.length - 1];
+        const currentEraser = allEraserFigures.at(-1);
 
         currentEraser.points = [...currentEraser.points, [x, y]];
 
@@ -1438,16 +1453,33 @@ const Application = (settings) => {
       }
 
       if (activeTool === 'fadepen') {
-        const currentFigure = allFadeFigures[allFadeFigures.length - 1];
+        const currentFadeFigure = allFadeFigures.at(-1);
 
-        currentFigure.points = [...currentFigure.points, [x, y]];
+        if (isShiftPressed) {
+          updatePenStrokeEnd(currentFadeFigure, { x, y });
+        } else {
+          currentFadeFigure.points = [...currentFadeFigure.points, [x, y]];
+        }
 
         setFadeFigures([...allFadeFigures]);
         return;
       }
 
-      if (['brush', 'pen', 'highlighter'].includes(activeTool)) {
-        const currentFigure = allFigures[allFigures.length - 1];
+      if (activeTool === 'pen') {
+        const currentFigure = allFigures.at(-1);
+
+        if (isShiftPressed) {
+          updatePenStrokeEnd(currentFigure, { x, y });
+        } else {
+          currentFigure.points = [...currentFigure.points, [x, y]];
+        }
+
+        setAllFigures([...allFigures]);
+        return;
+      }
+
+      if (['brush', 'highlighter'].includes(activeTool)) {
+        const currentFigure = allFigures.at(-1);
 
         currentFigure.points = [...currentFigure.points, [x, y]];
 
@@ -1456,7 +1488,7 @@ const Application = (settings) => {
       }
 
       if (shapeList.includes(activeTool)) {
-        const currentFigure = allFigures[allFigures.length - 1];
+        const currentFigure = allFigures.at(-1);
 
         if (isShiftPressed) {
           if (['line', 'arrow', 'flat_arrow'].includes(currentFigure.type)) {
