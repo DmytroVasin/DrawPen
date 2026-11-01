@@ -5,8 +5,9 @@ import {
   stampLightBackgroundColor,
   stampDarkBackgroundColor,
   stampEdgeColor,
+  rainbowScaleFactor,
 } from '../../constants.js';
-import { createGradient } from './figures.js';
+import { hslColor } from './figures.js';
 
 // Local geometry, scaled to the selected Stamp radius when drawing.
 export const stampSVG = {
@@ -18,14 +19,17 @@ export const stampSVG = {
   arrowPointRatio: 360/200
 };
 
-// Товщини в координатах SVG, у порядку розмірів widthList.
-const stampBorderWidthList = [
-  { outerBorderWidth: 42, innerBorderWidth: 20 }, // gray: 1.1 px,    white: 2 px
-  { outerBorderWidth: 32, innerBorderWidth: 16 }, // gray: 1 px,      white: 2 px
-  { outerBorderWidth: 33, innerBorderWidth: 20 }, // gray: 0.975 px,  white: 3 px
-  { outerBorderWidth: 34, innerBorderWidth: 23 }, // gray: 0.9625 px, white: 4.025 px
-  { outerBorderWidth: 35, innerBorderWidth: 25 }, // gray: 1 px,      white: 5 px
-];
+
+// White Background: 2/2/3/4/5px, Gray Background: 1px
+const stampInnerBorderWidthList = [2, 2, 3, 4, 5];
+const stampBorderWidthList = stampInnerBorderWidthList.map((innerBorderWidth, widthIndex) => {
+  const unitsPerPixel = stampSVG.outerCircleRadius / widthList[widthIndex].stamp_radius;
+
+  return {
+    outerBorderWidth: (innerBorderWidth + 2) * unitsPerPixel,
+    innerBorderWidth: innerBorderWidth * unitsPerPixel,
+  };
+});
 
 const createStampCirclePath = (radius) => {
   return new Path2D(`
@@ -85,7 +89,7 @@ const getStampGeometry = (figure) => {
   return { center, radius, scale, angle, isPointerVisible, widthIndex };
 };
 
-const detectStampColors = (ctx, figure, updateRainbowColorDeg, colorList) => {
+const detectStampColors = (figure, updateRainbowColorDeg, colorList) => {
   const { colorIndex, rainbowColorDeg, erased, widthIndex } = figure;
 
   const radius = widthList[widthIndex].stamp_radius;
@@ -97,12 +101,11 @@ const detectStampColors = (ctx, figure, updateRainbowColorDeg, colorList) => {
   }
 
   if (colorList[colorIndex].isRainbow) {
-    const startAt = [-stampSVG.outerCircleRadius, 0];
-    const endAt   = [stampSVG.arrowLength, 0];
-    const gradientScale = stampSVG.outerCircleRadius / radius;
+    const templateLength = stampSVG.outerCircleRadius + stampSVG.arrowLength;
+    const stampDistance = templateLength * radius / stampSVG.outerCircleRadius;
+    const distance = stampDistance * rainbowScaleFactor;
 
-    const [gradientColor, distance] = createGradient(ctx, startAt, endAt, rainbowColorDeg, gradientScale);
-    color = gradientColor;
+    color = hslColor(rainbowColorDeg + distance / 2);
 
     updateRainbowColorDeg(currentDeg => Math.max(currentDeg, rainbowColorDeg + distance));
   }
@@ -116,50 +119,52 @@ const detectStampColors = (ctx, figure, updateRainbowColorDeg, colorList) => {
 };
 
 export const drawStamp = (ctx, offscreenCanvas, figure, updateRainbowColorDeg, colorList) => {
+  if (figure.erased) {
+    const offCtx = offscreenCanvas.getContext('2d');
+    offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+    drawStampBody(offCtx, figure, updateRainbowColorDeg, colorList);
+
+    // Прозорість застосовується до всього штампа після складання його частин.
+    ctx.save();
+    ctx.globalAlpha = eraserAlpha;
+    ctx.resetTransform();
+    ctx.drawImage(offscreenCanvas, 0, 0);
+    ctx.restore();
+    return;
+  }
+
+  drawStampBody(ctx, figure, updateRainbowColorDeg, colorList);
+};
+
+const drawStampBody = (ctx, figure, updateRainbowColorDeg, colorList) => {
   const { center, scale, angle, isPointerVisible, widthIndex } = getStampGeometry(figure);
-
-  const offCtx = offscreenCanvas.getContext('2d');
-  offCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-
-  const [color, backgroundColor] = detectStampColors(offCtx, figure, updateRainbowColorDeg, colorList);
+  const [color, backgroundColor] = detectStampColors(figure, updateRainbowColorDeg, colorList);
   const markPath = getStampMark(figure);
 
-  offCtx.save();
-  offCtx.translate(...center);
-  offCtx.scale(scale, scale);
-  offCtx.lineJoin = 'round';
+  ctx.save();
+  ctx.translate(...center);
+  ctx.scale(scale, scale);
+  ctx.lineJoin = 'round';
 
   if (isPointerVisible) {
-    offCtx.save();
-    offCtx.rotate(angle);
-    drawStampPath(offCtx, stampArrowPath, color, backgroundColor, widthIndex);
-    offCtx.restore();
+    ctx.save();
+    ctx.rotate(angle);
+    drawStampPath(ctx, stampArrowPath, color, backgroundColor, widthIndex);
+    ctx.restore();
   }
 
-  drawStampPath(offCtx, stampOuterCirclePath, color, backgroundColor, widthIndex);
+  drawStampPath(ctx, stampOuterCirclePath, color, backgroundColor, widthIndex);
 
   // Заповнюємо внутрішнє коло.
-  offCtx.fillStyle = backgroundColor;
-  offCtx.fill(stampInnerCirclePath);
+  ctx.fillStyle = backgroundColor;
+  ctx.fill(stampInnerCirclePath);
 
   // Малювання символу всередині Stamp
-  offCtx.fillStyle = color;
-  offCtx.fill(markPath);
-  offCtx.restore();
-
-  // Переносимо з допоміжного canvas на основний
-  let alpha = 1;
-
-  if (figure.erased) {
-    alpha = eraserAlpha;
-  }
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.resetTransform();
-  ctx.drawImage(offscreenCanvas, 0, 0);
+  ctx.fillStyle = color;
+  ctx.fill(markPath);
   ctx.restore();
-}
+};
 
 const drawStampPath = (ctx, path, color, backgroundColor, widthIndex) => {
   const { outerBorderWidth, innerBorderWidth } = stampBorderWidthList[widthIndex];
@@ -178,7 +183,7 @@ const drawStampPath = (ctx, path, color, backgroundColor, widthIndex) => {
   ctx.strokeStyle = backgroundColor;
   ctx.lineWidth = innerBorderWidth;
   ctx.stroke(path);
-}
+};
 
 export const getStampParts = (figure) => {
   const { center, radius, scale, angle, isPointerVisible } = getStampGeometry(figure);

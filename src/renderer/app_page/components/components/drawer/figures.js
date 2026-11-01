@@ -27,7 +27,7 @@ import {
   lineHeightMultiplier,
 } from '../../constants.js';
 
-const hslColor = (degree) => {
+export const hslColor = (degree) => {
   return `hsl(${degree % 360}, 70%, 60%)`
 }
 
