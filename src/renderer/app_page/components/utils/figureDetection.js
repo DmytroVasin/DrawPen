@@ -573,14 +573,14 @@ const isSegmentTouchLine = (segmentPoints, figure) => {
 }
 
 const isSegmentTouchArrow = (segmentPoints, figure) => {
-  const { points } = figure
+  const { points, widthIndex } = figure
   const [eraseAtX, eraseAtY] = segmentPoints.at(-1);
 
   if (isOnArrow(eraseAtX, eraseAtY, figure)) {
     return true
   }
 
-  const figurePoints = calcPointsArrow(points, figure.widthIndex)
+  const figurePoints = calcPointsArrow(points, widthIndex)
 
   return isSegmentIntersectCurve(segmentPoints, figurePoints)
 }

@@ -343,11 +343,11 @@ export const calcPointsArrow = (points, widthIndex) => {
   const minArrowLength = 20;
   const minTailSize = 1;
   const arrowSetup = [
-    { max_scale_length: 70,  d1_y: 1, d2_y: 4,  d3_y: 18, d2_x: 17, d3_x: 20 },
-    { max_scale_length: 130, d1_y: 2, d2_y: 7,  d3_y: 30, d2_x: 28, d3_x: 33 },
-    { max_scale_length: 190, d1_y: 3, d2_y: 10, d3_y: 42, d2_x: 39, d3_x: 46 },
+    { max_scale_length: 100, d1_y: 1, d2_y: 4,  d3_y: 18, d2_x: 17, d3_x: 20 },
+    { max_scale_length: 150, d1_y: 2, d2_y: 7,  d3_y: 30, d2_x: 28, d3_x: 33 },
+    { max_scale_length: 200, d1_y: 3, d2_y: 10, d3_y: 42, d2_x: 39, d3_x: 46 },
     { max_scale_length: 250, d1_y: 4, d2_y: 13, d3_y: 54, d2_x: 50, d3_x: 59 },
-    { max_scale_length: 270, d1_y: 5, d2_y: 16, d3_y: 66, d2_x: 61, d3_x: 72 },
+    { max_scale_length: 300, d1_y: 5, d2_y: 16, d3_y: 66, d2_x: 61, d3_x: 72 },
   ]
 
   const arrow = arrowSetup[widthIndex]
@@ -441,63 +441,6 @@ export const calcSegmentsFlatArrow = (points, widthIndex) => {
     [tip, headTop],
     [tip, headBottom],
   ];
-}
-
-export const isSmallArrowFigure = (points, widthIndex) => {
-  const [startPoint, endPoint] = points;
-
-  const smallArrowLengths = [60, 80, 100, 120, 140];
-  const smallArrowLength = smallArrowLengths[widthIndex];
-  const arrowLength = distanceBetweenPoints(startPoint, endPoint);
-
-  return arrowLength < smallArrowLength;
-}
-
-export const buildArrowArcSegments = (arrowPoints, widthIndex) => {
-  const arrowRoundSetup = [
-    { radius: 1, offset: 2 },
-    { radius: 2, offset: 3 },
-    { radius: 3, offset: 4 },
-    { radius: 4, offset: 5 },
-    { radius: 5, offset: 6 },
-  ];
-
-  const moveTowards = (fromPoint, toPoint, distance) => {
-    const fullDistance = distanceBetweenPoints(fromPoint, toPoint);
-    if (!fullDistance) {
-      return [...fromPoint];
-    }
-
-    const ratio = distance / fullDistance;
-
-    return [
-      fromPoint[0] + (toPoint[0] - fromPoint[0]) * ratio,
-      fromPoint[1] + (toPoint[1] - fromPoint[1]) * ratio,
-    ];
-  };
-
-  const pointsCount = arrowPoints.length;
-  const arcRadius = arrowRoundSetup[widthIndex].radius;
-  const arcOffset = arrowRoundSetup[widthIndex].offset;
-
-  return arrowPoints.map((cornerPoint, index) => {
-    const prevPoint = arrowPoints[(index - 1 + pointsCount) % pointsCount];
-    const nextPoint = arrowPoints[(index + 1) % pointsCount];
-
-    const prevLength = distanceBetweenPoints(cornerPoint, prevPoint);
-    const nextLength = distanceBetweenPoints(cornerPoint, nextPoint);
-    const safeOffset = Math.min(arcOffset, prevLength * 0.35, nextLength * 0.35);
-
-    const entryPoint = moveTowards(cornerPoint, prevPoint, safeOffset);
-    const exitPoint = moveTowards(cornerPoint, nextPoint, safeOffset);
-
-    return {
-      entryPoint,
-      cornerPoint,
-      exitPoint,
-      arcRadius,
-    };
-  });
 }
 
 export const getCornersWithMargin = (pointA, pointB) => {

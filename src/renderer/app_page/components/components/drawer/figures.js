@@ -2,10 +2,7 @@ import {
   getPerfectPath2D,
   getLazyPoints,
   distanceBetweenPoints,
-  calcPointsArrow,
   calcSegmentsFlatArrow,
-  buildArrowArcSegments,
-  isSmallArrowFigure,
   getCornersWithMargin,
   getWrappedTextLines,
   getTextAutoResizeHandle,
@@ -291,49 +288,6 @@ export const drawRainbowHighlighter = (ctx, offscreenCanvas, figure, updateRainb
   ctx.resetTransform();
   ctx.drawImage(offscreenCanvas, 0, 0);
   ctx.restore();
-}
-
-export const drawArrow = (ctx, figure, updateRainbowColorDeg, colorList) => {
-  const { points, widthIndex } = figure;
-
-  const isSmallArrow = isSmallArrowFigure(points, widthIndex);
-  const figurePoints = calcPointsArrow(points, widthIndex);
-  const arcSegments = buildArrowArcSegments(figurePoints, widthIndex);
-
-  const [color] = detectColorAndWidth(ctx, figure, updateRainbowColorDeg, colorList)
-  const shadowColor = '#222';
-  const shadowBlur = 2;
-  const shadowOffsetX = 1;
-  const shadowOffsetY = 2;
-
-  ctx.fillStyle = color;
-  ctx.shadowColor = shadowColor;
-  ctx.shadowBlur = shadowBlur;
-  ctx.shadowOffsetX = shadowOffsetX;
-  ctx.shadowOffsetY = shadowOffsetY;
-
-  if (figure.erased) {
-    ctx.shadowColor = 'transparent';
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(...figurePoints[0]);
-
-  arcSegments.forEach(({ entryPoint, cornerPoint, exitPoint, arcRadius }) => {
-    if (isSmallArrow) {
-      ctx.lineTo(...cornerPoint);
-      return;
-    }
-
-    ctx.lineTo(...entryPoint);
-    ctx.arcTo(cornerPoint[0], cornerPoint[1], exitPoint[0], exitPoint[1], arcRadius);
-  });
-
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = 'transparent'; // Reset shadows
 }
 
 export const drawArrowActive = (ctx, figure, hoveredDot) => {

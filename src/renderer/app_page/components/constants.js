@@ -39,9 +39,10 @@ export const penVariantList = ['pen', 'fadepen'];
 export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'diamond', 'oval', 'line', 'stamp'];
 export const arrowVariantList = ['arrow', 'flat_arrow'];
 
-export const stampLightBackgroundColor = '#FFFFFF';
-export const stampDarkBackgroundColor = '#1E1E1E';
-export const stampEdgeColor = '#808080';
+export const outlinedFigureBgColor = '#FFFFFF';
+export const outlinedFigureDarkBgColor = '#1E1E1E';
+export const outlinedFigureEdgeColor = '#808080';
+export const outlinedFigureInnerBorderWidthList = [2, 2, 3, 4, 5];
 
 export const dotRadius = 5;
 export const dotStrokeWidth = 1;

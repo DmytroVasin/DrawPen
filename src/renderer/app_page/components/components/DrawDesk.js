@@ -10,7 +10,6 @@ import {
   drawRainbowHighlighter,
   drawLine,
   drawLineActive,
-  drawArrow,
   drawArrowActive,
   drawFlatArrow,
   drawFlatArrowActive,
@@ -25,6 +24,7 @@ import {
   drawEraserTail,
   drawText,
 } from './drawer/figures.js';
+import { drawArrow } from './drawer/arrow.js';
 import { drawStamp } from './drawer/stamp.js';
 
 const DrawDesk = ({
@@ -106,7 +106,7 @@ const DrawDesk = ({
       }
 
       if (figure.type === 'arrow') {
-        drawArrow(ctx, figure, updateRainbowColorDeg, colorList)
+        drawArrow(ctx, offscreenCanvas, figure, updateRainbowColorDeg, colorList);
 
         if (activeFigureInfo && figure.id === activeFigureInfo.id) {
           drawArrowActive(ctx, figure, activeFigureInfo.hoveredDotName)

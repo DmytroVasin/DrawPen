@@ -2,9 +2,10 @@ import {
   widthList,
   erasedFigureColor,
   eraserAlpha,
-  stampLightBackgroundColor,
-  stampDarkBackgroundColor,
-  stampEdgeColor,
+  outlinedFigureBgColor,
+  outlinedFigureDarkBgColor,
+  outlinedFigureEdgeColor,
+  outlinedFigureInnerBorderWidthList,
   rainbowScaleFactor,
 } from '../../constants.js';
 import { hslColor } from './figures.js';
@@ -21,8 +22,7 @@ export const stampSVG = {
 
 
 // White Background: 2/2/3/4/5px, Gray Background: 1px
-const stampInnerBorderWidthList = [2, 2, 3, 4, 5];
-const stampBorderWidthList = stampInnerBorderWidthList.map((innerBorderWidth, widthIndex) => {
+const stampBorderWidthList = outlinedFigureInnerBorderWidthList.map((innerBorderWidth, widthIndex) => {
   const unitsPerPixel = stampSVG.outerCircleRadius / widthList[widthIndex].stamp_radius;
 
   return {
@@ -84,20 +84,20 @@ const getStampGeometry = (figure) => {
 
   const scale = radius / stampSVG.outerCircleRadius;
   const angle = Math.atan2(dy, dx);
-  const isPointerVisible = Math.hypot(dx, dy) > radius + 1;
+  const isPointerVisible = Math.hypot(dx, dy) > radius + 1; // 1 Pixel gap - to remove floating numbers
 
   return { center, radius, scale, angle, isPointerVisible, widthIndex };
 };
 
 const detectStampColors = (figure, updateRainbowColorDeg, colorList) => {
-  const { colorIndex, rainbowColorDeg, erased, widthIndex } = figure;
+  const { colorIndex, widthIndex, rainbowColorDeg, erased } = figure;
 
   const radius = widthList[widthIndex].stamp_radius;
   let color = colorList[colorIndex].color;
-  let backgroundColor = stampLightBackgroundColor;
+  let backgroundColor = outlinedFigureBgColor;
 
   if (colorList[colorIndex].isLightColor) {
-    backgroundColor = stampDarkBackgroundColor;
+    backgroundColor = outlinedFigureDarkBgColor;
   }
 
   if (colorList[colorIndex].isRainbow) {
@@ -112,7 +112,7 @@ const detectStampColors = (figure, updateRainbowColorDeg, colorList) => {
 
   if (erased) {
     color = erasedFigureColor;
-    backgroundColor = stampLightBackgroundColor;
+    backgroundColor = outlinedFigureBgColor;
   }
 
   return [color, backgroundColor];
@@ -140,7 +140,6 @@ export const drawStamp = (ctx, offscreenCanvas, figure, updateRainbowColorDeg, c
 const drawStampBody = (ctx, figure, updateRainbowColorDeg, colorList) => {
   const { center, scale, angle, isPointerVisible, widthIndex } = getStampGeometry(figure);
   const [color, backgroundColor] = detectStampColors(figure, updateRainbowColorDeg, colorList);
-  const markPath = getStampMark(figure);
 
   ctx.save();
   ctx.translate(...center);
@@ -148,13 +147,23 @@ const drawStampBody = (ctx, figure, updateRainbowColorDeg, colorList) => {
   ctx.lineJoin = 'round';
 
   if (isPointerVisible) {
-    ctx.save();
-    ctx.rotate(angle);
-    drawStampPath(ctx, stampArrowPath, color, backgroundColor, widthIndex);
-    ctx.restore();
+    drawStampArrow(ctx, angle, color, backgroundColor, widthIndex);
   }
 
   drawStampPath(ctx, stampOuterCirclePath, color, backgroundColor, widthIndex);
+  drawStampMark(ctx, figure, color, backgroundColor);
+  ctx.restore();
+};
+
+const drawStampArrow = (ctx, angle, color, backgroundColor, widthIndex) => {
+  ctx.save();
+  ctx.rotate(angle);
+  drawStampPath(ctx, stampArrowPath, color, backgroundColor, widthIndex);
+  ctx.restore();
+};
+
+const drawStampMark = (ctx, figure, color, backgroundColor) => {
+  const markPath = getStampMark(figure);
 
   // Заповнюємо внутрішнє коло.
   ctx.fillStyle = backgroundColor;
@@ -163,14 +172,13 @@ const drawStampBody = (ctx, figure, updateRainbowColorDeg, colorList) => {
   // Малювання символу всередині Stamp
   ctx.fillStyle = color;
   ctx.fill(markPath);
-  ctx.restore();
 };
 
 const drawStampPath = (ctx, path, color, backgroundColor, widthIndex) => {
   const { outerBorderWidth, innerBorderWidth } = stampBorderWidthList[widthIndex];
 
   // Малюємо зовнішню сіру обводку.
-  ctx.strokeStyle = stampEdgeColor;
+  ctx.strokeStyle = outlinedFigureEdgeColor;
   ctx.lineWidth = outerBorderWidth;
   ctx.stroke(path);
 
