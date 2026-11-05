@@ -406,6 +406,7 @@ function createMainWindow() {
 
   mainWindow = new BrowserWindow({
     show: false,
+    ...(isMac && { type: 'panel' }), // Panels can receive focus without activating the app.
     x: displayX,
     y: displayY,
     width: displayWidth,
@@ -473,6 +474,7 @@ function createExtendedToolbarWindow() {
 
   extendedToolbarWindow = new BrowserWindow({
     show: false,
+    ...(isMac && { type: 'panel' }),
     ...getExtendedToolbarWindowSize(),
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
@@ -1689,7 +1691,7 @@ function releaseFocusBack() {
     return
   }
 
-  app.hide()
+  if (app.isActive()) app.hide()
 }
 
 function storeToolbarPositionFromExtendedWindow() {
