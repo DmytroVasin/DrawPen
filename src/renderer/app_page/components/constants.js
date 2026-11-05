@@ -44,6 +44,15 @@ export const outlinedFigureDarkBgColor = '#1E1E1E';
 export const outlinedFigureEdgeColor = '#808080';
 export const outlinedFigureInnerBorderWidthList = [2, 2, 3, 4, 5];
 
+export const minArrowLength = 30;
+export const arrowSetup = [
+  { max_scale_length: 100, d2_y: 4,  d3_y: 18, d2_x: 17, d3_x: 20 },
+  { max_scale_length: 150, d2_y: 7,  d3_y: 30, d2_x: 28, d3_x: 33 },
+  { max_scale_length: 200, d2_y: 10, d3_y: 42, d2_x: 39, d3_x: 46 },
+  { max_scale_length: 250, d2_y: 13, d3_y: 54, d2_x: 50, d3_x: 59 },
+  { max_scale_length: 300, d2_y: 16, d3_y: 66, d2_x: 61, d3_x: 72 },
+];
+
 export const dotRadius = 5;
 export const dotStrokeWidth = 1;
 export const dotHoverRadius = 10;

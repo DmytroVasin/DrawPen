@@ -36,9 +36,10 @@ import {
   resizeFigure,
   moveToCoordinates,
   calculateAspectRatio,
+  calculateArrowPoint,
   calculateStampArrowPoint,
 } from './utils/figureDetection.js';
-import { FaPaintBrush, FaPencilAlt, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { FaPaintBrush, FaPencilAlt, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaAngleLeft } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
 import { MdOutlineClose } from "react-icons/md";
@@ -83,7 +84,6 @@ const Icons = {
   Eraser: FaEraser,
   Trash: FaRegTrashAlt,
   AngleLeft: FaAngleLeft,
-  AngleRight: FaAngleRight,
 };
 
 const Application = (settings) => {
@@ -107,6 +107,7 @@ const Application = (settings) => {
   const initialToolbarDefaultBrush = settings.tool_bar_default_brush
   const initialToolbarDefaultFigure = settings.tool_bar_default_figure
   const initialToolbarOrientation = settings.tool_bar_orientation
+  const initialToolbarReversed = settings.tool_bar_reversed
   const initialToolbarCollapsed = settings.tool_bar_collapsed
   const initialToolbarPosition = { x: settings.tool_bar_x, y: settings.tool_bar_y }
   const [initialMainColorIndex, initialSecondaryColorIndex] = settings.swap_colors_indexes
@@ -132,11 +133,7 @@ const Application = (settings) => {
       { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1, strokeIndex: 1 },
       { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 3, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
       { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
-      { id: Date.now() + 5, type: 'stamp',     colorIndex: 0, widthIndex: 0, points: [[90, 475],  [126, 475]], rainbowColorDeg: 0 },
-      { id: Date.now() + 6, type: 'stamp',     colorIndex: 1, widthIndex: 1, points: [[170, 475], [215, 475]], rainbowColorDeg: 0 },
-      { id: Date.now() + 7, type: 'stamp',     colorIndex: 2, widthIndex: 2, points: [[250, 475], [304, 475]], rainbowColorDeg: 0 },
-      { id: Date.now() + 8, type: 'stamp',     colorIndex: 3, widthIndex: 3, points: [[330, 475], [393, 475]], rainbowColorDeg: 0 },
-      { id: Date.now() + 9, type: 'stamp',     colorIndex: 4, widthIndex: 4, points: [[410, 475], [482, 475]], rainbowColorDeg: 0 },
+      { id: Date.now() + 5, type: 'stamp',     colorIndex: 0, widthIndex: 2, points: [[90, 450],  [144, 450]], rainbowColorDeg: (Math.random() * 360) },
     ]
   }
 
@@ -166,6 +163,7 @@ const Application = (settings) => {
   const [lastActivePen, setLastActivePen] = useState(initialLastActivePen);
   const [lastActiveArrow, setLastActiveArrow] = useState(initialLastActiveArrow);
   const [toolbarCollapsed, setToolbarCollapsed] = useState(initialToolbarCollapsed);
+  const [toolbarReversed, setToolbarReversed] = useState(initialToolbarReversed);
   const [toolbarPosition, setToolbarPosition] = useState(initialToolbarPosition);
   const [toolbarSlide, setToolbarSlide] = useState('main-slide');
   const [rippleEffects, setRippleEffects] = useState([]);
@@ -1595,10 +1593,12 @@ const Application = (settings) => {
         const currentFigure = allFigures.at(-1);
         const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
 
+        if (currentFigure.type === 'arrow') {
+          currentFigure.points[1] = calculateArrowPoint(currentFigure);
+        }
         if (['rectangle', 'diamond', 'oval'].includes(currentFigure.type)) {
           currentFigure.ratio = calculateAspectRatio(currentFigure);
         }
-
         if (['stamp'].includes(currentFigure.type)) {
           currentFigure.points[1] = calculateStampArrowPoint(currentFigure);
         }
@@ -1617,6 +1617,12 @@ const Application = (settings) => {
       const activeFigure = findActiveFigure()
 
       if (activeFigureInfo.resizing) {
+        if (activeFigure.type === 'arrow') {
+          activeFigure.points[1] = calculateArrowPoint(activeFigure);
+
+          setAllFigures([...allFigures]);
+        }
+
         if (['rectangle', 'diamond', 'oval'].includes(activeFigure.type)) {
           activeFigure.ratio = calculateAspectRatio(activeFigure);
 
@@ -1948,6 +1954,11 @@ const Application = (settings) => {
     });
   }, []);
 
+  const handleChangeToolbarReversed = (isReversed) => {
+    setToolbarReversed(isReversed);
+    invokeSetSettings({ tool_bar_reversed: isReversed });
+  };
+
   const handleChangeWhiteboardTheme = (theme) => {
     setWhiteboardTheme(theme);
     invokeSetSettings({ whiteboard_color: theme });
@@ -2171,6 +2182,7 @@ const Application = (settings) => {
             setToolbarSlide={setToolbarSlide}
             isCollapsed={toolbarCollapsed}
             setIsCollapsed={setToolbarCollapsed}
+            isReversed={toolbarReversed}
             shortcutHintsDisabled={Boolean(textEditorContainer)}
             clearDeskShortcut={key_clear_desk}
             lastActiveBrush={toolbarLastActiveBrush}
@@ -2182,6 +2194,7 @@ const Application = (settings) => {
             handleChangeColor={handleChangeColor}
             handleChangeWidth={handleChangeWidth}
             handleChangeTool={handleChangeTool}
+            handleChangeReversed={handleChangeToolbarReversed}
             handleClearDesk={handleReset}
             handleEnablePointerMode={handleEnablePointerMode}
             handlePositionCommit={invokeCommitToolbarPosition}

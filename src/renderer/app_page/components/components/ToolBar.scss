@@ -5,19 +5,6 @@
   --toolbar-switch-duration: 0.3s;
 }
 
-#toolbar {
-  position: absolute;
-  top: var(--border-size);
-  left: var(--border-size);
-
-  .toolbar__container {
-    .toolbar__panels-track {
-      display: flex;
-      transition: transform var(--toolbar-switch-duration);
-    }
-  }
-}
-
 // Trick to support 'stairs' nature of the ToolBar
 #toolbar {
   pointer-events: none;
@@ -49,14 +36,9 @@
 }
 
 #toolbar {
-  display: flex;
-  width: max-content;
-
-  > .toolbar__mode-switcher,
-  > .toolbar__container,
-  > .toolbar__slider {
-    flex-shrink: 0;
-  }
+  position: absolute;
+  top: var(--border-size);
+  left: var(--border-size);
 
   .toolbar__close {
     position: absolute;
@@ -107,6 +89,7 @@
       padding: 0 4px;
       align-items: center;
       cursor: move;
+      touch-action: none;
 
       .draglines {
         display: grid;
@@ -124,204 +107,242 @@
     }
   }
 
-  .toolbar__container {
-    position: relative;
-    background-color: var(--toolbar-background-color);
+  .toolbar__tail {
+    position: absolute;
     display: flex;
-    align-self: center;
-    overflow: hidden;
-    box-sizing: border-box;
 
-    .toolbar__panel {
+    .toolbar__container {
       position: relative;
-    }
+      background-color: var(--toolbar-background-color);
+      align-self: center;
+      overflow: hidden;
+      box-sizing: border-box;
 
-    button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+      .toolbar__panels-track {
+        position: absolute;
+        display: flex;
 
-    .toolbar__body,
-    .side-view-body {
-      position: absolute;
-      display: flex;
-      width: 100%;
-      height: 100%;
-      justify-content: center;
-      align-items: center;
-    }
+        .toolbar__panel {
+          position: relative;
+        }
+      }
 
-    .toolbar__items {
-      position: relative;
-      display: flex;
-      margin: 0;
-      padding: 0;
-      align-items: center;
-
-      li {
-        position: relative;
+      button {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 2px;
-        border: 1px solid transparent;
-        cursor: pointer;
+      }
 
-        button {
-          svg {
-            width: 20px;
-            height: 20px;
-          }
-        }
+      .toolbar__body,
+      .side-view-body {
+        position: absolute;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .toolbar__shortcut-hint {
-          pointer-events: none;
-          position: absolute;
-          left: 50%;
-          bottom: -4px;
+      .toolbar__items {
+        position: relative;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+
+        li {
+          position: relative;
           display: flex;
-          height: 16px;
-          align-items: center;
           justify-content: center;
-          box-sizing: border-box;
-          padding: 0 4px;
-          border: 1px solid var(--gray-500);
-          border-radius: 4px;
-          background-color: var(--gray-50);
-          color: var(--gray-600);
-          font-family: var(--font-primary);
-          font-size: 10px;
-          opacity: 0;
-          transform: translate(-50%, 4px) scale(0.95);
-          transform-origin: center bottom;
-          transition:
-            opacity 150ms ease-out,
-            transform 150ms ease-out;
-          user-select: none;
-        }
+          align-items: center;
+          padding: 2px;
+          border: 1px solid transparent;
+          cursor: pointer;
 
-        &.active {
-          // background-color: #EEEEEF;
-          border: 1px solid var(--toolbar-border-color);
-          border-radius: 5px;
-
-          &.more_figures {
-            position: relative;
-
-            &::after {
-              pointer-events: none;
-              content: "";
-              position: absolute;
-              bottom: 2px;
-              right: 2px;
-              width: 5px;
-              height: 5px;
-              background-color: #000;
-              clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+          button {
+            svg {
+              width: 20px;
+              height: 20px;
             }
           }
+
+          .toolbar__shortcut-hint {
+            pointer-events: none;
+            position: absolute;
+            left: 50%;
+            bottom: -4px;
+            display: flex;
+            height: 16px;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 0 4px;
+            border: 1px solid var(--gray-500);
+            border-radius: 4px;
+            background-color: var(--gray-50);
+            color: var(--gray-600);
+            font-family: var(--font-primary);
+            font-size: 10px;
+            opacity: 0;
+            transform: translate(-50%, 4px) scale(0.95);
+            transform-origin: center bottom;
+            transition:
+              opacity 150ms ease-out,
+              transform 150ms ease-out;
+            user-select: none;
+          }
+
+          &.active {
+            // background-color: #EEEEEF;
+            border: 1px solid var(--toolbar-border-color);
+            border-radius: 5px;
+
+            &.more_figures {
+              position: relative;
+
+              &::after {
+                pointer-events: none;
+                content: "";
+                position: absolute;
+                bottom: 2px;
+                right: 2px;
+                width: 5px;
+                height: 5px;
+                background-color: #000;
+                clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+              }
+            }
+          }
+
+          &.cross-line {
+            border: none;
+            background-color: var(--toolbar-border-color);
+            padding: 0;
+            cursor: default;
+          }
         }
 
-        &.cross-line {
-          border: none;
-          background-color: var(--toolbar-border-color);
-          padding: 0;
-          cursor: default;
-        }
-      }
-
-      .toolbar__width-picker,
-      .toolbar__color-picker {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--toolbar-border-color);
-        box-sizing: border-box;
-        border-radius: 5px;
-      }
-
-      .toolbar__width-picker {
-        div {
-          pointer-events: none;
-          height: 15px;
-          background-color: var(--toolbar-border-color);
-          transform: rotate(45deg);
+        .toolbar__width-picker,
+        .toolbar__color-picker {
+          width: 24px;
+          height: 24px;
+          border: 2px solid var(--toolbar-border-color);
+          box-sizing: border-box;
+          border-radius: 5px;
         }
 
-        &.thin { div { width: 2px; }}
-        &.light { div { width: 4px; }}
-        &.medium { div { width: 6px; }}
-        &.bold { div { width: 8px; }}
-        &.extra-bold { div { width: 10px; }}
-      }
+        .toolbar__width-picker {
+          div {
+            pointer-events: none;
+            height: 15px;
+            background-color: var(--toolbar-border-color);
+            transform: rotate(45deg);
+          }
 
-      .toolbar__color-picker {
-        &.color_tool_laser,
-        &.color_tool_eraser {
-          cursor: default;
+          &.thin { div { width: 2px; }}
+          &.light { div { width: 4px; }}
+          &.medium { div { width: 6px; }}
+          &.bold { div { width: 8px; }}
+          &.extra-bold { div { width: 10px; }}
         }
 
-        &.color-rainbow { background-image: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
-        &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
-        &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
-      }
-
-      .toolbar__color-hint-wrapper {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-
-        .toolbar__color-hint {
-          position: absolute;
-          top: -6px;
-          left: -6px;
-
-          transform: translate(-50%, -50%);
-
-          border: 1px solid var(--toolbar-border-color);
-          border-radius: 50%;
-
-          cursor: pointer;
-          aspect-ratio: 1;
+        .toolbar__color-picker {
+          &.color_tool_laser,
+          &.color_tool_eraser {
+            cursor: default;
+          }
 
           &.color-rainbow { background-image: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
           &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
           &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
+        }
 
-          &.thin { width: 9px; }
-          &.light { width: 10px; }
-          &.medium { width: 11px; }
-          &.bold { width: 12px; }
-          &.extra-bold { width: 13px; }
+        .toolbar__color-hint-wrapper {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+
+          .toolbar__color-hint {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+
+            transform: translate(-50%, -50%);
+
+            border: 1px solid var(--toolbar-border-color);
+            border-radius: 50%;
+
+            cursor: pointer;
+            aspect-ratio: 1;
+
+            &.color-rainbow { background-image: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); }
+            &.color_tool_laser { background-image: radial-gradient(circle, white 0%, red 100%); }
+            &.color_tool_eraser { background-image: radial-gradient(circle, white 0%, dimgray 100%); }
+
+            &.thin { width: 9px; }
+            &.light { width: 10px; }
+            &.medium { width: 11px; }
+            &.bold { width: 12px; }
+            &.extra-bold { width: 13px; }
+          }
+        }
+      }
+    }
+
+    .toolbar__slider {
+      display: flex;
+      align-self: center;
+      align-items: center;
+      justify-content: center;
+
+      box-sizing: border-box;
+      border: 1px solid var(--toolbar-border-color);
+
+      background-color: var(--toolbar-background-color);
+      cursor: pointer;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  &.toolbar--collapsed {
+    .toolbar__slider {
+      svg {
+        transform: scaleX(-1);
+      }
+    }
+  }
+
+  &.toolbar--reversed {
+    .toolbar__slider {
+      svg {
+        transform: scaleX(-1);
+      }
+    }
+
+    &.toolbar--collapsed {
+      .toolbar__slider {
+        svg {
+          transform: scaleX(1);
         }
       }
     }
   }
 
-  .toolbar__slider {
-    display: flex;
-    align-self: center;
-    align-items: center;
-    justify-content: center;
-
-    box-sizing: border-box;
-    border: 1px solid var(--toolbar-border-color);
-
-    background-color: var(--toolbar-background-color);
-    cursor: pointer;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
   &.toolbar--shortcut-hints-visible {
-    .toolbar__items {
-      li {
-        .toolbar__shortcut-hint {
-          opacity: 1;
-          transform: translate(-50%, 0) scale(1);
+    .toolbar__tail {
+      .toolbar__container {
+        .toolbar__items {
+          li {
+            .toolbar__shortcut-hint {
+              opacity: 1;
+              transform: translate(-50%, 0) scale(1);
+            }
+          }
         }
       }
     }
@@ -329,7 +350,12 @@
 }
 
 .toolbar--horizontal {
-  flex-direction: row;
+  .toolbar__tail {
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    flex-direction: row;
+  }
 
   .toolbar__slider {
     height: var(--toolbar-thickness);
@@ -347,7 +373,13 @@
       flex-direction: row;
       width: calc(var(--toolbar-width--full) + var(--toolbar-width--mini));
       height: 100%;
-      transform: translateX(0);
+      top: 0;
+      left: 0;
+
+      // Animate expansion/collapse, but switch direction instantly.
+      transition:
+        left var(--toolbar-switch-duration),
+        right var(--toolbar-switch-duration);
 
       .toolbar__panel--full {
         width: var(--toolbar-width--full);
@@ -409,13 +441,48 @@
     width: var(--toolbar-width--mini);
 
     .toolbar__panels-track {
-      transform: translateX(calc(-1 * var(--toolbar-width--full)));
+      left: calc(-1 * var(--toolbar-width--full));
+    }
+  }
+
+  &.toolbar--reversed {
+    .toolbar__tail {
+      left: auto;
+      right: 100%;
+      flex-direction: row-reverse;
+
+      .toolbar__slider {
+        border-radius: 10px 0 0 10px;
+      }
+
+      .toolbar__container {
+        .toolbar__panels-track {
+          flex-direction: row-reverse;
+          left: auto;
+          right: 0;
+        }
+      }
+    }
+
+    &.toolbar--collapsed {
+      .toolbar__tail {
+        .toolbar__container {
+          .toolbar__panels-track {
+            right: calc(-1 * var(--toolbar-width--full));
+          }
+        }
+      }
     }
   }
 }
 
 .toolbar--vertical {
-  flex-direction: column;
+  .toolbar__tail {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+  }
 
   .toolbar__slider {
     width: var(--toolbar-thickness);
@@ -437,7 +504,13 @@
       flex-direction: column;
       width: 100%;
       height: calc(var(--toolbar-width--full) + var(--toolbar-width--mini));
-      transform: translateY(0);
+      top: 0;
+      left: 0;
+
+      // Animate expansion/collapse, but switch direction instantly.
+      transition:
+        top var(--toolbar-switch-duration),
+        bottom var(--toolbar-switch-duration);
 
       .toolbar__panel--full {
         flex-shrink: 0;
@@ -503,25 +576,37 @@
     height: var(--toolbar-width--mini);
 
     .toolbar__panels-track {
-      transform: translateY(calc(-1 * var(--toolbar-width--full)));
+      top: calc(-1 * var(--toolbar-width--full));
     }
   }
-}
 
-// Reverse the outer sections only, preserving tool order inside the panel.
-// The transform anchors the mode switcher throughout the width/height animation.
-#toolbar.toolbar--horizontal.toolbar--reversed {
-  flex-direction: row-reverse;
-  transform: translateX(calc(-100% + 80px));
+  &.toolbar--reversed {
+    .toolbar__tail {
+      top: auto;
+      bottom: 100%;
+      flex-direction: column-reverse;
 
-  .toolbar__slider { border-radius: 10px 0 0 10px; }
-  .toolbar__close { left: calc(100% - 85px); }
-}
+      .toolbar__slider {
+        border-radius: 10px 10px 0 0;
+      }
 
-#toolbar.toolbar--vertical.toolbar--reversed {
-  flex-direction: column-reverse;
-  transform: translateY(calc(-100% + 72px));
+      .toolbar__container {
+        .toolbar__panels-track {
+          flex-direction: column-reverse;
+          top: auto;
+          bottom: 0;
+        }
+      }
+    }
 
-  .toolbar__slider { border-radius: 10px 10px 0 0; }
-  .toolbar__close { top: calc(100% - 77px); }
+    &.toolbar--collapsed {
+      .toolbar__tail {
+        .toolbar__container {
+          .toolbar__panels-track {
+            bottom: calc(-1 * var(--toolbar-width--full));
+          }
+        }
+      }
+    }
+  }
 }

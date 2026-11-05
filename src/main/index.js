@@ -8,7 +8,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import electronSquirrelStartup from 'electron-squirrel-startup';
-import { getPointerToolbarOffset, isToolbarReversed } from '../shared/toolbarPosition.js';
 
 if (electronSquirrelStartup) {
   app.quit();
@@ -33,20 +32,11 @@ const KEY_Q                    = 'CmdOrCtrl+Q'
 const KEY_NULL                 = '[NULL]'
 
 const EXTENDED_TOOLBAR_WINDOW_MARGIN = 10
-const EXTENDED_TOOLBAR_WINDOW_PADDING = 5
 const EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH = 80
 const EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT = 72
-const EXTENDED_TOOLBAR_SLIDER_SIZE = 17
 
-// Reserve an arrow slot on both sides so flipping it never moves the native window or icon.
-const EXTENDED_TOOLBAR_HORIZONTAL_WINDOW_SIZE = {
-  width: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + 2 * EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
-  height: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + EXTENDED_TOOLBAR_WINDOW_PADDING,
-}
-const EXTENDED_TOOLBAR_VERTICAL_WINDOW_SIZE = {
-  width: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + EXTENDED_TOOLBAR_WINDOW_PADDING,
-  height: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + 2 * EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
-}
+const EXTENDED_TOOLBAR_WINDOW_WIDTH  = EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + EXTENDED_TOOLBAR_WINDOW_MARGIN * 2
+const EXTENDED_TOOLBAR_WINDOW_HEIGHT = EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + EXTENDED_TOOLBAR_WINDOW_MARGIN * 2
 
 let lastShortcutTime = 0;
 const throttleDelay = 250;
@@ -98,6 +88,10 @@ const schema = {
     type: 'string',
     enum: ['horizontal', 'vertical'],
     default: 'horizontal'
+  },
+  tool_bar_reversed: {
+    type: 'boolean',
+    default: false
   },
   tool_bar_x: {
     type: 'number',
@@ -469,7 +463,8 @@ function createExtendedToolbarWindow() {
 
   extendedToolbarWindow = new BrowserWindow({
     show: false,
-    ...getExtendedToolbarWindowSize(),
+    width: EXTENDED_TOOLBAR_WINDOW_WIDTH,
+    height: EXTENDED_TOOLBAR_WINDOW_HEIGHT,
     transparent: true,
     backgroundColor: '#00000000', // 8-symbol ARGB
     resizable: false,
@@ -513,8 +508,7 @@ function createExtendedToolbarWindow() {
     app.quit()
   })
 
-  extendedToolbarWindow.on('moved', () => {
-    updateExtendedToolbarDirection()
+  extendedToolbarWindow.on('move', () => {
     scheduleStoreToolbarPositionFromExtendedWindow()
   })
 
@@ -752,6 +746,7 @@ ipcMain.handle('get_settings', () => {
     whiteboard_spacing: store.get('whiteboard_spacing'),
     show_tool_bar: store.get('show_tool_bar'),
     tool_bar_orientation: store.get('tool_bar_orientation'),
+    tool_bar_reversed: store.get('tool_bar_reversed'),
     show_drawing_border: store.get('show_drawing_border'),
     cute_cursor_mode: store.get('cute_cursor_mode'),
     pen_smoothing: store.get('pen_smoothing'),
@@ -878,15 +873,6 @@ ipcMain.handle('reset_to_originals', () => {
   resetApp();
 
   return null
-});
-
-ipcMain.handle('get_extended_window_configuration', () => {
-  rawLog('Getting extended window configuration...')
-
-  return {
-    tool_bar_orientation: store.get('tool_bar_orientation'),
-    isReversed: getExtendedToolbarDirection(),
-  };
 });
 
 ipcMain.handle('get_configuration', () => {
@@ -1217,16 +1203,9 @@ ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
 ipcMain.handle('set_toolbar_orientation', (_event, value) => {
   rawLog('Setting toolbar orientation:', value)
 
-  flushExtendedToolbarPosition()
-  const currentDisplay = getLockedMonitor() || getUnderToolbarMonitor() || getActiveMonitor() || getUnderCursorMonitor()
   store.set('tool_bar_orientation', value)
 
-  const { width, height } = getExtendedToolbarWindowSize()
-  extendedToolbarWindow.setSize(width, height)
-  updateExtendedToolbarWindowPosition(currentDisplay)
-
   mainWindow.reload()
-  extendedToolbarWindow.reload()
 
   return null
 });
@@ -1414,13 +1393,9 @@ function resetApp() {
 
     tray.setImage(getTrayIconPath())
 
-    const { width, height } = getExtendedToolbarWindowSize()
-    extendedToolbarWindow.setSize(width, height)
-
     enablePointerMode()
 
     mainWindow.reload()
-    extendedToolbarWindow.reload()
 
     if (settingsWindow) {
       settingsWindow.reload()
@@ -1723,9 +1698,8 @@ function storeToolbarPositionFromExtendedWindow() {
   const { x: displayX, y: displayY } = currentDisplay.workArea
   const { x: extToolBarX, y: extToolBarY } = extendedToolbarWindow.getBounds()
 
-  const offset = getPointerToolbarOffset(store.get('tool_bar_orientation'), EXTENDED_TOOLBAR_WINDOW_MARGIN)
-  const toolBarX = extToolBarX - displayX + offset.x
-  const toolBarY = extToolBarY - displayY + offset.y
+  const toolBarX = extToolBarX - displayX + EXTENDED_TOOLBAR_WINDOW_MARGIN
+  const toolBarY = extToolBarY - displayY + EXTENDED_TOOLBAR_WINDOW_MARGIN
 
   rawLog(`Update Toolbar: display: ${currentDisplay.id}, toolBarX: ${toolBarX}, toolBarY: ${toolBarY}`)
 
@@ -1804,38 +1778,13 @@ function showExtendedToolbarWindow() {
   showWindow(extendedToolbarWindow, { inactive: true })
 }
 
-function getExtendedToolbarWindowSize() {
-  if (store.get('tool_bar_orientation') === 'vertical') {
-    return EXTENDED_TOOLBAR_VERTICAL_WINDOW_SIZE
-  }
-
-  return EXTENDED_TOOLBAR_HORIZONTAL_WINDOW_SIZE
-}
-
-function getExtendedToolbarDirection() {
-  const display = getLockedMonitor() || getUnderToolbarMonitor() || getActiveMonitor() || getUnderCursorMonitor()
-  const orientation = store.get('tool_bar_orientation')
-  const offset = getPointerToolbarOffset(orientation, EXTENDED_TOOLBAR_WINDOW_MARGIN)
-  const bounds = extendedToolbarWindow.getBounds()
-  return isToolbarReversed({
-    x: bounds.x - display.workArea.x + offset.x,
-    y: bounds.y - display.workArea.y + offset.y,
-  }, display.workArea, orientation)
-}
-
-function updateExtendedToolbarDirection() {
-  extendedToolbarWindow.webContents.send('toolbar_direction', getExtendedToolbarDirection())
-}
-
 function updateExtendedToolbarWindowPosition(display) {
   const { x: displayX, y: displayY } = display.workArea
-  const offset = getPointerToolbarOffset(store.get('tool_bar_orientation'), EXTENDED_TOOLBAR_WINDOW_MARGIN)
 
   extendedToolbarWindow.setBounds({
-    x: displayX + store.get('tool_bar_x') - offset.x,
-    y: displayY + store.get('tool_bar_y') - offset.y,
+    x: displayX + store.get('tool_bar_x') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
+    y: displayY + store.get('tool_bar_y') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
   })
-  updateExtendedToolbarDirection()
 }
 
 function getLockedMonitor() {

@@ -1262,6 +1262,13 @@ export function calculateAspectRatio(figure) {
   return Math.min(Math.max(Math.abs(dx / dy), 0.02), 50);
 }
 
+export const calculateArrowPoint = (figure) => {
+  const { points, widthIndex } = figure;
+  const arrowPoints = calcPointsArrow(points, widthIndex);
+
+  return arrowPoints[3]; // Update: Min arrow size
+};
+
 const calculateStampAngle = (figure) => {
   const [pointA, pointB] = figure.points;
   const dx = pointB[0] - pointA[0];

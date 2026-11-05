@@ -9,8 +9,6 @@
 
         --toolbar-background-color: #FFFFFF;
         --toolbar-border-color: #020202;
-        --toolbar-thickness: 44px;
-        --toolbar-arrow-size: 17px; /* Matches pointerToolbarArrowSize */
       }
 
       html,
@@ -35,24 +33,15 @@
         pointer-events: none;
       }
 
-      .toolbar__mode-switcher {
-        -webkit-app-region: drag;
-      }
-
       .toolbar__close,
       .toolbar__main-button {
         -webkit-app-region: no-drag;  /* overlaps switcher */
       }
 
-      .toolbar-extended {
+      #toolbar {
         position: absolute;
         top: var(--toolbar-window-margin);
         left: var(--toolbar-window-margin);
-      }
-
-      #toolbar {
-        width: 80px;
-        height: 72px;
       }
 
       .toolbar__close {
@@ -78,10 +67,8 @@
       }
 
       .toolbar__mode-switcher {
+        -webkit-app-region: drag;
         display: flex;
-        box-sizing: border-box;
-        width: 80px;
-        height: 72px;
         background-color: var(--toolbar-background-color);
         border-radius: 10px;
         border: 1px solid var(--toolbar-border-color);
@@ -122,84 +109,11 @@
         border-radius: 50%;
         background-color: var(--toolbar-border-color);
       }
-
-      .toolbar__slider {
-        position: absolute;
-        display: flex;
-        align-self: center;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        border: 1px solid var(--toolbar-border-color);
-        background-color: var(--toolbar-background-color);
-        cursor: pointer;
-      }
-
-      .toolbar__slider svg {
-        width: 16px;
-        height: 16px;
-      }
-
-      .toolbar--horizontal {
-        margin-left: var(--toolbar-arrow-size);
-      }
-
-      .toolbar--horizontal .toolbar__slider {
-        left: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        width: var(--toolbar-arrow-size);
-        height: var(--toolbar-thickness);
-        border-left: 0;
-        border-radius: 0 10px 10px 0;
-      }
-
-      .toolbar--horizontal.toolbar--reversed .toolbar__slider {
-        left: auto;
-        right: 100%;
-        border-left: 1px solid var(--toolbar-border-color);
-        border-right: 0;
-        border-radius: 10px 0 0 10px;
-      }
-
-      .toolbar--horizontal.toolbar--reversed .toolbar__slider svg {
-        rotate: 180deg;
-      }
-
-      .toolbar--vertical {
-        margin-top: var(--toolbar-arrow-size);
-      }
-
-      .toolbar--vertical .toolbar__slider {
-        left: 50%;
-        top: 100%;
-        transform: translateX(-50%);
-        width: var(--toolbar-thickness);
-        height: var(--toolbar-arrow-size);
-        border-top: 0;
-        border-radius: 0 0 10px 10px;
-      }
-
-      .toolbar--vertical .toolbar__slider svg {
-        rotate: 90deg;
-      }
-
-      .toolbar--vertical.toolbar--reversed .toolbar__slider {
-        top: auto;
-        bottom: 100%;
-        border-top: 1px solid var(--toolbar-border-color);
-        border-bottom: 0;
-        border-radius: 10px 10px 0 0;
-      }
-
-      .toolbar--vertical.toolbar--reversed .toolbar__slider svg {
-        rotate: -90deg;
-      }
     </style>
   </head>
 
   <body>
-    <aside id="toolbar" class="toolbar-extended">
+    <aside id="toolbar">
       <div class="toolbar__mode-switcher">
         <div class="toolbar__draglines">
           <div class="draglines">
@@ -231,12 +145,6 @@
             <div></div>
           </div>
         </div>
-      </div>
-
-      <div class="toolbar__slider">
-        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-          <path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"></path>
-        </svg>
       </div>
 
       <div class="toolbar__close">

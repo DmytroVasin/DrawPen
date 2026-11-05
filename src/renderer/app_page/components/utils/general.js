@@ -1,6 +1,6 @@
 import { getStroke } from "perfect-freehand";
 import { LazyBrush } from "lazy-brush";
-import { widthList, SNAP_ANGLE, dotTextMargin, lineHeightMultiplier } from '../constants.js'
+import { widthList, SNAP_ANGLE, dotTextMargin, lineHeightMultiplier, minArrowLength, arrowSetup } from '../constants.js'
 
 export function getPerfectPath2D(points, strokeOptions) {
   const stroke = getStroke(points, strokeOptions);
@@ -340,16 +340,6 @@ export function applyAspectRatioLock(startX, startY, x, y, ratio) {
 }
 
 export const calcPointsArrow = (points, widthIndex) => {
-  const minArrowLength = 20;
-  const minTailSize = 1;
-  const arrowSetup = [
-    { max_scale_length: 100, d1_y: 1, d2_y: 4,  d3_y: 18, d2_x: 17, d3_x: 20 },
-    { max_scale_length: 150, d1_y: 2, d2_y: 7,  d3_y: 30, d2_x: 28, d3_x: 33 },
-    { max_scale_length: 200, d1_y: 3, d2_y: 10, d3_y: 42, d2_x: 39, d3_x: 46 },
-    { max_scale_length: 250, d1_y: 4, d2_y: 13, d3_y: 54, d2_x: 50, d3_x: 59 },
-    { max_scale_length: 300, d1_y: 5, d2_y: 16, d3_y: 66, d2_x: 61, d3_x: 72 },
-  ]
-
   const arrow = arrowSetup[widthIndex]
 
   // ---
@@ -370,16 +360,12 @@ export const calcPointsArrow = (points, widthIndex) => {
 
   // ---
 
-  const d1 = [0,                                      Math.max(arrow.d1_y * scaleFactor, minTailSize)]
+  const d1 = [0,                                      0]
   const d2 = [length - arrow.d2_x * scaleFactor,      arrow.d2_y * scaleFactor]
   const d3 = [length - arrow.d3_x * scaleFactor,      arrow.d3_y * scaleFactor]
   const d4 = [length,                                 0]
   const d5 = [d3[0],                                  d3[1] * -1]
   const d6 = [d2[0],                                  d2[1] * -1]
-  const d7 = [d1[0],                                  d1[1] * -1]
-
-  // const t1 = [ -2 * d1[1],                            d7[1]]
-  // const t2 = [ -2 * d1[1],                            d1[1]]
 
   function transformPoint([x, y]) {
     return [
@@ -388,8 +374,7 @@ export const calcPointsArrow = (points, widthIndex) => {
     ];
   }
 
-  const figurePoints = [d1, d2, d3, d4, d5, d6, d7].map(transformPoint)
-  // const tailPoints = [t1, t2].map(transformPoint)
+  const figurePoints = [d1, d2, d3, d4, d5, d6].map(transformPoint)
 
   return figurePoints
 }

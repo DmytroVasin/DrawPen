@@ -5,54 +5,27 @@ import {
   outlinedFigureDarkBgColor,
   outlinedFigureEdgeColor,
   outlinedFigureInnerBorderWidthList,
+  minArrowLength,
+  arrowSetup,
 } from '../../constants.js';
-import {
-  calcPointsArrow,
-  distanceBetweenPoints,
-} from '../../utils/general.js';
+import { calcPointsArrow, distanceBetweenPoints } from '../../utils/general.js';
 import { createGradient } from './figures.js';
 
-// White Background: 2/2/3/4/5px, Gray Background: 1px
-const arrowBorderWidthList = outlinedFigureInnerBorderWidthList.map((innerBorderWidth) => {
+// White Background: 1px at minArrowLength, 2/2/3/4/5px at max_scale_length, Gray Background: 1px
+const getArrowBorderWidths = (widthIndex, arrowLength) => {
+  const maxScaleLength = arrowSetup[widthIndex].max_scale_length;
+
+  const scaleFactor = Math.min(Math.max((arrowLength - minArrowLength) / (maxScaleLength - minArrowLength), 0), 1);
+  const innerBorderWidth = 1 + (outlinedFigureInnerBorderWidthList[widthIndex] - 1) * scaleFactor;
+
   return {
     outerBorderWidth: innerBorderWidth + 2,
     innerBorderWidth,
   };
-});
+};
 
-const createArrowPath = (figure) => {
-  const { points, widthIndex } = figure;
-
-  const arrowPoints = calcPointsArrow(points, widthIndex);
-
-  const cornerOffset = [2, 3, 4, 5, 6][widthIndex];
-
-  const corners = arrowPoints.map((cornerPoint, index) => {
-    const prevPoint = arrowPoints[(index - 1 + arrowPoints.length) % arrowPoints.length];
-    const nextPoint = arrowPoints[(index + 1) % arrowPoints.length];
-
-    const prevLength = distanceBetweenPoints(cornerPoint, prevPoint);
-    const nextLength = distanceBetweenPoints(cornerPoint, nextPoint);
-    const safeOffset = Math.min(cornerOffset, prevLength * 0.35, nextLength * 0.35);
-
-    const entryPoint = [
-      cornerPoint[0] + (prevPoint[0] - cornerPoint[0]) * safeOffset / prevLength,
-      cornerPoint[1] + (prevPoint[1] - cornerPoint[1]) * safeOffset / prevLength,
-    ];
-    const exitPoint = [
-      cornerPoint[0] + (nextPoint[0] - cornerPoint[0]) * safeOffset / nextLength,
-      cornerPoint[1] + (nextPoint[1] - cornerPoint[1]) * safeOffset / nextLength,
-    ];
-
-    return { entryPoint, cornerPoint, exitPoint };
-  });
-
-  // SVG-контур зі скругленням кутів без виходу за межі сусідніх сторін.
-  const pathData = corners.map(({ entryPoint, cornerPoint, exitPoint }) => {
-    return `L ${entryPoint} Q ${cornerPoint} ${exitPoint}`;
-  }).join(' ');
-
-  return new Path2D(`M ${corners.at(-1).exitPoint} ${pathData} Z`);
+const createArrowPath = (arrowPoints) => {
+  return new Path2D(`M ${arrowPoints.join(' L ')} Z`);
 };
 
 const detectArrowColors = (ctx, figure, updateRainbowColorDeg, colorList) => {
@@ -100,23 +73,26 @@ export const drawArrow = (ctx, offscreenCanvas, figure, updateRainbowColorDeg, c
 };
 
 const drawArrowBody = (ctx, figure, updateRainbowColorDeg, colorList) => {
-  const { widthIndex } = figure;
+  const { points, widthIndex } = figure;
 
   const [color, backgroundColor] = detectArrowColors(ctx, figure, updateRainbowColorDeg, colorList);
-
-  const arrowPath = createArrowPath(figure);
 
   ctx.save();
   // ctx.translate(...pointA);
   // ctx.rotate(angle); // points are in correct direction - so we do not need this
   ctx.lineJoin = 'round';
 
-  drawArrowPath(ctx, arrowPath, color, backgroundColor, widthIndex);
+  drawArrowPath(ctx, points, color, backgroundColor, widthIndex);
   ctx.restore();
 };
 
-const drawArrowPath = (ctx, path, color, backgroundColor, widthIndex) => {
-  const { outerBorderWidth, innerBorderWidth } = arrowBorderWidthList[widthIndex];
+const drawArrowPath = (ctx, points, color, backgroundColor, widthIndex) => {
+  const arrowPoints = calcPointsArrow(points, widthIndex);
+  const path = createArrowPath(arrowPoints);
+
+  const arrowLength = distanceBetweenPoints(arrowPoints[0], arrowPoints[3]);
+
+  const { outerBorderWidth, innerBorderWidth } = getArrowBorderWidths(widthIndex, arrowLength);
 
   // Малюємо зовнішню сіру обводку.
   ctx.strokeStyle = outlinedFigureEdgeColor;
