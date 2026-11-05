@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import electronSquirrelStartup from 'electron-squirrel-startup';
+import { getPointerToolbarOffset, isToolbarReversed } from '../shared/toolbarPosition.js';
 
 if (electronSquirrelStartup) {
   app.quit();
@@ -37,13 +38,14 @@ const EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH = 80
 const EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT = 72
 const EXTENDED_TOOLBAR_SLIDER_SIZE = 17
 
+// Reserve an arrow slot on both sides so flipping it never moves the native window or icon.
 const EXTENDED_TOOLBAR_HORIZONTAL_WINDOW_SIZE = {
-  width: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
+  width: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + 2 * EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
   height: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + EXTENDED_TOOLBAR_WINDOW_PADDING,
 }
 const EXTENDED_TOOLBAR_VERTICAL_WINDOW_SIZE = {
   width: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_WIDTH + EXTENDED_TOOLBAR_WINDOW_PADDING,
-  height: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
+  height: EXTENDED_TOOLBAR_WINDOW_MARGIN + EXTENDED_TOOLBAR_MODE_SWITCHER_HEIGHT + 2 * EXTENDED_TOOLBAR_SLIDER_SIZE + EXTENDED_TOOLBAR_WINDOW_PADDING,
 }
 
 let lastShortcutTime = 0;
@@ -516,6 +518,7 @@ function createExtendedToolbarWindow() {
   })
 
   extendedToolbarWindow.on('moved', () => {
+    updateExtendedToolbarDirection()
     scheduleStoreToolbarPositionFromExtendedWindow()
   })
 
@@ -898,6 +901,7 @@ ipcMain.handle('get_extended_window_configuration', () => {
 
   return {
     tool_bar_orientation: store.get('tool_bar_orientation'),
+    isReversed: getExtendedToolbarDirection(),
   };
 });
 
@@ -1189,10 +1193,13 @@ ipcMain.handle('set_disable_toolbar_in_pointer_mode', (_event, value) => {
 ipcMain.handle('set_toolbar_orientation', (_event, value) => {
   rawLog('Setting toolbar orientation:', value)
 
+  flushExtendedToolbarPosition()
+  const currentDisplay = getLockedMonitor() || getUnderToolbarMonitor() || getActiveMonitor() || getUnderCursorMonitor()
   store.set('tool_bar_orientation', value)
 
   const { width, height } = getExtendedToolbarWindowSize()
   extendedToolbarWindow.setSize(width, height)
+  updateExtendedToolbarWindowPosition(currentDisplay)
 
   mainWindow.reload()
   extendedToolbarWindow.reload()
@@ -1692,8 +1699,9 @@ function storeToolbarPositionFromExtendedWindow() {
   const { x: displayX, y: displayY } = currentDisplay.workArea
   const { x: extToolBarX, y: extToolBarY } = extendedToolbarWindow.getBounds()
 
-  const toolBarX = extToolBarX - displayX + EXTENDED_TOOLBAR_WINDOW_MARGIN
-  const toolBarY = extToolBarY - displayY + EXTENDED_TOOLBAR_WINDOW_MARGIN
+  const offset = getPointerToolbarOffset(store.get('tool_bar_orientation'), EXTENDED_TOOLBAR_WINDOW_MARGIN)
+  const toolBarX = extToolBarX - displayX + offset.x
+  const toolBarY = extToolBarY - displayY + offset.y
 
   rawLog(`Update Toolbar: display: ${currentDisplay.id}, toolBarX: ${toolBarX}, toolBarY: ${toolBarY}`)
 
@@ -1780,13 +1788,30 @@ function getExtendedToolbarWindowSize() {
   return EXTENDED_TOOLBAR_HORIZONTAL_WINDOW_SIZE
 }
 
+function getExtendedToolbarDirection() {
+  const display = getLockedMonitor() || getUnderToolbarMonitor() || getActiveMonitor() || getUnderCursorMonitor()
+  const orientation = store.get('tool_bar_orientation')
+  const offset = getPointerToolbarOffset(orientation, EXTENDED_TOOLBAR_WINDOW_MARGIN)
+  const bounds = extendedToolbarWindow.getBounds()
+  return isToolbarReversed({
+    x: bounds.x - display.workArea.x + offset.x,
+    y: bounds.y - display.workArea.y + offset.y,
+  }, display.workArea, orientation)
+}
+
+function updateExtendedToolbarDirection() {
+  extendedToolbarWindow.webContents.send('toolbar_direction', getExtendedToolbarDirection())
+}
+
 function updateExtendedToolbarWindowPosition(display) {
   const { x: displayX, y: displayY } = display.workArea
+  const offset = getPointerToolbarOffset(store.get('tool_bar_orientation'), EXTENDED_TOOLBAR_WINDOW_MARGIN)
 
   extendedToolbarWindow.setBounds({
-    x: displayX + store.get('tool_bar_x') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
-    y: displayY + store.get('tool_bar_y') - EXTENDED_TOOLBAR_WINDOW_MARGIN,
+    x: displayX + store.get('tool_bar_x') - offset.x,
+    y: displayY + store.get('tool_bar_y') - offset.y,
   })
+  updateExtendedToolbarDirection()
 }
 
 function getLockedMonitor() {

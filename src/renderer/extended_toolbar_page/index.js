@@ -14,6 +14,10 @@ switchToDrawButtons.forEach(button => {
   });
 });
 
+const setDirection = (isReversed) => toolbar.classList.toggle('toolbar--reversed', isReversed);
+window.electronAPI.onToolbarDirection(setDirection);
+
 window.electronAPI.getConfiguration().then((config) => {
   toolbar.classList.add(`toolbar--${config.tool_bar_orientation}`);
+  setDirection(config.isReversed);
 });

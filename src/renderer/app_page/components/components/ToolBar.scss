@@ -50,6 +50,13 @@
 
 #toolbar {
   display: flex;
+  width: max-content;
+
+  > .toolbar__mode-switcher,
+  > .toolbar__container,
+  > .toolbar__slider {
+    flex-shrink: 0;
+  }
 
   .toolbar__close {
     position: absolute;
@@ -499,4 +506,22 @@
       transform: translateY(calc(-1 * var(--toolbar-width--full)));
     }
   }
+}
+
+// Reverse the outer sections only, preserving tool order inside the panel.
+// The transform anchors the mode switcher throughout the width/height animation.
+#toolbar.toolbar--horizontal.toolbar--reversed {
+  flex-direction: row-reverse;
+  transform: translateX(calc(-100% + 80px));
+
+  .toolbar__slider { border-radius: 10px 0 0 10px; }
+  .toolbar__close { left: calc(100% - 85px); }
+}
+
+#toolbar.toolbar--vertical.toolbar--reversed {
+  flex-direction: column-reverse;
+  transform: translateY(calc(-100% + 72px));
+
+  .toolbar__slider { border-radius: 10px 10px 0 0; }
+  .toolbar__close { top: calc(100% - 77px); }
 }

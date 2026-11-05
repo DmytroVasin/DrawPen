@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import "./ToolBar.scss";
 import { drawingToolList, shapeList, widthList, shortcutHintHoldDelayMs, toolbarViewportMargin, updateStoreDelay } from "../constants.js";
 
+import { toolbarIconSize, isToolbarReversed, getVisibleToolbarPosition } from '../../../../shared/toolbarPosition.js';
+
 const STICKY_DISTANCE = 15;
 
 const humanizedKey = (key) => {
@@ -89,6 +91,13 @@ const ToolBar = ({
   const [showShortcutHints, setShowShortcutHints] = useState(false);
   const [shortcutHintRevealCount, setShortcutHintRevealCount] = useState(0);
 
+  const viewport = { width: window.innerWidth, height: window.innerHeight };
+  const [toolbarSize, setToolbarSize] = useState(toolbarIconSize);
+  const isReversed = isToolbarReversed(position, viewport, orientation);
+  const visiblePosition = getVisibleToolbarPosition(
+    position, viewport, toolbarSize, orientation, isReversed, toolbarViewportMargin
+  );
+
   const toolbarRef = useRef();
   const shortcutHintTimerRef = useRef(null);
   const positionCommitTimeoutRef = useRef(null);
@@ -144,8 +153,8 @@ const ToolBar = ({
       return { x: toInt(x), y: toInt(y) };
     }
 
-    const toolbarWidth = toolbarRef.current.offsetWidth;
-    const toolbarHeight = toolbarRef.current.offsetHeight;
+    const toolbarWidth = toolbarIconSize.width;
+    const toolbarHeight = toolbarIconSize.height;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
@@ -187,8 +196,8 @@ const ToolBar = ({
   const onPointerDown = (e) => {
     setDragging(true);
     setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+      x: e.clientX - visiblePosition.x,
+      y: e.clientY - visiblePosition.y,
     });
   };
 
@@ -237,13 +246,12 @@ const ToolBar = ({
     let frameId = null;
 
     const applyClamp = () => {
-      setPosition((prev) => {
-        const clamped = clampPosition(prev.x, prev.y);
-        if (clamped.x === prev.x && clamped.y === prev.y) {
-          return prev;
-        }
-
-        return clamped;
+      // Refit the visible toolbar without changing the saved icon position.
+      const width = toolbarElement.offsetWidth;
+      const height = toolbarElement.offsetHeight;
+      setToolbarSize((prev) => {
+        if (prev.width === width && prev.height === height) return prev;
+        return { width, height };
       });
     };
 
@@ -272,7 +280,7 @@ const ToolBar = ({
       resizeObserver.disconnect();
       // window.removeEventListener("resize", scheduleClamp);
     };
-  }, [clampPosition, setPosition]);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("pointermove", onPointerMove);
@@ -373,11 +381,12 @@ const ToolBar = ({
       ref={toolbarRef}
       className={`
         toolbar--${orientation}
+        ${isReversed ? "toolbar--reversed" : ""}
         ${toolbarSlide}
         ${isCollapsed ? "toolbar--collapsed" : ""}
         ${areShortcutHintsVisible ? "toolbar--shortcut-hints-visible" : ""}
       `}
-      style={{ left: position.x, top: position.y }}
+      style={{ left: visiblePosition.x, top: visiblePosition.y }}
     >
       <div className="toolbar__mode-switcher">
         <div className="toolbar__draglines" onPointerDown={onPointerDown}>
@@ -606,7 +615,7 @@ const ToolBar = ({
 
       <div className="toolbar__slider" onClick={handleToggleCollapsed}>
         {
-          isCollapsed ? <Icons.AngleRight /> : <Icons.AngleLeft />
+          isCollapsed !== isReversed ? <Icons.AngleRight /> : <Icons.AngleLeft />
         }
       </div>
 
