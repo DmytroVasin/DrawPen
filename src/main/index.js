@@ -842,6 +842,12 @@ ipcMain.handle('exit_zoom', () => {
   return null
 });
 
+ipcMain.handle('open_about', () => {
+  showAboutWindow()
+
+  return null
+});
+
 ipcMain.handle('open_notification', (_event, info) => {
   if (info.action === 'open_screenshot') {
     enablePointerMode()

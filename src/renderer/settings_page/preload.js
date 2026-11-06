@@ -6,6 +6,7 @@ const { platform } = process;
 contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer -> Main
   getConfiguration: () => ipcRenderer.invoke('get_configuration'),
+  openAbout: () => ipcRenderer.invoke('open_about'),
   setShortcut: (key, value) => ipcRenderer.invoke('set_shortcut', key, value),
   canRegisterShortcut: (key, accelerator) => ipcRenderer.invoke('can_register_shortcut', key, accelerator),
   setLaunchOnLogin: (value) => ipcRenderer.invoke('set_launch_on_login', value),

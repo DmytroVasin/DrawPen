@@ -298,6 +298,10 @@ const Settings = (config) => {
     window.electronAPI.openScreenshotDirectory();
   }
 
+  const openAbout = () => {
+    window.electronAPI.openAbout();
+  }
+
   return (
     <div className="settings-page">
       {
@@ -339,7 +343,7 @@ const Settings = (config) => {
             Application
           </div>
 
-          <div className="settings-sidebar-version">
+          <div className="settings-sidebar-version" onClick={openAbout}>
             DrawPen {appVersion}
           </div>
         </div>
