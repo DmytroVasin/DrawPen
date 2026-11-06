@@ -1,5 +1,23 @@
 # Change Log
 
+## [0.0.61] - 2026-11-07
+### Features:
+- Added a Stamp figure
+- Added New Arrow appearance with contrasting outlines and a minimum length
+- Added left/up toolbar expansion near screen edges
+- Added 'CMD/CTRL+D' to duplicate selected figures
+- Added 'CMD/CTRL+X' to cut selected figures
+- Added '[' and ']' shortcuts for increase/decrease stroke width and text size
+- Added straight-line drawing while holding Shift for Pen and Fade Pen
+
+### Improvements:
+- Improved keyboard layout support for canvas and configurable shortcuts
+- Improved shortcut recording for special keys and CMD+CTRL combinations
+- Improved Rainbow gradients for straight strokes
+
+### Bug Fixes:
+- Fixed shortcut conflicts when restoring defaults
+
 ## [0.0.60] - 2026-10-18
 ### Features:
 - Added a separate Pen tool with fixed stroke width (removed the "Fixed Stroke Width" setting)
