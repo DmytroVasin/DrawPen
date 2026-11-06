@@ -18,7 +18,6 @@ import {
   distanceBetweenPoints,
   calculateCanvasTextWidth,
   calculateCanvasWrappedTextHeight,
-  calculateAngleSnap,
   applySoftSnap,
   applyAspectRatioLock,
 } from './utils/general.js';
@@ -37,8 +36,10 @@ import {
   moveToCoordinates,
   calculateAspectRatio,
   calculateArrowPoint,
-  calculateStampArrowPoint,
 } from './utils/figureDetection.js';
+import {
+  updateStampAngle,
+} from './utils/stamp.js';
 import { FaPaintBrush, FaPencilAlt, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaAngleLeft } from "react-icons/fa";
 import { AiOutlineLine } from "react-icons/ai";
 import { GiLaserburn } from "react-icons/gi";
@@ -55,6 +56,7 @@ import {
   penVariantList,
   drawingToolList,
   shapeList,
+  twoPointShapeList,
   arrowVariantList,
   createApplicationColorList,
   widthList,
@@ -129,11 +131,11 @@ const Application = (settings) => {
   if (process.env.NODE_ENV === 'development') {
     initialFigures = [
       { id: Date.now() + 0, type: 'arrow',     colorIndex: 0, widthIndex: 2, points: [[100, 100], [400, 100]], rainbowColorDeg: (Math.random() * 360) },
-      { id: Date.now() + 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: 250 },
-      { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150], [450, 250]],  rainbowColorDeg: (Math.random() * 360), ratio: 1, strokeIndex: 1 },
+      { id: Date.now() + 1, type: 'line',      colorIndex: 0, widthIndex: 2, points: [[100, 200], [400, 200]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 2, type: 'rectangle', colorIndex: 0, widthIndex: 2, points: [[70, 150],  [450, 250]], rainbowColorDeg: (Math.random() * 360), ratio: 1, strokeIndex: 1 },
       { id: Date.now() + 3, type: 'oval',      colorIndex: 0, widthIndex: 3, points: [[100, 300], [400, 450]], rainbowColorDeg: (Math.random() * 360), ratio: 1 },
       { id: Date.now() + 4, type: 'text',      colorIndex: 2, widthIndex: 2, points: [[152, 118]],             rainbowColorDeg: (Math.random() * 360), text: 'Hello World', width: 400, height: 150, scale: 1 },
-      { id: Date.now() + 5, type: 'stamp',     colorIndex: 0, widthIndex: 2, points: [[90, 450],  [144, 450]], rainbowColorDeg: (Math.random() * 360) },
+      { id: Date.now() + 5, type: 'stamp',     colorIndex: 0, widthIndex: 2, points: [[90, 450]],              rainbowColorDeg: (Math.random() * 360), angle: Math.PI / 4, isPointerVisible: true },
     ]
   }
 
@@ -999,17 +1001,10 @@ const Application = (settings) => {
           };
         }
 
-        const updatedFigure = {
+        return {
           ...figure,
           widthIndex: newWidthIndex,
-          points: [...figure.points],
         };
-
-        if (figure.type === 'stamp') {
-          updatedFigure.points[1] = calculateStampArrowPoint(updatedFigure);
-        }
-
-        return updatedFigure;
       });
     });
   };
@@ -1382,11 +1377,16 @@ const Application = (settings) => {
       ratio: 1,
     };
 
-    if (shapeList.includes(newFigure.type)) {
+    if (twoPointShapeList.includes(newFigure.type)) {
       newFigure.points.push([x, y]);
     }
 
-    if (activeTool === 'fadepen') {
+    if (newFigure.type === 'stamp') {
+      newFigure.angle = 0;
+      newFigure.isPointerVisible = false;
+    }
+
+    if (newFigure.type === 'fadepen') {
       setIsFadeDrawing(true);
       setFadeFigures(prevFadeFigures => [...prevFadeFigures, newFigure]);
       setIsDrawing(true);
@@ -1405,7 +1405,7 @@ const Application = (settings) => {
     const fromPoint = figure.points.at(-2);
     const toPoint = figure.points.at(-1);
 
-    const result = calculateAngleSnap(fromPoint[0], fromPoint[1], x, y, Math.PI / 4);
+    const result = applySoftSnap(fromPoint[0], fromPoint[1], x, y);
 
     toPoint[0] = result.x;
     toPoint[1] = result.y;
@@ -1485,7 +1485,16 @@ const Application = (settings) => {
         return
       }
 
-      if (shapeList.includes(activeTool)) {
+      if (activeTool === 'stamp') {
+        const currentFigure = allFigures.at(-1);
+
+        updateStampAngle(currentFigure, x, y);
+
+        setAllFigures([...allFigures]);
+        return;
+      }
+
+      if (twoPointShapeList.includes(activeTool)) {
         const currentFigure = allFigures.at(-1);
 
         if (isShiftPressed) {
@@ -1565,6 +1574,17 @@ const Application = (settings) => {
         setRedoStackFigures([]);
       }
 
+      if (activeTool === 'stamp') {
+        const currentFigure = allFigures.at(-1);
+
+        updateStampAngle(currentFigure, x, y);
+
+        setUndoStackFigures(prevUndoStack => [...prevUndoStack, { type: 'add', figures: [currentFigure] }]);
+        setRedoStackFigures([]);
+
+        setAllFigures([...allFigures]);
+      }
+
       if (activeTool === 'fadepen') {
         const currentFigure = allFadeFigures.at(-1);
 
@@ -1589,7 +1609,7 @@ const Application = (settings) => {
         setAllFigures([...allFigures]);
       }
 
-      if (shapeList.includes(activeTool)) {
+      if (twoPointShapeList.includes(activeTool)) {
         const currentFigure = allFigures.at(-1);
         const shapeDistance = distanceBetweenPoints(currentFigure.points[0], upPoint);
 
@@ -1598,9 +1618,6 @@ const Application = (settings) => {
         }
         if (['rectangle', 'diamond', 'oval'].includes(currentFigure.type)) {
           currentFigure.ratio = calculateAspectRatio(currentFigure);
-        }
-        if (['stamp'].includes(currentFigure.type)) {
-          currentFigure.points[1] = calculateStampArrowPoint(currentFigure);
         }
 
         if (shapeDistance < minObjectDistance) {
@@ -1625,12 +1642,6 @@ const Application = (settings) => {
 
         if (['rectangle', 'diamond', 'oval'].includes(activeFigure.type)) {
           activeFigure.ratio = calculateAspectRatio(activeFigure);
-
-          setAllFigures([...allFigures]);
-        }
-
-        if (['stamp'].includes(activeFigure.type)) {
-          activeFigure.points[1] = calculateStampArrowPoint(activeFigure);
 
           setAllFigures([...allFigures]);
         }

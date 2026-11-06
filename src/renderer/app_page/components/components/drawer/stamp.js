@@ -8,18 +8,12 @@ import {
   outlinedFigureInnerBorderWidthList,
   rainbowScaleFactor,
 } from '../../constants.js';
+import {
+  getStampGeometry,
+  stampArrowPoints,
+  stampSVG
+} from '../../utils/stamp.js';
 import { hslColor } from './figures.js';
-
-// Local geometry, scaled to the selected Stamp radius when drawing.
-export const stampSVG = {
-  outerCircleRadius: 200,
-  innerCircleRadius: 130,
-  arrowWidth: 220,
-  arrowBodyLength: 260,
-  arrowLength: 360,
-  arrowPointRatio: 360/200
-};
-
 
 // White Background: 2/2/3/4/5px, Gray Background: 1px
 const stampBorderWidthList = outlinedFigureInnerBorderWidthList.map((innerBorderWidth, widthIndex) => {
@@ -39,15 +33,6 @@ const createStampCirclePath = (radius) => {
     Z
   `);
 };
-
-const stampArrowPoints = [
-  [0,                        -stampSVG.arrowWidth / 2],
-  [stampSVG.arrowBodyLength, -stampSVG.arrowWidth / 2],
-  [stampSVG.arrowLength,     0],
-  [stampSVG.arrowBodyLength, stampSVG.arrowWidth / 2],
-  [0,                        stampSVG.arrowWidth / 2],
-  [0,                        -stampSVG.arrowWidth / 2],
-];
 
 const stampOuterCirclePath = createStampCirclePath(stampSVG.outerCircleRadius);
 const stampInnerCirclePath = createStampCirclePath(stampSVG.innerCircleRadius);
@@ -72,21 +57,6 @@ const getStampMark = (figure) => {
     default:
       return crossMark;
   }
-};
-
-const getStampGeometry = (figure) => {
-  const { points: [center, pointB], widthIndex } = figure;
-
-  const dx = pointB[0] - center[0];
-  const dy = pointB[1] - center[1];
-
-  const radius = widthList[widthIndex].stamp_radius;
-
-  const scale = radius / stampSVG.outerCircleRadius;
-  const angle = Math.atan2(dy, dx);
-  const isPointerVisible = Math.hypot(dx, dy) > radius + 1; // 1 Pixel gap - to remove floating numbers
-
-  return { center, radius, scale, angle, isPointerVisible, widthIndex };
 };
 
 const detectStampColors = (figure, updateRainbowColorDeg, colorList) => {
@@ -191,25 +161,4 @@ const drawStampPath = (ctx, path, color, backgroundColor, widthIndex) => {
   ctx.strokeStyle = backgroundColor;
   ctx.lineWidth = innerBorderWidth;
   ctx.stroke(path);
-};
-
-export const getStampParts = (figure) => {
-  const { center, radius, scale, angle, isPointerVisible } = getStampGeometry(figure);
-
-  const [centerX, centerY] = center;
-
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-
-  const rotatePoint = ([x, y]) => [
-    centerX + (x * cos - y * sin) * scale,
-    centerY + (x * sin + y * cos) * scale,
-  ];
-
-  let arrowStampPoints = []
-  if (isPointerVisible) {
-    arrowStampPoints = stampArrowPoints.map(rotatePoint)
-  }
-
-  return { center, radius, arrowStampPoints };
 };

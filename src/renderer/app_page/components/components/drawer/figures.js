@@ -7,6 +7,7 @@ import {
   getWrappedTextLines,
   getTextAutoResizeHandle,
 } from '../../utils/general.js';
+import { getStampHandlePoint } from '../../utils/stamp.js';
 import {
   widthList,
   penVariantList,
@@ -313,9 +314,9 @@ export const drawFlatArrowActive = (ctx, figure, hoveredDot) => {
 }
 
 export const drawStampActive = (ctx, figure, hoveredDot) => {
-  const [, pointB] = figure.points;
+  const handlePoint = getStampHandlePoint(figure)
 
-  drawDot(ctx, pointB, hoveredDot === 'pointB');
+  drawOneDot(ctx, handlePoint, hoveredDot);
 };
 
 export const drawLine = (ctx, figure, updateRainbowColorDeg, colorList) => {
@@ -631,6 +632,10 @@ const drawSelectionBox = (ctx, startX, startY, endX, endY) => {
   ctx.strokeStyle = dotBorderColor;
   ctx.lineWidth = activeSelectionBoxLineWidth;
   ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+}
+
+const drawOneDot = (ctx, pointA, hoveredDot) => {
+  drawDot(ctx, pointA, hoveredDot === 'pointA')
 }
 
 const drawTwoDots = (ctx, pointA, pointB, hoveredDot) => {

@@ -1,6 +1,5 @@
 import {
   pointToSegmentDistance,
-  distanceBetweenPoints,
   segmentsIntersect,
   applySoftSnap,
   applyAspectRatioLock,
@@ -12,7 +11,7 @@ import {
   getTextAutoResizeHandle,
 } from './general.js';
 
-import { stampSVG, getStampParts } from '../components/drawer/stamp.js';
+import { getStampParts, getStampHandlePoint, updateStampAngle } from './stamp.js';
 import {
   dotTextMargin,
   figureMinScale,
@@ -320,11 +319,11 @@ const isOverText = (x, y, figure) => {
 }
 
 const isOnOneDot = (x, y, figure) => {
-  const [, pointB] = figure.points;
+  const pointA = getStampHandlePoint(figure);
 
   const inRadius = withinRadius(x, y)
 
-  if (inRadius(pointB)) return 'pointB'
+  if (inRadius(pointA)) return 'pointA'
 
   return null
 }
@@ -727,7 +726,7 @@ export const getDotNameOnFigure = (x, y, figure) => {
     case 'oval':
       return isOnFourDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
     case 'stamp':
-      return isOnOneDot(x, y, figure) // ['pointB', null]
+      return isOnOneDot(x, y, figure) // ['pointA', null]
     case 'text':
       return isOnTextDots(x, y, figure) // ['pointA', 'pointB', 'pointC', 'pointD', null]
     default:
@@ -749,7 +748,7 @@ export const getSideNameOnFigure = (x, y, figure) => {
 };
 
 const getDotCoordinates = (figure, dotName) => {
-  if (['line', 'arrow', 'flat_arrow', 'stamp'].includes(figure.type)) {
+  if (['line', 'arrow', 'flat_arrow'].includes(figure.type)) {
     if (dotName === 'pointA') return figure.points[0];
     if (dotName === 'pointB') return figure.points[1];
   }
@@ -761,6 +760,12 @@ const getDotCoordinates = (figure, dotName) => {
     if (dotName === 'pointB') return pointB;
     if (dotName === 'pointC') return [pointA[0], pointB[1]];
     if (dotName === 'pointD') return [pointB[0], pointA[1]];
+  }
+
+  if (['stamp'].includes(figure.type)) {
+    const pointA = getStampHandlePoint(figure);
+
+    if (dotName === 'pointA') return pointA;
   }
 
   if (['text'].includes(figure.type)) {
@@ -987,10 +992,6 @@ const resizeShapeByDots = (figure, activeFigureInfo, { x, y, isShiftPressed }) =
   }
 }
 
-const resizeStampByDot = (figure, { x, y }) => {
-  figure.points[1] = [x, y];
-}
-
 const resizeTextByDots = (figure, activeFigureInfo, { x, y, isShiftPressed }) => {
   const { resizingDotName } = activeFigureInfo;
 
@@ -1068,7 +1069,7 @@ const resizeFigureByDot = (figure, activeFigureInfo, { x, y, isShiftPressed }) =
   }
 
   if (['stamp'].includes(figure.type)) {
-    resizeStampByDot(figure, { x, y });
+    updateStampAngle(figure, x, y);
     return;
   }
 
@@ -1218,10 +1219,6 @@ export const resizeFigure = (figure, activeFigureInfo, { x, y, isShiftPressed })
 }
 
 const getPointsCenter = (figure) => {
-  if (figure.type === 'stamp') {
-    return figure.points[0];
-  }
-
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -1267,33 +1264,6 @@ export const calculateArrowPoint = (figure) => {
   const arrowPoints = calcPointsArrow(points, widthIndex);
 
   return arrowPoints[3]; // Update: Min arrow size
-};
-
-const calculateStampAngle = (figure) => {
-  const [pointA, pointB] = figure.points;
-  const dx = pointB[0] - pointA[0];
-  const dy = pointB[1] - pointA[1];
-
-  return Math.atan2(dy, dx);
-};
-
-export const calculateStampArrowPoint = (figure) => {
-  const { points: [pointA, pointB], widthIndex } = figure;
-
-  const radius = widthList[widthIndex].stamp_radius;
-  const angle = calculateStampAngle(figure);
-  const isPointerVisible = distanceBetweenPoints(pointA, pointB) > radius + 1;
-
-  let distance = radius;
-
-  if (isPointerVisible) {
-    distance = radius * stampSVG.arrowPointRatio;
-  }
-
-  return [
-    pointA[0] + Math.cos(angle) * distance,
-    pointA[1] + Math.sin(angle) * distance,
-  ];
 };
 
 export const getFigureBounds = (figure) => {

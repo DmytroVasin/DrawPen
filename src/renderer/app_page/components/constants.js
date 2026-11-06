@@ -21,7 +21,7 @@ export const minObjectDistance = 5; // Minimum length of drawn object
 export const figureMinScale = 0.2;
 export const pastCooldownMs = 300;
 export const escDoubleTapMs = 300;
-export const SNAP_ANGLE = Math.PI / 12; // 45°
+export const SNAP_ANGLE = Math.PI / 12; // 15°
 export const highlighterAlpha = 0.35;
 export const eraserAlpha = 0.5;
 export const minWhiteboardWidth = 350;
@@ -36,7 +36,8 @@ export const palmMinContactArea = 2000;
 export const drawingToolList = ['brush', 'pen', 'fadepen'];
 export const penVariantList = ['pen', 'fadepen'];
 
-export const shapeList = ['arrow', 'flat_arrow', 'rectangle', 'diamond', 'oval', 'line', 'stamp'];
+export const twoPointShapeList = ['arrow', 'flat_arrow', 'rectangle', 'diamond', 'oval', 'line'];
+export const shapeList = [...twoPointShapeList, 'stamp'];
 export const arrowVariantList = ['arrow', 'flat_arrow'];
 
 export const outlinedFigureBgColor = '#FFFFFF';
