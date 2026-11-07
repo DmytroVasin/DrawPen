@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import './Settings.scss';
 import ShortcutRow from './ShortcutRow';
 import ColorPicker from './ColorPicker';
+import ToolbarCustomization from './ToolbarCustomization';
 import {
   createApplicationColorList,
   timeStep,
@@ -18,13 +19,38 @@ import {
   IoRefreshCircleOutline,
   IoChevronDown,
   IoChevronForward,
-  IoColorPaletteOutline,
+  IoOptionsOutline,
   IoApps,
   IoWarningOutline,
 } from "react-icons/io5";
 import { HiSwitchHorizontal } from "react-icons/hi";
-import { FaRegKeyboard } from "react-icons/fa6";
-import { FaPlus, FaMinus } from "react-icons/fa";
+import { FaRegKeyboard, FaFont } from "react-icons/fa6";
+import { FaPaintBrush, FaPencilAlt, FaHighlighter, FaRegSquare, FaRegCircle, FaArrowRight, FaLongArrowAltRight, FaEraser, FaRegTrashAlt, FaPlus, FaMinus } from "react-icons/fa";
+import { AiOutlineLine } from "react-icons/ai";
+import { GiLaserburn } from "react-icons/gi";
+import { LuMonitor } from "react-icons/lu";
+import FaMagicPencilAlt from "../../app_page/components/components/icons/FaMagicPencilAlt.js";
+import FaRegDiamond from "../../app_page/components/components/icons/FaRegDiamond.js";
+import StampIcon from "../../app_page/components/components/icons/StampIcon.js";
+
+const Icons = {
+  brush: FaPaintBrush,
+  pen: FaPencilAlt,
+  fadepen: FaMagicPencilAlt,
+  arrow: FaArrowRight,
+  flat_arrow: FaLongArrowAltRight,
+  rectangle: FaRegSquare,
+  diamond: FaRegDiamond,
+  oval: FaRegCircle,
+  line: AiOutlineLine,
+  stamp: StampIcon,
+  text: FaFont,
+  highlighter: FaHighlighter,
+  laser: GiLaserburn,
+  eraser: FaEraser,
+  clear_desk: FaRegTrashAlt,
+  chevron_forward: IoChevronForward,
+};
 
 const Settings = (config) => {
   const [showDrawingBorder, setShowDrawingBorder] = useState(config.show_drawing_border);
@@ -51,6 +77,24 @@ const Settings = (config) => {
   const [drawingMonitor, setDrawingMonitor]           = useState(config.drawing_monitor);
   const [toolbarColorPalette, setToolbarColorPalette] = useState(config.tool_bar_color_palette);
   const [editingColorId, setEditingColorId]           = useState(null);
+
+  const [toolbarOptions, setToolbarOptions] = useState({
+    tool_bar_show_brush:       config.tool_bar_show_brush,
+    tool_bar_show_pen:         config.tool_bar_show_pen,
+    tool_bar_show_fadepen:     config.tool_bar_show_fadepen,
+    tool_bar_show_arrow:       config.tool_bar_show_arrow,
+    tool_bar_show_flat_arrow:  config.tool_bar_show_flat_arrow,
+    tool_bar_show_rectangle:   config.tool_bar_show_rectangle,
+    tool_bar_show_diamond:     config.tool_bar_show_diamond,
+    tool_bar_show_oval:        config.tool_bar_show_oval,
+    tool_bar_show_line:        config.tool_bar_show_line,
+    tool_bar_show_stamp:       config.tool_bar_show_stamp,
+    tool_bar_show_text:        config.tool_bar_show_text,
+    tool_bar_show_highlighter: config.tool_bar_show_highlighter,
+    tool_bar_show_laser:       config.tool_bar_show_laser,
+    tool_bar_show_eraser:      config.tool_bar_show_eraser,
+    tool_bar_show_clear_desk:  config.tool_bar_show_clear_desk,
+  });
 
   const colorList = createApplicationColorList(toolbarColorPalette);
   const mainColorInfo = colorList[mainColor];
@@ -86,11 +130,17 @@ const Settings = (config) => {
   }
 
   const saveToolbarColor = (colorId, color) => {
-    setToolbarColorPalette({...toolbarColorPalette, [colorId]: color });
+    setToolbarColorPalette(prevToolbarColorPalette => ({ ...prevToolbarColorPalette, [colorId]: color }));
     setEditingColorId(null);
 
     window.electronAPI.setToolbarColor(colorId, color);
   }
+
+  const applyToolbarVisibility = (allToolbarOptions, changedToolbarOptions) => {
+    setToolbarOptions(allToolbarOptions);
+
+    window.electronAPI.setToolbarVisibility(changedToolbarOptions);
+  };
 
   const canRegisterShortcut = async (key, accelerator) => {
     return await window.electronAPI.canRegisterShortcut(key, accelerator);
@@ -324,15 +374,23 @@ const Settings = (config) => {
             onClick={() => selectTab('shortcuts')}
           >
             <FaRegKeyboard className="icon" />
-            Keyboard Shortcuts
+            Shortcuts
           </div>
 
           <div
             className={`settings-sidebar-item ${activeTab === 'appearance' ? 'active' : ''}`}
             onClick={() => selectTab('appearance')}
           >
-            <IoColorPaletteOutline className="icon" />
+            <LuMonitor className="icon" />
             Appearance
+          </div>
+
+          <div
+            className={`settings-sidebar-item ${activeTab === 'toolbar' ? 'active' : ''}`}
+            onClick={() => selectTab('toolbar')}
+          >
+            <IoOptionsOutline className="icon" />
+            Toolbar
           </div>
 
           <div
@@ -445,45 +503,6 @@ const Settings = (config) => {
 
             <div className="settings-content">
               <div className="settings-section">
-
-                <div className="settings-item">
-                  <div className="settings-item-info">
-                    <div className="settings-item-title">Toolbar Colors</div>
-                  </div>
-
-                  <div className="settings-item-control">
-                    <ul className="toolbar-colors-control">
-                      {toolbarColorIds.map((colorId) => {
-                        const color = toolbarColorPalette[colorId];
-                        const colorTitle = colorList.find((colorInfo) => colorInfo.id === colorId).title;
-                        const isEditing = editingColorId === colorId;
-
-                        return (
-                          <li
-                            key={colorId}
-                            className={`toolbar-color-slot-anchor ${isEditing ? 'active' : ''}`}
-                          >
-                            <button
-                              type="button"
-                              className="toolbar-color-slot"
-                              style={{ backgroundColor: color }}
-                              onClick={() => setEditingColorId(isEditing ? null : colorId)}
-                              title={colorTitle}
-                            />
-
-                            {isEditing && (
-                              <ColorPicker
-                                initialColor={color}
-                                onCancel={() => setEditingColorId(null)}
-                                onSave={(nextColor) => saveToolbarColor(colorId, nextColor)}
-                              />
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </div>
 
                 <div className="settings-item">
                   <div className="settings-item-info">
@@ -627,6 +646,65 @@ const Settings = (config) => {
                   </div>
                 </div>
 
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'toolbar' && (
+          <div className="settings-container">
+            <div className="settings-header">
+              <div className="settings-title">Toolbar</div>
+            </div>
+
+            <div className="settings-content">
+              <div className="settings-section">
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Colors</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <ul className="toolbar-colors-control">
+                      {toolbarColorIds.map((colorId) => {
+                        const color = toolbarColorPalette[colorId];
+                        const colorTitle = colorList.find((colorInfo) => colorInfo.id === colorId).title;
+                        const isEditing = editingColorId === colorId;
+
+                        return (
+                          <li
+                            key={colorId}
+                            className={`toolbar-color-slot-anchor ${isEditing ? 'active' : ''}`}
+                          >
+                            <button
+                              type="button"
+                              className="toolbar-color-slot"
+                              style={{ backgroundColor: color }}
+                              onClick={() => setEditingColorId(isEditing ? null : colorId)}
+                              title={colorTitle}
+                            />
+
+                            {isEditing && (
+                              <ColorPicker
+                                initialColor={color}
+                                onCancel={() => setEditingColorId(null)}
+                                onSave={(nextColor) => saveToolbarColor(colorId, nextColor)}
+                              />
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+
+                <ToolbarCustomization
+                  toolbarOptions={toolbarOptions}
+                  onChange={applyToolbarVisibility}
+                  onError={showToast}
+                  Icons={Icons}
+                />
               </div>
             </div>
           </div>

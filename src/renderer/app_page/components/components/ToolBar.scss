@@ -1,8 +1,24 @@
 :root {
   --toolbar-thickness: 44px;
-  --toolbar-width--full: calc(10px + 9*36px + 2*9px + 10px);
-  --toolbar-width--mini: calc(10px + 36px + 10px);
+  --toolbar-item-size: 32px; // 26px content + 4px padding + 2px border.
+  --toolbar-separator-size: 1px;
+  --toolbar-spacing: 5px;
   --toolbar-switch-duration: 0.3s;
+}
+
+#toolbar {
+  --toolbar-width--full_min: calc(
+    var(--toolbar-item-size) * var(--toolbar-min-items-amount) +
+    var(--toolbar-spacing) * (var(--toolbar-min-items-amount) + 3)
+  );
+  --toolbar-width--full_current: calc(
+    var(--toolbar-item-size) * var(--toolbar-items-amount) +
+    var(--toolbar-separator-size) * (1 + var(--toolbar-has-clear-desk)) +
+    var(--toolbar-spacing) * (var(--toolbar-items-amount) + var(--toolbar-has-clear-desk) + 4)
+  );
+
+  --toolbar-width--mini: calc(var(--toolbar-spacing) * 2 + var(--toolbar-item-size) + var(--toolbar-spacing) * 2);
+  --toolbar-width--full: max(var(--toolbar-width--full_min), var(--toolbar-width--full_current));
 }
 
 // Trick to support 'stairs' nature of the ToolBar
@@ -143,9 +159,21 @@
         align-items: center;
       }
 
+      .toolbar__body--main {
+        box-sizing: border-box;
+        gap: var(--toolbar-spacing);
+
+        .toolbar__items--tools {
+          flex: 1;
+          justify-content: center;
+        }
+      }
+
       .toolbar__items {
         position: relative;
         display: flex;
+        flex-shrink: 0;
+        gap: var(--toolbar-spacing);
         margin: 0;
         padding: 0;
         align-items: center;
@@ -153,8 +181,10 @@
         li {
           position: relative;
           display: flex;
+          flex-shrink: 0;
           justify-content: center;
           align-items: center;
+          margin: 0;
           padding: 2px;
           border: 1px solid transparent;
           cursor: pointer;
@@ -398,6 +428,10 @@
     .toolbar__body {
       top: 0;
       left: 0;
+
+      &.toolbar__body--main {
+        padding: 0 calc(var(--toolbar-spacing) * 2);
+      }
     }
 
     .side-view-body {
@@ -411,12 +445,10 @@
       li {
         width: 26px;
         height: 26px;
-        margin: 2px;
 
         &.cross-line {
           width: 1px;
           height: 20px;
-          margin: 2px 4px;
         }
       }
     }
@@ -533,6 +565,11 @@
     .toolbar__body {
       top: 0;
       left: 0;
+
+      &.toolbar__body--main {
+        flex-direction: column;
+        padding: calc(var(--toolbar-spacing) * 2) 0;
+      }
     }
 
     .side-view-body {
@@ -546,12 +583,10 @@
       li {
         width: 26px;
         height: 26px;
-        margin: 2px;
 
         &.cross-line {
           width: 20px;
           height: 1px;
-          margin: 4px 2px;
         }
       }
     }

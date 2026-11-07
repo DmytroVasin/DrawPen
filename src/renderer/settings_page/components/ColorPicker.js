@@ -44,6 +44,7 @@ const ColorPicker = ({ initialColor, onCancel, onSave }) => {
 
   const inputValue = draftColor.slice(1);
   const isInputValid = /^[0-9A-F]{6}$/.test(inputValue);
+  const canSave = isInputValid && draftColor !== initialColor;
   const activeShades = COLOR_PICKER_COLORS.find((shades) => shades.includes(draftColor));
   const activeShadeIndex = activeShades?.indexOf(draftColor);
 
@@ -77,7 +78,7 @@ const ColorPicker = ({ initialColor, onCancel, onSave }) => {
   };
 
   const saveColor = () => {
-    if (!isInputValid) return;
+    if (!canSave) return;
 
     onSave(draftColor);
   };
@@ -158,7 +159,7 @@ const ColorPicker = ({ initialColor, onCancel, onSave }) => {
           </div>
 
           <div
-            className={`color-picker-save ${isInputValid ? '' : 'disabled'}`}
+            className={`color-picker-save ${canSave ? '' : 'disabled'}`}
             onClick={saveColor}
           >
             <IoCheckmark />

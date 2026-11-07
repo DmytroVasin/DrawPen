@@ -24,9 +24,9 @@ const ToolBar = ({
   setIsCollapsed,
   isReversed,
   shortcutHintsDisabled,
+  toolbarOptions,
+  visibleTools,
   clearDeskShortcut,
-  lastActiveBrush,
-  lastActiveFigure,
   activeTool,
   activeColorIndex,
   activeWidthIndex,
@@ -41,24 +41,50 @@ const ToolBar = ({
   Icons,
   colorList,
 }) => {
+  const getNumericShortcut = (tools, tool) => {
+    const index = tools.indexOf(tool);
+
+    if (index === -1) {
+      return;
+    }
+
+    return String(index + 1);
+  };
+
+  const getMainShortcut = (tool) => {
+    if (drawingToolList.includes(tool)) {
+      if (!visibleTools.brushes.includes(tool)) return;
+
+      return getNumericShortcut(visibleTools.toolbarItems, "brushes");
+    }
+
+    if (shapeList.includes(tool)) {
+      if (!visibleTools.shapes.includes(tool)) return;
+
+      return getNumericShortcut(visibleTools.toolbarItems, "shapes");
+    }
+
+    return getNumericShortcut(visibleTools.toolbarItems, tool);
+  };
+
   const toolConfig = {
-    brush:       { title: "Brush",       alias: "B", mainPanel: "1", subPanel: "1" },
-    pen:         { title: "Pen",         alias: "P", mainPanel: "1", subPanel: "2" },
-    fadepen:     { title: "Fade Pen",    alias: "P", mainPanel: "1", subPanel: "3" },
-    arrow:       { title: "Arrow",       alias: "A", mainPanel: "2", subPanel: "1" },
-    flat_arrow:  { title: "Flat Arrow",  alias: "A", mainPanel: "2", subPanel: "2" },
-    rectangle:   { title: "Rectangle",   alias: "R", mainPanel: "2", subPanel: "3" },
-    diamond:     { title: "Diamond",     alias: "D", mainPanel: "2", subPanel: "4" },
-    oval:        { title: "Oval",        alias: "O", mainPanel: "2", subPanel: "5" },
-    line:        { title: "Line",                    mainPanel: "2", subPanel: "6" },
-    stamp:       { title: "Stamp",       alias: "S", mainPanel: "2", subPanel: "7" },
-    text:        { title: "Text",        alias: "T", mainPanel: "3" },
-    highlighter: { title: "Highlighter", alias: "H", mainPanel: "4" },
-    laser:       { title: "Laser",       alias: "L", mainPanel: "5" },
-    eraser:      { title: "Eraser",      alias: "E", mainPanel: "6" },
-    color:       { title: "Color",                   mainPanel: "7", disabledFor: ["laser", "eraser"] },
-    brushSize:   { title: "Brush Size",              mainPanel: "8" },
-    clearDesk:   { title: "Clear Desk",              mainPanel: humanizedShortcut(clearDeskShortcut) },
+    brush:       { title: "Brush",       alias: "B", mainPanel: getMainShortcut("brush"),       subPanel: getNumericShortcut(visibleTools.brushes, "brush") },
+    pen:         { title: "Pen",         alias: "P", mainPanel: getMainShortcut("pen"),         subPanel: getNumericShortcut(visibleTools.brushes, "pen") },
+    fadepen:     { title: "Fade Pen",    alias: "P", mainPanel: getMainShortcut("fadepen"),     subPanel: getNumericShortcut(visibleTools.brushes, "fadepen") },
+    arrow:       { title: "Arrow",       alias: "A", mainPanel: getMainShortcut("arrow"),       subPanel: getNumericShortcut(visibleTools.shapes, "arrow") },
+    flat_arrow:  { title: "Flat Arrow",  alias: "A", mainPanel: getMainShortcut("flat_arrow"),  subPanel: getNumericShortcut(visibleTools.shapes, "flat_arrow") },
+    rectangle:   { title: "Rectangle",   alias: "R", mainPanel: getMainShortcut("rectangle"),   subPanel: getNumericShortcut(visibleTools.shapes, "rectangle") },
+    diamond:     { title: "Diamond",     alias: "D", mainPanel: getMainShortcut("diamond"),     subPanel: getNumericShortcut(visibleTools.shapes, "diamond") },
+    oval:        { title: "Oval",        alias: "O", mainPanel: getMainShortcut("oval"),        subPanel: getNumericShortcut(visibleTools.shapes, "oval") },
+    line:        { title: "Line",                    mainPanel: getMainShortcut("line"),        subPanel: getNumericShortcut(visibleTools.shapes, "line") },
+    stamp:       { title: "Stamp",       alias: "S", mainPanel: getMainShortcut("stamp"),       subPanel: getNumericShortcut(visibleTools.shapes, "stamp") },
+    text:        { title: "Text",        alias: "T", mainPanel: getMainShortcut("text") },
+    highlighter: { title: "Highlighter", alias: "H", mainPanel: getMainShortcut("highlighter") },
+    laser:       { title: "Laser",       alias: "L", mainPanel: getMainShortcut("laser") },
+    eraser:      { title: "Eraser",      alias: "E", mainPanel: getMainShortcut("eraser") },
+    color:       { title: "Color",                   mainPanel: getMainShortcut("color"), disabledFor: ["laser", "eraser"] },
+    brushSize:   { title: "Brush Size",              mainPanel: getMainShortcut("brushSize") },
+    clear_desk:  { title: "Clear Desk",              mainPanel: humanizedShortcut(clearDeskShortcut) },
   };
 
   const allIcons = {
@@ -328,19 +354,21 @@ const ToolBar = ({
   };
 
   const pickFigureOrSwitchView = () => {
-    if (shapeList.includes(activeTool)) {
+    if (visibleTools.shapes.length > 1 && visibleTools.shapes.includes(activeTool)) {
       setToolbarSlide("tool-slide");
-    } else {
-      pickTool(lastActiveFigure);
+      return;
     }
+
+    pickTool(visibleTools.selectedShape);
   };
 
   const pickBrushOrSwitchView = () => {
-    if (drawingToolList.includes(activeTool)) {
+    if (visibleTools.brushes.length > 1 && visibleTools.brushes.includes(activeTool)) {
       setToolbarSlide("brush-slide");
-    } else {
-      pickTool(lastActiveBrush);
+      return;
     }
+
+    pickTool(visibleTools.selectedBrush);
   };
 
   const handleToggleCollapsed = () => {
@@ -370,7 +398,13 @@ const ToolBar = ({
         ${isCollapsed ? "toolbar--collapsed" : ""}
         ${areShortcutHintsVisible ? "toolbar--shortcut-hints-visible" : ""}
       `}
-      style={{ left: position.x, top: position.y }}
+      style={{
+        left: position.x,
+        top: position.y,
+        '--toolbar-items-amount': visibleTools.toolbarItems.length + Number(toolbarOptions.tool_bar_show_clear_desk),
+        '--toolbar-has-clear-desk': Number(toolbarOptions.tool_bar_show_clear_desk),
+        '--toolbar-min-items-amount': colorList.length,
+      }}
     >
       <div className="toolbar__close">
         <button tabIndex={-1} onClick={handleCloseToolBar}>
@@ -413,138 +447,227 @@ const ToolBar = ({
         <div className="toolbar__container">
           <div className="toolbar__panels-track">
             <div className="toolbar__panel toolbar__panel--full">
-              <div className="toolbar__body">
+              <div className="toolbar__body toolbar__body--main">
+                <ul className="toolbar__items toolbar__items--tools">
+                  {
+                    visibleTools.brushes.length > 0 && (
+                      <li className={`${visibleTools.brushes.includes(activeTool) ? "active" : ""} ${visibleTools.brushes.length > 1 ? "more_figures" : ""}`} onClick={pickBrushOrSwitchView}>
+                        <button tabIndex={-1} title={renderToolTitle(visibleTools.selectedBrush, "mainPanel")}>
+                          {allIcons[visibleTools.selectedBrush]}
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint(visibleTools.selectedBrush, "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    visibleTools.shapes.length > 0 && (
+                      <li className={`${visibleTools.shapes.includes(activeTool) ? "active" : ""} ${visibleTools.shapes.length > 1 ? "more_figures" : ""}`} onClick={pickFigureOrSwitchView}>
+                        <button tabIndex={-1} title={renderToolTitle(visibleTools.selectedShape, "mainPanel")}>
+                          {allIcons[visibleTools.selectedShape]}
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint(visibleTools.selectedShape, "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_text && (
+                      <li className={activeTool === "text" ? "active" : undefined} onClick={() => pickTool("text")}>
+                        <button tabIndex={-1} title={renderToolTitle("text", "mainPanel")}>
+                          <Icons.Text />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("text", "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_highlighter && (
+                      <li className={activeTool === "highlighter" ? "active" : undefined} onClick={() => pickTool("highlighter")}>
+                        <button tabIndex={-1} title={renderToolTitle("highlighter", "mainPanel")}>
+                          <Icons.Highlighter />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("highlighter", "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_laser && (
+                      <li className={activeTool === "laser" ? "active" : undefined} onClick={() => pickTool("laser")}>
+                        <button tabIndex={-1} title={renderToolTitle("laser", "mainPanel")}>
+                          <Icons.Laser />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("laser", "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_eraser && (
+                      <li className={activeTool === "eraser" ? "active" : undefined} onClick={() => pickTool("eraser")}>
+                        <button tabIndex={-1} title={renderToolTitle("eraser", "mainPanel")}>
+                          <Icons.Eraser />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("eraser", "mainPanel")}</div>
+                      </li>
+                    )
+                  }
+                </ul>
+
                 <ul className="toolbar__items">
-                  <li className={drawingToolList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickBrushOrSwitchView()}>
-                    <button tabIndex={-1} title={renderToolTitle(lastActiveBrush, "mainPanel")}>
-                      {allIcons[lastActiveBrush]}
-                    </button>
-                    <div className="toolbar__shortcut-hint">
-                      {renderToolShortcutHint(lastActiveBrush, "mainPanel")}
-                    </div>
-                  </li>
-                  <li className={shapeList.includes(activeTool) ? "active more_figures" : undefined} onClick={() => pickFigureOrSwitchView()}>
-                    <button tabIndex={-1} title={renderToolTitle(lastActiveFigure, "mainPanel")}>
-                      {allIcons[lastActiveFigure]}
-                    </button>
-                    <div className="toolbar__shortcut-hint">
-                      {renderToolShortcutHint(lastActiveFigure, "mainPanel")}
-                    </div>
-                  </li>
-                  <li className={activeTool === "text" ? "active" : undefined} onClick={() => handleChangeTool("text")}>
-                    <button tabIndex={-1} title={renderToolTitle("text", "mainPanel")}>
-                      <Icons.Text />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("text", "mainPanel")}</div>
-                  </li>
-                  <li className={activeTool === "highlighter" ? "active" : undefined} onClick={() => handleChangeTool("highlighter")}>
-                    <button tabIndex={-1} title={renderToolTitle("highlighter", "mainPanel")}>
-                      <Icons.Highlighter />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("highlighter", "mainPanel")}</div>
-                  </li>
-                  <li className={activeTool === "laser" ? "active" : undefined} onClick={() => handleChangeTool("laser")}>
-                    <button tabIndex={-1} title={renderToolTitle("laser", "mainPanel")}>
-                      <Icons.Laser />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("laser", "mainPanel")}</div>
-                  </li>
-                  <li className={activeTool === "eraser" ? "active" : undefined} onClick={() => handleChangeTool("eraser")}>
-                    <button tabIndex={-1} title={renderToolTitle("eraser", "mainPanel")}>
-                      <Icons.Eraser />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("eraser", "mainPanel")}</div>
-                  </li>
-                  <li className="cross-line"></li>
+                  <li className="cross-line" />
+
                   <li onClick={() => !isColorControlDisabled && setToolbarSlide("color-slide")}>
-                    <button tabIndex={-1} className={`toolbar__color-picker ${activeColor.isRainbow ? 'color-rainbow' : ''} color_tool_${activeTool}`} style={{ backgroundColor: activeColor.color }} title={isColorControlDisabled ? renderToolTitle("color") : renderToolTitle("color", "mainPanel")} />
+                    <button tabIndex={-1} className={`toolbar__color-picker ${activeColor.isRainbow ? 'color-rainbow' : ''} color_tool_${activeTool}`} style={{ backgroundColor: activeColor.color }} title={isColorControlDisabled ? toolConfig.color.title : renderToolTitle("color", "mainPanel")} />
                     {!isColorControlDisabled && <div className="toolbar__shortcut-hint">{renderToolShortcutHint("color", "mainPanel")}</div>}
                   </li>
+
                   <li onClick={() => setToolbarSlide("width-slide")}>
                     <button tabIndex={-1} className={`toolbar__width-picker ${widthList[activeWidthIndex].name}`} title={renderToolTitle("brushSize", "mainPanel")}>
                       <div />
                     </button>
                     <div className="toolbar__shortcut-hint">{renderToolShortcutHint("brushSize", "mainPanel")}</div>
                   </li>
-                  <li className="cross-line"></li>
-                  <li onClick={handleClearDesk}>
-                    <button tabIndex={-1} title={renderToolTitle("clearDesk", "mainPanel")}>
-                      <Icons.Trash />
-                    </button>
-                    {toolConfig.clearDesk.mainPanel && (
-                      <div className="toolbar__shortcut-hint">{renderToolShortcutHint("clearDesk", "mainPanel")}</div>
-                    )}
-                  </li>
+
+                  {
+                    toolbarOptions.tool_bar_show_clear_desk && (
+                      <>
+                        <li className="cross-line"></li>
+
+                        <li onClick={handleClearDesk}>
+                          <button tabIndex={-1} title={renderToolTitle("clear_desk", "mainPanel")}>
+                            <Icons.Trash />
+                          </button>
+
+                          {
+                            toolConfig.clear_desk.mainPanel && (
+                              <div className="toolbar__shortcut-hint">{renderToolShortcutHint("clear_desk", "mainPanel")}</div>
+                            )
+                          }
+                        </li>
+                      </>
+                    )
+                  }
                 </ul>
               </div>
 
               <div className="side-view-body brush-group">
                 <ul className="toolbar__items">
-                  <li className={activeTool === "brush" ? "active" : undefined} onClick={() => pickTool("brush")}>
-                    <button tabIndex={-1} title={renderToolTitle("brush", "subPanel")}>
-                      <Icons.Brush />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("brush", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "pen" ? "active" : undefined} onClick={() => pickTool("pen")}>
-                    <button tabIndex={-1} title={renderToolTitle("pen", "subPanel")}>
-                      <Icons.Pen />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("pen", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "fadepen" ? "active" : undefined} onClick={() => pickTool("fadepen")}>
-                    <button tabIndex={-1} title={renderToolTitle("fadepen", "subPanel")}>
-                      <Icons.MagicPen />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("fadepen", "subPanel")}</div>
-                  </li>
+                  {
+                    toolbarOptions.tool_bar_show_brush && (
+                      <li className={activeTool === "brush" ? "active" : undefined} onClick={() => pickTool("brush")}>
+                        <button tabIndex={-1} title={renderToolTitle("brush", "subPanel")}>
+                          <Icons.Brush />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("brush", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_pen && (
+                      <li className={activeTool === "pen" ? "active" : undefined} onClick={() => pickTool("pen")}>
+                        <button tabIndex={-1} title={renderToolTitle("pen", "subPanel")}>
+                          <Icons.Pen />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("pen", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_fadepen && (
+                      <li className={activeTool === "fadepen" ? "active" : undefined} onClick={() => pickTool("fadepen")}>
+                        <button tabIndex={-1} title={renderToolTitle("fadepen", "subPanel")}>
+                          <Icons.MagicPen />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("fadepen", "subPanel")}</div>
+                      </li>
+                    )
+                  }
                 </ul>
               </div>
 
               <div className="side-view-body tool-group">
                 <ul className="toolbar__items">
-                  <li className={activeTool === "arrow" ? "active" : undefined} onClick={() => pickTool("arrow")}>
-                    <button tabIndex={-1} title={renderToolTitle("arrow", "subPanel")}>
-                      <Icons.Arrow />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("arrow", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "flat_arrow" ? "active" : undefined} onClick={() => pickTool("flat_arrow")}>
-                    <button tabIndex={-1} title={renderToolTitle("flat_arrow", "subPanel")}>
-                      <Icons.FlatArrow />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("flat_arrow", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "rectangle" ? "active" : undefined} onClick={() => pickTool("rectangle")}>
-                    <button tabIndex={-1} title={renderToolTitle("rectangle", "subPanel")}>
-                      <Icons.Rectangle />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("rectangle", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "diamond" ? "active" : undefined} onClick={() => pickTool("diamond")}>
-                    <button tabIndex={-1} title={renderToolTitle("diamond", "subPanel")}>
-                      <Icons.Diamond />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("diamond", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "oval" ? "active" : undefined} onClick={() => pickTool("oval")}>
-                    <button tabIndex={-1} title={renderToolTitle("oval", "subPanel")}>
-                      <Icons.Oval />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("oval", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "line" ? "active" : undefined} onClick={() => pickTool("line")}>
-                    <button tabIndex={-1} title={renderToolTitle("line", "subPanel")}>
-                      <Icons.Line />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("line", "subPanel")}</div>
-                  </li>
-                  <li className={activeTool === "stamp" ? "active" : undefined} onClick={() => pickTool("stamp")}>
-                    <button tabIndex={-1} title={renderToolTitle("stamp", "subPanel")}>
-                      <Icons.Stamp />
-                    </button>
-                    <div className="toolbar__shortcut-hint">{renderToolShortcutHint("stamp", "subPanel")}</div>
-                  </li>
+                  {
+                    toolbarOptions.tool_bar_show_arrow && (
+                      <li className={activeTool === "arrow" ? "active" : undefined} onClick={() => pickTool("arrow")}>
+                        <button tabIndex={-1} title={renderToolTitle("arrow", "subPanel")}>
+                          <Icons.Arrow />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("arrow", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_flat_arrow && (
+                      <li className={activeTool === "flat_arrow" ? "active" : undefined} onClick={() => pickTool("flat_arrow")}>
+                        <button tabIndex={-1} title={renderToolTitle("flat_arrow", "subPanel")}>
+                          <Icons.FlatArrow />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("flat_arrow", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_rectangle && (
+                      <li className={activeTool === "rectangle" ? "active" : undefined} onClick={() => pickTool("rectangle")}>
+                        <button tabIndex={-1} title={renderToolTitle("rectangle", "subPanel")}>
+                          <Icons.Rectangle />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("rectangle", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_diamond && (
+                      <li className={activeTool === "diamond" ? "active" : undefined} onClick={() => pickTool("diamond")}>
+                        <button tabIndex={-1} title={renderToolTitle("diamond", "subPanel")}>
+                          <Icons.Diamond />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("diamond", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_oval && (
+                      <li className={activeTool === "oval" ? "active" : undefined} onClick={() => pickTool("oval")}>
+                        <button tabIndex={-1} title={renderToolTitle("oval", "subPanel")}>
+                          <Icons.Oval />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("oval", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_line && (
+                      <li className={activeTool === "line" ? "active" : undefined} onClick={() => pickTool("line")}>
+                        <button tabIndex={-1} title={renderToolTitle("line", "subPanel")}>
+                          <Icons.Line />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("line", "subPanel")}</div>
+                      </li>
+                    )
+                  }
+
+                  {
+                    toolbarOptions.tool_bar_show_stamp && (
+                      <li className={activeTool === "stamp" ? "active" : undefined} onClick={() => pickTool("stamp")}>
+                        <button tabIndex={-1} title={renderToolTitle("stamp", "subPanel")}>
+                          <Icons.Stamp />
+                        </button>
+                        <div className="toolbar__shortcut-hint">{renderToolShortcutHint("stamp", "subPanel")}</div>
+                      </li>
+                    )
+                  }
                 </ul>
               </div>
 

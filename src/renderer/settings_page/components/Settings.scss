@@ -28,6 +28,7 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
+  scrollbar-width: none;
   font-family: var(--font-primary);
   font-size: 10px;
   background-color: var(--gray-300);
@@ -154,6 +155,7 @@ html, body {
           .settings-title {
             font-size: 13px;
             font-weight: 500;
+            line-height: 16px;
           }
         }
 
@@ -163,6 +165,116 @@ html, body {
             border-radius: 20px;
             padding: 2px 15px;
             border: 2px solid var(--gray-75);
+
+            .toolbar-customization-group {
+              border-bottom: 1px solid var(--gray-300);
+
+              .settings-item {
+                border-bottom: none;
+                user-select: none;
+
+                .settings-item-hint {
+                  .icon {
+                    transition: transform 0.2s ease;
+                  }
+                }
+              }
+
+              .settings-group-content {
+                display: grid;
+                grid-template-rows: 0fr;
+                transition: grid-template-rows 0.2s ease;
+
+                .settings-group-content-inner {
+                  min-height: 0;
+                  overflow: hidden;
+
+                  .toolbar-customization-tools {
+                    display: flex;
+                    padding-bottom: 12px;
+
+                    &.toolbar-customization-tools--brushes {
+                      gap: var(--space-lg);
+                    }
+
+                    &.toolbar-customization-tools--shapes {
+                      justify-content: space-between;
+                      gap: 0;
+                    }
+
+                    .toolbar-customization-tool {
+                      display: flex;
+                      flex: 0 0 65px;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 8px;
+                      box-sizing: border-box;
+                      padding: 10px 0;
+                      border: 1px solid var(--gray-400);
+                      border-radius: 10px;
+
+                      .toolbar-customization-tool-icon {
+                        width: 16px;
+                        height: 16px;
+                      }
+
+                      .toolbar-customization-tool-title {
+                        font-weight: 500;
+                      }
+
+                      .toolbar-customization-tool-toggle {
+                        position: relative;
+                        width: 44px;
+                        height: 24px;
+                        background-color: var(--gray-400);
+                        border-radius: 12px;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease;
+
+                        &::after {
+                          content: '';
+                          position: absolute;
+                          top: 2px;
+                          left: 2px;
+                          width: 20px;
+                          height: 20px;
+                          background-color: var(--gray-25);
+                          border-radius: 50%;
+                          transition: transform 0.3s ease;
+                        }
+
+                        &.active {
+                          background-color: var(--blue-500);
+
+                          &::after {
+                            transform: translateX(20px);
+                          }
+                        }
+
+                        &:active::after {
+                          transform: scale(0.95);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              &.expanded {
+                .settings-item {
+                  .settings-item-hint {
+                    .icon {
+                      transform: rotate(90deg);
+                    }
+                  }
+                }
+
+                .settings-group-content {
+                  grid-template-rows: 1fr;
+                }
+              }
+            }
 
             .settings-item {
               display: flex;
@@ -177,7 +289,7 @@ html, body {
 
               .settings-item-hint {
                 display: flex;
-                margin: 4px 10px 0 0;
+                margin-right: var(--space-lg);
 
                 svg {
                   width: 16px;

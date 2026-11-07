@@ -1,6 +1,6 @@
 import './Application.scss';
 
-import React, { useCallback, useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { throttle, debounce } from 'lodash';
 import DrawDesk from './components/DrawDesk.js';
 import ToolBar from './components/ToolBar.js';
@@ -186,6 +186,52 @@ const Application = (settings) => {
   const [zoomInfo, setZoomInfo] = useState({ status: 'inactive' }); // 'inactive', 'capturing', 'zooming', 'drawing', 'resuming', 'exiting'
   const [toastInfo, setToastInfo] = useState(null);
   const [fadeOpacity, setFadeOpacity] = useState(1.0);
+  const [toolbarOptions, setToolbarOptions] = useState({
+    tool_bar_show_brush:       settings.tool_bar_show_brush,
+    tool_bar_show_pen:         settings.tool_bar_show_pen,
+    tool_bar_show_fadepen:     settings.tool_bar_show_fadepen,
+    tool_bar_show_arrow:       settings.tool_bar_show_arrow,
+    tool_bar_show_flat_arrow:  settings.tool_bar_show_flat_arrow,
+    tool_bar_show_rectangle:   settings.tool_bar_show_rectangle,
+    tool_bar_show_diamond:     settings.tool_bar_show_diamond,
+    tool_bar_show_oval:        settings.tool_bar_show_oval,
+    tool_bar_show_line:        settings.tool_bar_show_line,
+    tool_bar_show_stamp:       settings.tool_bar_show_stamp,
+    tool_bar_show_text:        settings.tool_bar_show_text,
+    tool_bar_show_highlighter: settings.tool_bar_show_highlighter,
+    tool_bar_show_laser:       settings.tool_bar_show_laser,
+    tool_bar_show_eraser:      settings.tool_bar_show_eraser,
+    tool_bar_show_clear_desk:  settings.tool_bar_show_clear_desk,
+  });
+
+  const visibleTools = useMemo(() => {
+    const isVisible = (tool) => toolbarOptions[`tool_bar_show_${tool}`];
+    const visibleBrushes = drawingToolList.filter(isVisible);
+    const visibleShapes = shapeList.filter(isVisible);
+    const toolbarItems = [];
+
+    if (visibleBrushes.length) toolbarItems.push('brushes');
+    if (visibleShapes.length) toolbarItems.push('shapes');
+    if (toolbarOptions.tool_bar_show_text) toolbarItems.push('text');
+    if (toolbarOptions.tool_bar_show_highlighter) toolbarItems.push('highlighter');
+    if (toolbarOptions.tool_bar_show_laser) toolbarItems.push('laser');
+    if (toolbarOptions.tool_bar_show_eraser) toolbarItems.push('eraser');
+    toolbarItems.push('color', 'brushSize');
+
+    let selectedBrush = visibleBrushes[0];
+    let selectedShape = visibleShapes[0];
+
+    if (visibleBrushes.includes(toolbarLastActiveBrush)) selectedBrush = toolbarLastActiveBrush;
+    if (visibleShapes.includes(toolbarLastActiveFigure)) selectedShape = toolbarLastActiveFigure;
+
+    return {
+      brushes: visibleBrushes,
+      shapes: visibleShapes,
+      toolbarItems,
+      selectedBrush,
+      selectedShape
+    };
+  }, [toolbarOptions, toolbarLastActiveBrush, toolbarLastActiveFigure]);
 
   const drawingInProgressRef = useRef(false);
   useLayoutEffect(() => {
@@ -257,8 +303,12 @@ const Application = (settings) => {
       setIsShiftPressed(true);
     }
 
-    if (eventCode === 'SPACE' && !eventRepeat) {
-      setIsSpacePressed(true);
+    if (eventCode === 'SPACE') {
+      event.preventDefault();
+
+      if (!eventRepeat) {
+        setIsSpacePressed(true);
+      }
     }
 
     if (isDrawing || isActiveFigureMoving()) {
@@ -596,115 +646,92 @@ const Application = (settings) => {
       }
     }
 
-    if (toolbarSlide === 'main-slide') {
-      switch (eventCode) {
-        case 'DIGIT1': {
-          let nextBrush = toolbarLastActiveBrush;
+    const digit = eventCode.match(/^DIGIT([1-9])$/);
 
-          if (activeTool === toolbarLastActiveBrush) {
-            nextBrush = getNextVariant(drawingToolList, activeTool, direction);
-          }
+    if (digit) {
+      const digitIndex = Number(digit[1]) - 1;
 
-          handleChangeTool(nextBrush);
-          break;
-        }
-        case 'DIGIT2': {
-          let nextShape = toolbarLastActiveFigure;
+      if (toolbarSlide === 'main-slide') {
+        const tool = visibleTools.toolbarItems[digitIndex];
 
-          if (activeTool === toolbarLastActiveFigure) {
-            nextShape = getNextVariant(shapeList, activeTool, direction);
-          }
+        switch (tool) {
+          case 'brushes': {
+            let selectedTool = visibleTools.selectedBrush;
 
-          handleChangeTool(nextShape);
-          break;
-        }
-        case 'DIGIT3': {
-          handleChangeTool('text');
-          break;
-        }
-        case 'DIGIT4': {
-          handleChangeTool('highlighter');
-          break;
-        }
-        case 'DIGIT5': {
-          handleChangeTool('laser');
-          break;
-        }
-        case 'DIGIT6': {
-          handleChangeTool('eraser');
-          break;
-        }
-        case 'DIGIT7': {
-          if (['eraser', 'laser'].includes(activeTool)) {
+            if (activeTool === selectedTool) {
+              selectedTool = getNextVariant(visibleTools.brushes, activeTool, direction);
+            }
+
+            handleChangeTool(selectedTool);
             break;
           }
-          const nextColorIndex = (activeColorIndex + direction + colorList.length) % colorList.length;
+          case 'shapes': {
+            let selectedTool = visibleTools.selectedShape;
 
-          handleChangeColor(nextColorIndex);
-          break;
-        }
-        case 'DIGIT8': {
-          const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
+            if (activeTool === selectedTool) {
+              selectedTool = getNextVariant(visibleTools.shapes, activeTool, direction);
+            }
 
-          handleChangeWidth(nextWidthIndex);
-          break;
+            handleChangeTool(selectedTool);
+            break;
+          }
+          case 'color': {
+            if (['eraser', 'laser'].includes(activeTool)) {
+              break;
+            }
+            const nextColorIndex = (activeColorIndex + direction + colorList.length) % colorList.length;
+
+            handleChangeColor(nextColorIndex);
+            break;
+          }
+          case 'brushSize': {
+            const nextWidthIndex = (activeWidthIndex + direction + widthList.length) % widthList.length;
+
+            handleChangeWidth(nextWidthIndex);
+            break;
+          }
+          default:
+            if (tool) handleChangeTool(tool);
         }
+
+        return;
       }
 
-      return;
-    }
+      switch (toolbarSlide) {
+        case 'brush-slide':
+          if (digitIndex < visibleTools.brushes.length) {
+            handleChangeTool(visibleTools.brushes[digitIndex]);
+            setToolbarSlide("main-slide");
+          }
+          break;
 
-    let digitIndex = null;
-    if (eventCode === 'DIGIT1') digitIndex = 0;
-    if (eventCode === 'DIGIT2') digitIndex = 1;
-    if (eventCode === 'DIGIT3') digitIndex = 2;
-    if (eventCode === 'DIGIT4') digitIndex = 3;
-    if (eventCode === 'DIGIT5') digitIndex = 4;
-    if (eventCode === 'DIGIT6') digitIndex = 5;
-    if (eventCode === 'DIGIT7') digitIndex = 6;
-    if (eventCode === 'DIGIT8') digitIndex = 7;
-    if (eventCode === 'DIGIT9') digitIndex = 8;
-    if (digitIndex === null) return;
+        case 'tool-slide':
+          if (digitIndex < visibleTools.shapes.length) {
+            handleChangeTool(visibleTools.shapes[digitIndex]);
+            setToolbarSlide("main-slide");
+          }
+          break;
 
-    switch (toolbarSlide) {
-      case 'brush-slide': {
-        if (digitIndex < drawingToolList.length) {
-          handleChangeTool(drawingToolList[digitIndex]);
-          setToolbarSlide("main-slide");
-        }
-        break;
+        case 'color-slide':
+          if (digitIndex < colorList.length) {
+            handleChangeColor(digitIndex);
+            setToolbarSlide("main-slide");
+          }
+          break;
+
+        case 'width-slide':
+          if (digitIndex < widthList.length) {
+            handleChangeWidth(digitIndex);
+            setToolbarSlide("main-slide");
+          }
+          break;
       }
-
-      case 'tool-slide':
-        if (digitIndex < shapeList.length) {
-          handleChangeTool(shapeList[digitIndex]);
-          setToolbarSlide("main-slide");
-        }
-        break;
-
-      case 'color-slide':
-        if (digitIndex < colorList.length) {
-          handleChangeColor(digitIndex);
-          setToolbarSlide("main-slide");
-        }
-        break;
-
-      case 'width-slide':
-        if (digitIndex < widthList.length) {
-          handleChangeWidth(digitIndex);
-          setToolbarSlide("main-slide");
-        }
-        break;
     }
-  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, toolbarLastActiveBrush, toolbarLastActiveFigure, lastActivePen, lastActiveArrow, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex, colorList, zoomInfo]);
+  }, [allFigures, undoStackFigures, redoStackFigures, clipboardFigure, isDrawing, activeFigureInfo, activeTool, activeColorIndex, activeWidthIndex, lastActivePen, lastActiveArrow, toolbarSlide, textEditorContainer, mouseCoordinates, mainColorIndex, secondaryColorIndex, colorList, zoomInfo, visibleTools]);
 
   const handleKeyUp = useCallback((event) => {
     const eventKey = (event.key || '').toUpperCase();
     const eventCode = (event.code || '').toUpperCase();
-
-    if (textEditorContainer) {
-      return
-    }
 
     if (eventKey === 'SHIFT') {
       setIsShiftPressed(false);
@@ -712,10 +739,13 @@ const Application = (settings) => {
 
     if (eventCode === 'SPACE') {
       setIsSpacePressed(false);
-
-      event.preventDefault();
     }
-  }, [textEditorContainer]);
+  }, []);
+
+  const handleWindowBlur = useCallback(() => {
+    setIsShiftPressed(false);
+    setIsSpacePressed(false);
+  }, []);
 
   const parseAccelerator = (shortcut) => {
     if (!shortcut) return null
@@ -784,12 +814,14 @@ const Application = (settings) => {
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleWindowBlur);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleWindowBlur);
     };
-  }, [handleKeyDown, handleKeyUp]);
+  }, [handleKeyDown, handleKeyUp, handleWindowBlur]);
 
   useEffect(() => {
     setToolbarSlide('main-slide');
@@ -1874,6 +1906,24 @@ const Application = (settings) => {
     setClearDrawingsOnHide(newSettings.clear_drawings_on_hide);
     setMainColorIndex(newSettings.swap_colors_indexes[0]);
     setSecondaryColorIndex(newSettings.swap_colors_indexes[1]);
+    setToolbarSlide('main-slide');
+    setToolbarOptions({
+      tool_bar_show_brush:       newSettings.tool_bar_show_brush,
+      tool_bar_show_pen:         newSettings.tool_bar_show_pen,
+      tool_bar_show_fadepen:     newSettings.tool_bar_show_fadepen,
+      tool_bar_show_arrow:       newSettings.tool_bar_show_arrow,
+      tool_bar_show_flat_arrow:  newSettings.tool_bar_show_flat_arrow,
+      tool_bar_show_rectangle:   newSettings.tool_bar_show_rectangle,
+      tool_bar_show_diamond:     newSettings.tool_bar_show_diamond,
+      tool_bar_show_oval:        newSettings.tool_bar_show_oval,
+      tool_bar_show_line:        newSettings.tool_bar_show_line,
+      tool_bar_show_stamp:       newSettings.tool_bar_show_stamp,
+      tool_bar_show_text:        newSettings.tool_bar_show_text,
+      tool_bar_show_highlighter: newSettings.tool_bar_show_highlighter,
+      tool_bar_show_laser:       newSettings.tool_bar_show_laser,
+      tool_bar_show_eraser:      newSettings.tool_bar_show_eraser,
+      tool_bar_show_clear_desk:  newSettings.tool_bar_show_clear_desk,
+    });
   };
 
   const handleUpdateToolbarPosition = (newSettings) => {
@@ -2195,9 +2245,9 @@ const Application = (settings) => {
             setIsCollapsed={setToolbarCollapsed}
             isReversed={toolbarReversed}
             shortcutHintsDisabled={Boolean(textEditorContainer)}
+            toolbarOptions={toolbarOptions}
+            visibleTools={visibleTools}
             clearDeskShortcut={key_clear_desk}
-            lastActiveBrush={toolbarLastActiveBrush}
-            lastActiveFigure={toolbarLastActiveFigure}
             activeTool={activeTool}
             activeColorIndex={activeColorIndex}
             activeWidthIndex={activeWidthIndex}

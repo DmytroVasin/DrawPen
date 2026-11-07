@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setAppIconColor: (value) => ipcRenderer.invoke('set_app_icon_color', value),
   setSwapColors: (value) => ipcRenderer.invoke('set_swap_colors', value),
   setToolbarColor: (colorId, value) => ipcRenderer.invoke('set_toolbar_color', colorId, value),
+  setToolbarVisibility: (options) => ipcRenderer.invoke('set_toolbar_visibility', options),
   setDrawingMonitor: (value) => ipcRenderer.invoke('set_drawing_monitor', value),
   setDisableToolbarInPointerMode: (value) => ipcRenderer.invoke('set_disable_toolbar_in_pointer_mode', value),
   setToolbarOrientation: (value) => ipcRenderer.invoke('set_toolbar_orientation', value),

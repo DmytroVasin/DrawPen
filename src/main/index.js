@@ -136,6 +136,66 @@ const schema = {
     type: 'boolean',
     default: false
   },
+  tool_bar_show_brush: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_pen: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_fadepen: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_arrow: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_flat_arrow: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_rectangle: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_diamond: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_oval: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_line: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_stamp: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_text: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_highlighter: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_laser: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_eraser: {
+    type: 'boolean',
+    default: true
+  },
+  tool_bar_show_clear_desk: {
+    type: 'boolean',
+    default: true
+  },
   active_monitor_id: { // show on what monitor we renderED draw window last time
     type: 'number',
   },
@@ -614,7 +674,7 @@ function createSettingsWindow() {
   settingsWindow = new BrowserWindow({
     show: false,
     width: 800,
-    height: 560,
+    height: 605, // Expanded Toolbar: 549px + 36px header + 20px outer padding.
     useContentSize: true,
     resizable: false,
     minimizable: false,
@@ -759,6 +819,23 @@ ipcMain.handle('get_settings', () => {
     tool_bar_default_brush: store.get('tool_bar_default_brush'),
     tool_bar_default_figure: store.get('tool_bar_default_figure'),
     tool_bar_collapsed: store.get('tool_bar_collapsed'),
+
+    tool_bar_show_brush: store.get('tool_bar_show_brush'),
+    tool_bar_show_pen: store.get('tool_bar_show_pen'),
+    tool_bar_show_fadepen: store.get('tool_bar_show_fadepen'),
+    tool_bar_show_arrow: store.get('tool_bar_show_arrow'),
+    tool_bar_show_flat_arrow: store.get('tool_bar_show_flat_arrow'),
+    tool_bar_show_rectangle: store.get('tool_bar_show_rectangle'),
+    tool_bar_show_diamond: store.get('tool_bar_show_diamond'),
+    tool_bar_show_oval: store.get('tool_bar_show_oval'),
+    tool_bar_show_line: store.get('tool_bar_show_line'),
+    tool_bar_show_stamp: store.get('tool_bar_show_stamp'),
+    tool_bar_show_text: store.get('tool_bar_show_text'),
+    tool_bar_show_highlighter: store.get('tool_bar_show_highlighter'),
+    tool_bar_show_laser: store.get('tool_bar_show_laser'),
+    tool_bar_show_eraser: store.get('tool_bar_show_eraser'),
+    tool_bar_show_clear_desk: store.get('tool_bar_show_clear_desk'),
+
     swap_colors_indexes: store.get('swap_colors_indexes'),
     fade_disappear_after_ms: store.get('fade_disappear_after_ms'),
     fade_out_duration_time_ms: store.get('fade_out_duration_time_ms'),
@@ -904,6 +981,22 @@ ipcMain.handle('get_configuration', () => {
     clear_drawings_on_hide:                   store.get('clear_drawings_on_hide'),
     disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
     tool_bar_orientation:                     store.get('tool_bar_orientation'),
+
+    tool_bar_show_brush:                      store.get('tool_bar_show_brush'),
+    tool_bar_show_pen:                        store.get('tool_bar_show_pen'),
+    tool_bar_show_fadepen:                    store.get('tool_bar_show_fadepen'),
+    tool_bar_show_arrow:                      store.get('tool_bar_show_arrow'),
+    tool_bar_show_flat_arrow:                 store.get('tool_bar_show_flat_arrow'),
+    tool_bar_show_rectangle:                  store.get('tool_bar_show_rectangle'),
+    tool_bar_show_diamond:                    store.get('tool_bar_show_diamond'),
+    tool_bar_show_oval:                       store.get('tool_bar_show_oval'),
+    tool_bar_show_line:                       store.get('tool_bar_show_line'),
+    tool_bar_show_stamp:                      store.get('tool_bar_show_stamp'),
+    tool_bar_show_text:                       store.get('tool_bar_show_text'),
+    tool_bar_show_highlighter:                store.get('tool_bar_show_highlighter'),
+    tool_bar_show_laser:                      store.get('tool_bar_show_laser'),
+    tool_bar_show_eraser:                     store.get('tool_bar_show_eraser'),
+    tool_bar_show_clear_desk:                 store.get('tool_bar_show_clear_desk'),
 
     screenshot_directory:                     store.get('screenshot_directory'),
     screenshot_directory_is_default:          store.get('screenshot_directory') === schema.screenshot_directory.default,
@@ -1149,6 +1242,16 @@ ipcMain.handle('set_toolbar_color', (_event, colorId, normalizedColor) => {
   return null
 });
 
+ipcMain.handle('set_toolbar_visibility', (_event, options) => {
+  rawLog('Setting toolbar visibility:', options)
+
+  store.set(options)
+
+  refreshSettingsInRenderer();
+
+  return null
+});
+
 ipcMain.handle('set_fade_disappear_after_ms', (_event, value) => {
   rawLog('Setting fade disappear after:', value)
 
@@ -1218,17 +1321,33 @@ ipcMain.handle('set_toolbar_orientation', (_event, value) => {
 
 function refreshSettingsInRenderer() {
   mainWindow.webContents.send('refresh_settings', {
-    whiteboard_color:        store.get('whiteboard_color'),
-    whiteboard_layout:       store.get('whiteboard_layout'),
-    whiteboard_opacity:      store.get('whiteboard_opacity'),
-    whiteboard_style:        store.get('whiteboard_style'),
-    whiteboard_spacing:      store.get('whiteboard_spacing'),
-    show_drawing_border:     store.get('show_drawing_border'),
-    cute_cursor_mode:        store.get('cute_cursor_mode'),
-    pen_smoothing:           store.get('pen_smoothing'),
-    tool_bar_color_palette:  store.get('tool_bar_color_palette'),
-    swap_colors_indexes:     store.get('swap_colors_indexes'),
-    clear_drawings_on_hide:  store.get('clear_drawings_on_hide'),
+    whiteboard_color:          store.get('whiteboard_color'),
+    whiteboard_layout:         store.get('whiteboard_layout'),
+    whiteboard_opacity:        store.get('whiteboard_opacity'),
+    whiteboard_style:          store.get('whiteboard_style'),
+    whiteboard_spacing:        store.get('whiteboard_spacing'),
+    show_drawing_border:       store.get('show_drawing_border'),
+    cute_cursor_mode:          store.get('cute_cursor_mode'),
+    pen_smoothing:             store.get('pen_smoothing'),
+    tool_bar_color_palette:    store.get('tool_bar_color_palette'),
+    swap_colors_indexes:       store.get('swap_colors_indexes'),
+    clear_drawings_on_hide:    store.get('clear_drawings_on_hide'),
+
+    tool_bar_show_brush:       store.get('tool_bar_show_brush'),
+    tool_bar_show_pen:         store.get('tool_bar_show_pen'),
+    tool_bar_show_fadepen:     store.get('tool_bar_show_fadepen'),
+    tool_bar_show_arrow:       store.get('tool_bar_show_arrow'),
+    tool_bar_show_flat_arrow:  store.get('tool_bar_show_flat_arrow'),
+    tool_bar_show_rectangle:   store.get('tool_bar_show_rectangle'),
+    tool_bar_show_diamond:     store.get('tool_bar_show_diamond'),
+    tool_bar_show_oval:        store.get('tool_bar_show_oval'),
+    tool_bar_show_line:        store.get('tool_bar_show_line'),
+    tool_bar_show_stamp:       store.get('tool_bar_show_stamp'),
+    tool_bar_show_text:        store.get('tool_bar_show_text'),
+    tool_bar_show_highlighter: store.get('tool_bar_show_highlighter'),
+    tool_bar_show_laser:       store.get('tool_bar_show_laser'),
+    tool_bar_show_eraser:      store.get('tool_bar_show_eraser'),
+    tool_bar_show_clear_desk:  store.get('tool_bar_show_clear_desk'),
   })
 }
 
