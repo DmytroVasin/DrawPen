@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.62] - 2026-11-14
+### Features:
+- Added a Toolbar tab in Settings to show or hide individual tools and entire tool groups
+
+### Bug Fixes:
+- Fixed Shift and Space remaining pressed after editing text or switching windows
+
 ## [0.0.61] - 2026-11-07
 ### Features:
 - Added a Stamp figure
