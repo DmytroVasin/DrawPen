@@ -272,6 +272,10 @@ const schema = {
     type: 'string',
     default: path.join(app.getPath('pictures'), 'drawpen'),
   },
+  screenshot_directory_bookmark: {
+    type: 'string',
+    default: '',
+  },
 };
 
 // rawLog('[STORE PATH]:', app.getPath('userData') + '/config.json');
@@ -304,6 +308,7 @@ let mainWindow
 let extendedToolbarWindow
 let aboutWindow
 let settingsWindow
+let releaseScreenshotDirectoryAccessFn
 
 let isQuitting = false
 let startAsHidden = false
@@ -721,6 +726,7 @@ app.on('second-instance', () => {
 app.commandLine.appendSwitch('disable-pinch');
 
 app.whenReady().then(() => {
+  startScreenshotDirectoryAccess()
   launchTracker()
 
   hideDock()
@@ -754,6 +760,7 @@ app.on('before-quit', () => {
 app.on('will-quit', () => {
   rawLog('Will quit app... (Unregister all shortcuts)')
 
+  stopScreenshotDirectoryAccess()
   unRegisterGlobalShortcuts()
 });
 
@@ -954,6 +961,12 @@ ipcMain.handle('open_notification', (_event, info) => {
 
     return null
   }
+
+  if (info.action === 'open_settings') {
+    showSettingsWindow()
+
+    return null
+  }
 });
 
 ipcMain.handle('reset_to_originals', () => {
@@ -1026,6 +1039,7 @@ ipcMain.handle('choose_screenshot_directory', async () => {
     title: 'Choose screenshot folder',
     buttonLabel: 'Choose',
     properties: isMac ? ['openDirectory', 'createDirectory'] : ['openDirectory'],
+    securityScopedBookmarks: isMas,
   }
 
   if (fs.existsSync(screenshotDirectory)) {
@@ -1040,6 +1054,18 @@ ipcMain.handle('choose_screenshot_directory', async () => {
 
     const selectedDirectory = result.filePaths[0]
 
+    if (isMas) {
+      const bookmark = result.bookmarks?.[0]
+
+      if (!bookmark) {
+        throw new Error('Unable to remember access to this folder. Please choose the folder again.')
+      }
+
+      store.set('screenshot_directory_bookmark', bookmark)
+      stopScreenshotDirectoryAccess()
+      startScreenshotDirectoryAccess()
+    }
+
     store.set('screenshot_directory', selectedDirectory)
 
     return {
@@ -1053,7 +1079,8 @@ ipcMain.handle('choose_screenshot_directory', async () => {
 });
 
 ipcMain.handle('reset_screenshot_directory', () => {
-  store.reset('screenshot_directory')
+  store.reset('screenshot_directory', 'screenshot_directory_bookmark')
+  stopScreenshotDirectoryAccess()
 
   return {
     path: store.get('screenshot_directory'),
@@ -1509,6 +1536,7 @@ function resetApp() {
     const preservedUserId = store.get('user_id')
 
     store.clear()
+    stopScreenshotDirectoryAccess()
 
     if (preservedUserId) {
       store.set('user_id', preservedUserId)
@@ -1766,14 +1794,37 @@ async function makeScreenshot() {
       button_data: screenshotName,
     });
   } catch (error) {
+    const isDirectoryAccessError = isMas && ['EACCES', 'EPERM'].includes(error.code)
+
     sendNotification({
       title: 'Image export failed',
-      body: error.message,
+      body: isDirectoryAccessError ? 'Choose the screenshot folder again in Settings to allow DrawPen to access it.' : error.message,
       button_label: isMac ? 'Settings' : null,
-      button_action: isMac ? 'open_security_preferences' : null,
+      button_action: isMac ? (isDirectoryAccessError ? 'open_settings' : 'open_security_preferences') : null,
       button_data: null,
     });
   }
+}
+
+function startScreenshotDirectoryAccess() {
+  if (!isMas) return
+  if (releaseScreenshotDirectoryAccessFn) return
+
+  const bookmark = store.get('screenshot_directory_bookmark')
+  if (!bookmark) return
+
+  try {
+    releaseScreenshotDirectoryAccessFn = app.startAccessingSecurityScopedResource(bookmark)
+  } catch (error) {
+    rawLog('Unable to restore screenshot folder access:', error)
+  }
+}
+
+function stopScreenshotDirectoryAccess() {
+  if (!releaseScreenshotDirectoryAccessFn) return
+
+  releaseScreenshotDirectoryAccessFn()
+  releaseScreenshotDirectoryAccessFn = undefined
 }
 
 function sendNotification(data) {
@@ -2072,7 +2123,7 @@ function launchTracker() {
       flushAt: 1
     })
 
-    const { screenshot_directory, ...analyticsConfig } = store.store
+    const { screenshot_directory, screenshot_directory_bookmark, ...analyticsConfig } = store.store
 
     posthog.capture({
       distinctId: store.get('user_id') || 'anonymous',

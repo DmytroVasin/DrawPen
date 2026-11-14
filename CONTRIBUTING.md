@@ -35,3 +35,13 @@ The app stores its settings between restarts in the file. To reset the settings 
 # app.getPath('userData')
 rm /Users/your_user_name/Library/Application\ Support/drawpen/config.json
 ```
+
+## Mac App (MAS)
+
+Mac App Store builds store a security-scoped bookmark alongside a screenshot folder selected in Settings.
+
+The MAS signing configuration must enable these file-access entitlements:
+
+- `com.apple.security.assets.pictures.read-write` for the default `Pictures/drawpen` folder.
+- `com.apple.security.files.user-selected.read-write` for folders selected in Settings.
+- `com.apple.security.files.bookmarks.app-scope` to restore access after restarting DrawPen.
