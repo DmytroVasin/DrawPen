@@ -1015,8 +1015,8 @@ ipcMain.handle('get_configuration', () => {
     tool_bar_show_eraser:                     store.get('tool_bar_show_eraser'),
     tool_bar_show_clear_desk:                 store.get('tool_bar_show_clear_desk'),
 
-    screenshot_directory:                     store.get('screenshot_directory'),
-    screenshot_directory_is_default:          store.get('screenshot_directory') === schema.screenshot_directory.default,
+    screenshot_directory:                     getDisplayPath(store.get('screenshot_directory')),
+    screenshot_directory_is_default:          getDisplayPath(store.get('screenshot_directory')) === getDisplayPath(schema.screenshot_directory.default),
 
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
@@ -1069,8 +1069,8 @@ ipcMain.handle('choose_screenshot_directory', async () => {
     store.set('screenshot_directory', selectedDirectory)
 
     return {
-      path: selectedDirectory,
-      isDefault: selectedDirectory === schema.screenshot_directory.default,
+      path: getDisplayPath(selectedDirectory),
+      isDefault: getDisplayPath(selectedDirectory) === getDisplayPath(schema.screenshot_directory.default),
     }
   } catch (error) {
     dialog.showErrorBox('Unable to select screenshot folder', error.message)
@@ -1083,7 +1083,7 @@ ipcMain.handle('reset_screenshot_directory', () => {
   stopScreenshotDirectoryAccess()
 
   return {
-    path: store.get('screenshot_directory'),
+    path: getDisplayPath(store.get('screenshot_directory')),
     isDefault: true,
   }
 });
@@ -1751,6 +1751,16 @@ async function captureMainWindowImage() {
   })
 }
 
+function getDisplayPath(filePath) {
+  if (!isMas) return filePath
+
+  try {
+    return fs.realpathSync(filePath)
+  } catch {
+    return filePath
+  }
+}
+
 async function makeScreenshot() {
   if (zoomMode || zoomModeStarting) return
 
@@ -1788,7 +1798,7 @@ async function makeScreenshot() {
 
     sendNotification({
       title: `Click to open ${isMac ? 'in Finder' : 'folder'}`,
-      body: savePath,
+      body: getDisplayPath(savePath),
       button_label: 'Open',
       button_action: 'open_screenshot',
       button_data: screenshotName,
