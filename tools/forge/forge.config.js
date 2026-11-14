@@ -4,11 +4,15 @@ const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
 const isMasBuild = process.argv.includes('--platform=mas');
+const isMasDistribution = process.env.npm_lifecycle_event === 'make:mas';
 const isSigningEnabled = !process.argv.includes('--no-sign');
-const masProvisioningProfile = process.env.APPLE_MAS_PROVISIONING_PROFILE;
+const masProvisioningProfileKey = isMasDistribution
+  ? 'APPLE_MAS_DISTRIBUTION_PROVISIONING_PROFILE'
+  : 'APPLE_MAS_PROVISIONING_PROFILE';
+const masProvisioningProfile = process.env[masProvisioningProfileKey];
 
 if (isMasBuild && !masProvisioningProfile) {
-  throw new Error('Set APPLE_MAS_PROVISIONING_PROFILE to your development provisioning profile path.');
+  throw new Error(`Set ${masProvisioningProfileKey} to your provisioning profile path.`);
 }
 
 const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
@@ -16,8 +20,8 @@ const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
 const signingConfig = isMasBuild
   ? {
     osxSign: {
-      identity: 'Apple Development',
-      type: 'development',
+      identity: isMasDistribution ? 'Apple Distribution' : 'Apple Development',
+      type: isMasDistribution ? 'distribution' : 'development',
       provisioningProfile: masProvisioningProfile,
       continueOnError: false,
       optionsForFile: (filePath) => ({
@@ -44,9 +48,17 @@ module.exports = {
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
+    appCategoryType: isMasBuild ? 'public.app-category.productivity' : undefined,
     ...(isSigningEnabled ? signingConfig : {}),
   },
-  makers: isMasBuild ? [] : [
+  makers: isMasBuild ? [
+    {
+      name: '@electron-forge/maker-pkg',
+      config: {
+        identity: '3rd Party Mac Developer Installer',
+      },
+    },
+  ] : [
     {
       name: '@electron-forge/maker-dmg',
       config: {

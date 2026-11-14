@@ -24,6 +24,7 @@
     "package": "electron-forge package",
     "package:mas": "electron-forge package --platform=mas",
     "make": "electron-forge make",
+    "make:mas": "electron-forge make --platform=mas --arch=universal",
     "publish": "electron-forge publish"
   },
   "config": {
@@ -35,6 +36,7 @@
     "@electron-forge/cli": "^7.11.2",
     "@electron-forge/maker-deb": "^7.11.2",
     "@electron-forge/maker-dmg": "^7.11.2",
+    "@electron-forge/maker-pkg": "^7.11.2",
     "@electron-forge/maker-rpm": "^7.11.2",
     "@electron-forge/maker-squirrel": "^7.11.2",
     "@electron-forge/maker-zip": "^7.11.2",
