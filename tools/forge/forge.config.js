@@ -4,8 +4,39 @@ const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
 const isMasBuild = process.argv.includes('--platform=mas');
+const isSigningEnabled = !process.argv.includes('--no-sign');
+const masProvisioningProfile = process.env.APPLE_MAS_PROVISIONING_PROFILE;
+
+if (isMasBuild && !masProvisioningProfile) {
+  throw new Error('Set APPLE_MAS_PROVISIONING_PROFILE to your development provisioning profile path.');
+}
 
 const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
+
+const signingConfig = isMasBuild
+  ? {
+    osxSign: {
+      identity: 'Apple Development',
+      type: 'development',
+      provisioningProfile: masProvisioningProfile,
+      continueOnError: false,
+      optionsForFile: (filePath) => ({
+        entitlements: path.join(__dirname, filePath.includes('.app/')
+          ? 'entitlements.mas.inherit.plist'
+          : 'entitlements.mas.plist'),
+        hardenedRuntime: false,
+      }),
+    },
+  }
+  : {
+    osxSign: {},
+    osxNotarize: {
+      tool: 'notarytool',
+      appleId: process.env.APPLE_ID,
+      appleIdPassword: process.env.APPLE_PASSWORD,
+      teamId: process.env.APPLE_TEAM_ID,
+    },
+  };
 
 module.exports = {
   packagerConfig: {
@@ -13,17 +44,7 @@ module.exports = {
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
-    ...(isMasBuild || process.argv.includes('--no-sign')
-      ? {}
-      : {
-        osxSign: {},
-        osxNotarize: {
-          tool: 'notarytool',
-          appleId: process.env.APPLE_ID,
-          appleIdPassword: process.env.APPLE_PASSWORD,
-          teamId: process.env.APPLE_TEAM_ID,
-        },
-      }),
+    ...(isSigningEnabled ? signingConfig : {}),
   },
   makers: isMasBuild ? [] : [
     {
