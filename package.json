@@ -22,6 +22,7 @@
     "start": "NODE_ENV=development electron-forge start",
     "package_no_sign": "electron-forge package -- --no-sign",
     "package": "electron-forge package",
+    "package:mas": "electron-forge package --platform=mas",
     "make": "electron-forge make",
     "publish": "electron-forge publish"
   },

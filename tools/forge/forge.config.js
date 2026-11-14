@@ -3,6 +3,7 @@ require('dotenv').config();
 const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
+const isMasBuild = process.argv.includes('--platform=mas');
 
 const linuxIconPng = path.join(rootDir, 'assets/build/icon_512.png');
 
@@ -12,7 +13,7 @@ module.exports = {
     executableName: process.platform === 'linux' ? packageJson.name : packageJson.productName,
     icon: path.join(rootDir, 'assets/build/icon'),
     appBundleId: packageJson.appId,
-    ...(process.argv.includes('--no-sign')
+    ...(isMasBuild || process.argv.includes('--no-sign')
       ? {}
       : {
         osxSign: {},
@@ -24,7 +25,7 @@ module.exports = {
         },
       }),
   },
-  makers: [
+  makers: isMasBuild ? [] : [
     {
       name: '@electron-forge/maker-dmg',
       config: {
@@ -152,7 +153,7 @@ module.exports = {
       }
     }
   ],
-  publishers: [
+  publishers: isMasBuild ? [] : [
     {
       name: '@electron-forge/publisher-github',
       config: {
