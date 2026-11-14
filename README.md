@@ -5,6 +5,14 @@
 </p>
 
 <p align="center">
+  <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen-0.0.62-arm64.dmg'>
+    <img alt='Download on the Mac App Store' height="40px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeMacAppStore.png?raw=true'/>
+  </a>
+</p>
+
+<p align="center"><strong>Direct downloads</strong></p>
+
+<p align="center">
   <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/DrawPen.Setup.exe'>
     <img alt='Get it on Windows' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeWindows.png?raw=true'/>
   </a>
@@ -14,6 +22,10 @@
   <a href='https://github.com/DmytroVasin/DrawPen/releases/latest/download/drawpen_0.0.62_amd64.deb'>
     <img alt='Get it on Linux' width="134px" src='https://github.com/DmytroVasin/DrawPen/blob/main/assets/static/BadgeLinux.png?raw=true'/>
   </a>
+</p>
+
+<p align="center">
+  Prefer the terminal? See <a href="#installation">package manager options</a>.
 </p>
 
 ---
@@ -26,7 +38,7 @@
 
 ### Installation
 
-You can download DrawPen for **free** from [releases](https://github.com/DmytroVasin/DrawPen/releases)
+Direct downloads are **free** and available on the [releases page](https://github.com/DmytroVasin/DrawPen/releases).
 
 Or install via **package managers**:
 
