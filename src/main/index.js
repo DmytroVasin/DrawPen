@@ -1,5 +1,4 @@
-import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer, autoUpdater, dialog, clipboard, ClipboardItem } from 'electron';
-import { updateElectronApp } from 'update-electron-app';
+import { app, Tray, Menu, BrowserWindow, screen, globalShortcut, shell, ipcMain, nativeTheme, systemPreferences, desktopCapturer, dialog, clipboard, ClipboardItem } from 'electron';
 import Store from 'electron-store';
 import { randomUUID } from 'crypto';
 import { isDeepStrictEqual } from 'util';
@@ -18,6 +17,7 @@ const isDebugLoggingEnabled = process.env.DRAWPEN_DEBUG === '1'
 const isLoggingEnabled = isDevelopment || isDebugLoggingEnabled
 
 const isMac = process.platform === 'darwin'
+const isMas = process.mas === true
 const isLinux = process.platform === 'linux'
 const isWin = process.platform === 'win32'
 
@@ -751,11 +751,6 @@ app.on('before-quit', () => {
   flushExtendedToolbarPosition()
 });
 
-autoUpdater.on('before-quit-for-update', () => {
-  isQuitting = true;
-  flushExtendedToolbarPosition()
-});
-
 app.on('will-quit', () => {
   rawLog('Will quit app... (Unregister all shortcuts)')
 
@@ -787,7 +782,16 @@ function hideDock() {
 }
 
 function updateApp() {
-  if (isLinux) return
+  if (isLinux) return // Electron's autoUpdater does not support Linux.
+  if (isMas) return // MAS builds do not provide autoUpdater;
+
+  const { autoUpdater } = require('electron')
+  const { updateElectronApp } = require('update-electron-app')
+
+  autoUpdater.on('before-quit-for-update', () => {
+    isQuitting = true;
+    flushExtendedToolbarPosition()
+  });
 
   updateElectronApp()
 }
