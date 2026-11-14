@@ -220,6 +220,10 @@ const schema = {
     type: 'boolean',
     default: false
   },
+  analytics_enabled: {
+    type: 'boolean',
+    default: !isMas
+  },
   key_binding_show_hide_app: {
     type: 'string',
     default: KEY_SHOW_HIDE_APP
@@ -994,6 +998,7 @@ ipcMain.handle('get_configuration', () => {
     drawing_monitor:                          store.get('drawing_monitor'),
     app_icon_color:                           store.get('app_icon_color'),
     launch_on_login:                          store.get('launch_on_login'),
+    analytics_enabled:                        store.get('analytics_enabled'),
     starts_hidden:                            store.get('starts_hidden'),
     clear_drawings_on_hide:                   store.get('clear_drawings_on_hide'),
     disable_toolbar_in_pointer_mode:          store.get('disable_toolbar_in_pointer_mode'),
@@ -1201,6 +1206,14 @@ ipcMain.handle('set_launch_on_login', (_event, value) => {
   safeSetLoginItemSettings({ openAtLogin: value });
 
   store.set('launch_on_login', value)
+
+  return null;
+});
+
+ipcMain.handle('set_analytics_enabled', (_event, value) => {
+  rawLog('Setting usage analytics:', value)
+
+  store.set('analytics_enabled', value)
 
   return null;
 });
@@ -2120,6 +2133,7 @@ function safeSetLoginItemSettings(settings) {
 
 function launchTracker() {
   if (isDevelopment) { return }
+  if (!store.get('analytics_enabled')) { return }
 
   try {
     const key = process.env.PUBLIC_POSTHOG_KEY;

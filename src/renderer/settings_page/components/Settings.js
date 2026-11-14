@@ -62,6 +62,7 @@ const Settings = (config) => {
   const [laserTimeMs, setLaserTimeMs] = useState(config.laser_time);
   const [launchOnLogin, setLaunchOnLogin] = useState(config.launch_on_login);
   const [startsHidden, setStartsHidden] = useState(config.starts_hidden);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(config.analytics_enabled);
   const [clearDrawingsOnHide, setClearDrawingsOnHide] = useState(config.clear_drawings_on_hide);
   const [disableToolbarInPointerMode, setDisableToolbarInPointerMode] = useState(config.disable_toolbar_in_pointer_mode);
   const [toolbarOrientation, setToolbarOrientation] = useState(config.tool_bar_orientation);
@@ -229,6 +230,13 @@ const Settings = (config) => {
     setLaunchOnLogin(nextState);
 
     window.electronAPI.setLaunchOnLogin(nextState);
+  };
+
+  const toggleAnalytics = () => {
+    const nextState = !analyticsEnabled;
+    setAnalyticsEnabled(nextState);
+
+    window.electronAPI.setAnalyticsEnabled(nextState);
   };
 
   const toggleStartsHidden = () => {
@@ -825,6 +833,20 @@ const Settings = (config) => {
                     <div
                       className={`toggle ${launchOnLogin ? 'active' : ''}`}
                       onClick={toggleLaunch}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-info">
+                    <div className="settings-item-title">Usage Analytics</div>
+                    <div className="settings-item-description">Share usage and system information to help improve the app</div>
+                  </div>
+
+                  <div className="settings-item-control">
+                    <div
+                      className={`toggle ${analyticsEnabled ? 'active' : ''}`}
+                      onClick={toggleAnalytics}
                     ></div>
                   </div>
                 </div>
