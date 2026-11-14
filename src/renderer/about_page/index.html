@@ -6,6 +6,7 @@
       :root {
         --gray-300: #DADEE0;
         --gray-400: #CCCECF;
+        --gray-700: #2E3439;
         --blue-500: #1D76DC;
         --font-primary: 'Inter', Arial, Helvetica, sans-serif;
       }
@@ -39,7 +40,16 @@
       }
 
       #version {
-        margin: 5px 0 15px 0;
+        margin: 5px 0;
+      }
+
+      .privacy-policy {
+        margin-bottom: 10px;
+        font-size: 9px;
+      }
+
+      .privacy-policy a {
+        color: var(--gray-700);
       }
 
       .description {
@@ -88,6 +98,7 @@
         <img src="../assets/icon.png" width='80' alt='drawpen'>
         <span class="title">DrawPen</span>
         <span id="version">Version ...</span>
+        <span class="privacy-policy"><a href="https://drawpen.app/privacy" target="_blank">Privacy Policy</a></span>
         <span class="description with-border">Source code available on <a href="https://github.com/DmytroVasin/DrawPen" target="_blank">GitHub</a></span>
         <span class="description"><a href="https://www.linkedin.com/in/dmytro-vasin/" target="_blank">Dmytro Vasin</a></span>
     </div>

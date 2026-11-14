@@ -617,7 +617,7 @@ function createAboutWindow() {
   aboutWindow = new BrowserWindow({
     show: false,
     width: 250,
-    height: 220,
+    height: 230,
     useContentSize: true,
     resizable: false,
     minimizable: false,

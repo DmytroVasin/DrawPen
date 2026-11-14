@@ -3,12 +3,12 @@ require('dotenv').config();
 const path = require('path');
 const packageJson = require('./../../package.json');
 const rootDir = process.cwd();
+
 const isMasBuild = process.argv.includes('--platform=mas');
-const isMasDistribution = process.env.npm_lifecycle_event === 'make:mas';
 const isSigningEnabled = !process.argv.includes('--no-sign');
-const masProvisioningProfileKey = isMasDistribution
-  ? 'APPLE_MAS_DISTRIBUTION_PROVISIONING_PROFILE'
-  : 'APPLE_MAS_PROVISIONING_PROFILE';
+
+const isMasDistribution = process.env.npm_lifecycle_event === 'make:mas';
+const masProvisioningProfileKey = isMasDistribution ? 'APPLE_MAS_DISTRIBUTION_PROVISIONING_PROFILE' : 'APPLE_MAS_PROVISIONING_PROFILE';
 const masProvisioningProfile = process.env[masProvisioningProfileKey];
 
 if (isMasBuild && !masProvisioningProfile) {
