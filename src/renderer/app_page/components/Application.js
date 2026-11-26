@@ -67,6 +67,8 @@ import {
   initialZoomIndex,
 } from './constants.js';
 
+const STRAIGHT_SEGMENT_STEP = 2;
+
 const Icons = {
   DrawModeEnabled: LuSquareMousePointer,
   Close: MdOutlineClose,
@@ -255,6 +257,7 @@ const Application = (settings) => {
   const lastPasteAtRef = useRef(0);
   const lastEscapeAtRef = useRef(0);
   const lastZoomShortcutAtRef = useRef(0);
+  const straightSegmentAnchorRef = useRef(null);
   useEffect(() => {
     if (zoomInfo.status !== 'capturing') return;
 
@@ -1249,6 +1252,7 @@ const Application = (settings) => {
   }
 
   const handleMouseDown = ({ x, y }) => {
+    straightSegmentAnchorRef.current = null;
     // Diactivate text editor
     if (textEditorContainer) {
       setTextEditorContainer({ ...textEditorContainer, isActive: false });
@@ -1429,7 +1433,7 @@ const Application = (settings) => {
     setIsDrawing(true);
   };
 
-  const updatePenStrokeEnd = (figure, { x, y }, { snap = true } = {}) => {
+  const updatePenStrokeEnd = (figure, { x, y }) => {
     if (figure.points.length === 1) {
       figure.points = [...figure.points, [...figure.points[0]]];
     }
@@ -1437,10 +1441,31 @@ const Application = (settings) => {
     const fromPoint = figure.points.at(-2);
     const toPoint = figure.points.at(-1);
 
-    const result = snap ? applySoftSnap(fromPoint[0], fromPoint[1], x, y) : { x, y };
+    const result = applySoftSnap(fromPoint[0], fromPoint[1], x, y);
 
     toPoint[0] = result.x;
     toPoint[1] = result.y;
+  };
+
+  // Straight segment at any angle (no snapping) from the point where Shift was pressed.
+  // The segment is filled with evenly spaced points: perfect-freehand's streamline smoothing
+  // would otherwise leave the stroke end far behind the cursor on a single long jump.
+  const updateStraightStrokeEnd = (figure, { x, y }) => {
+    if (straightSegmentAnchorRef.current === null) {
+      straightSegmentAnchorRef.current = figure.points.length - 1;
+    }
+
+    const basePoints = figure.points.slice(0, straightSegmentAnchorRef.current + 1);
+    const [startX, startY] = basePoints.at(-1);
+    const steps = Math.max(1, Math.ceil(Math.hypot(x - startX, y - startY) / STRAIGHT_SEGMENT_STEP));
+
+    const segmentPoints = [];
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      segmentPoints.push([startX + (x - startX) * t, startY + (y - startY) * t]);
+    }
+
+    figure.points = [...basePoints, ...segmentPoints];
   };
 
   const handleMouseMove = ({ x, y }) => {
@@ -1511,10 +1536,10 @@ const Application = (settings) => {
       if (['brush', 'highlighter'].includes(activeTool)) {
         const currentFigure = allFigures.at(-1);
 
-        // Shift: straight segment at any angle (no angle snapping)
         if (isShiftPressed) {
-          updatePenStrokeEnd(currentFigure, { x, y }, { snap: false });
+          updateStraightStrokeEnd(currentFigure, { x, y });
         } else {
+          straightSegmentAnchorRef.current = null;
           currentFigure.points = [...currentFigure.points, [x, y]];
         }
 
@@ -1563,6 +1588,7 @@ const Application = (settings) => {
   };
 
   const handleMouseUp = ({ x, y }) => {
+    straightSegmentAnchorRef.current = null;
     if (isDrawing) {
       const upPoint = [x, y];
 
