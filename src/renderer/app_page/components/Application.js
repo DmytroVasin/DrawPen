@@ -1429,7 +1429,7 @@ const Application = (settings) => {
     setIsDrawing(true);
   };
 
-  const updatePenStrokeEnd = (figure, { x, y }) => {
+  const updatePenStrokeEnd = (figure, { x, y }, { snap = true } = {}) => {
     if (figure.points.length === 1) {
       figure.points = [...figure.points, [...figure.points[0]]];
     }
@@ -1437,7 +1437,7 @@ const Application = (settings) => {
     const fromPoint = figure.points.at(-2);
     const toPoint = figure.points.at(-1);
 
-    const result = applySoftSnap(fromPoint[0], fromPoint[1], x, y);
+    const result = snap ? applySoftSnap(fromPoint[0], fromPoint[1], x, y) : { x, y };
 
     toPoint[0] = result.x;
     toPoint[1] = result.y;
@@ -1511,7 +1511,12 @@ const Application = (settings) => {
       if (['brush', 'highlighter'].includes(activeTool)) {
         const currentFigure = allFigures.at(-1);
 
-        currentFigure.points = [...currentFigure.points, [x, y]];
+        // Shift: straight segment at any angle (no angle snapping)
+        if (isShiftPressed) {
+          updatePenStrokeEnd(currentFigure, { x, y }, { snap: false });
+        } else {
+          currentFigure.points = [...currentFigure.points, [x, y]];
+        }
 
         setAllFigures([...allFigures]);
         return
