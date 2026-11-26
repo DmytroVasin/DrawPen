@@ -15,6 +15,8 @@ import {
 } from "../utils/toolbar.js";
 
 const ToolBar = ({
+  hidden,
+  isClickThroughSession,
   orientation,
   position,
   setPosition,
@@ -399,6 +401,7 @@ const ToolBar = ({
         ${areShortcutHintsVisible ? "toolbar--shortcut-hints-visible" : ""}
       `}
       style={{
+        visibility: hidden ? 'hidden' : 'visible',
         left: position.x,
         top: position.y,
         '--toolbar-items-amount': visibleTools.toolbarItems.length + Number(toolbarOptions.tool_bar_show_clear_desk),
@@ -425,7 +428,7 @@ const ToolBar = ({
         </div>
 
         <div className="toolbar__main-button">
-          <button tabIndex={-1} title="Pointer Mode" onClick={handleEnablePointerMode}>
+          <button tabIndex={-1} title={isClickThroughSession ? 'Click-through Mode' : 'Pointer Mode'} onClick={handleEnablePointerMode}>
             <Icons.DrawModeEnabled />
           </button>
         </div>

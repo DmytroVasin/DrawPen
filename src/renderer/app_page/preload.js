@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Renderer -> Main
   invokeCloseApp:              () => ipcRenderer.invoke('close_app'),
   invokePointerMode:           () => ipcRenderer.invoke('toggle_draw_or_pointer_window'),
+  invokeClickThroughMode:       () => ipcRenderer.invoke('enable_click_through_mode'),
   invokeOpenSettings:          () => ipcRenderer.invoke('open_settings'),
   invokeMakeScreenshot:        () => ipcRenderer.invoke('make_screenshot'),
   invokeRequestZoomStart:      () => ipcRenderer.invoke('request_zoom_start'),
@@ -20,6 +21,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Main -> Renderer
   onResetScreen:           (callback) => { ipcRenderer.on('reset_screen', () => callback()); },
   onToggleToolbar:         (callback) => { ipcRenderer.on('toggle_toolbar', () => callback()); },
+  onClickThroughMode:      (callback) => { ipcRenderer.on('set_click_through_mode', (_event, enabled) => callback(enabled)); },
+  onClickThroughSession:   (callback) => { ipcRenderer.on('set_click_through_session', (_event, enabled) => callback(enabled)); },
   onToggleWhiteboard:      (callback) => { ipcRenderer.on('toggle_whiteboard', () => callback()); },
   onRefreshSettings:       (callback) => { ipcRenderer.on('refresh_settings', (_event, newSettings) => callback(newSettings)); },
   onUpdateToolbarPosition: (callback) => { ipcRenderer.on('update_toolbar_position', (_event, newSettings) => callback(newSettings)); },

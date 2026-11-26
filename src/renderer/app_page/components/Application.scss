@@ -59,6 +59,14 @@ body {
 
         z-index: -1;
 
+        &.click-through {
+          --border-color: #F4A261;
+        }
+
+        &.click-through-paint {
+          --border-color: #6EA8FE;
+        }
+
         &::before {
           content: "";
           position: absolute;

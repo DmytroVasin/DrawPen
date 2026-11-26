@@ -430,6 +430,19 @@ const Settings = (config) => {
                 />
 
                 <ShortcutRow
+                  title="Switch Mode"
+                  description="Uses the Show/Hide App shortcut to switch Paint and Click-through during a Click-through session"
+                  hint="Global shortcut"
+                  wrapDescription
+                  shortcut={showHideApp}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_show_hide_app', acc)}
+                  onChange={(acc) => applyShortcut('key_binding_show_hide_app', acc)}
+                  onReset={() => resetShortcut('key_binding_show_hide_app')}
+                  onRemove={() => removeShortcut('key_binding_show_hide_app')}
+                  onError={showToast}
+                />
+
+                <ShortcutRow
                   title="Show/Hide Toolbar"
                   description="Toggles the floating toolbar"
                   shortcut={showHideToolbar}
@@ -545,7 +558,7 @@ const Settings = (config) => {
                 <div className="settings-item">
                   <div className="settings-item-info">
                     <div className="settings-item-title">Hide Extended Toolbar</div>
-                    <div className="settings-item-description">Affects only Pointer Mode</div>
+                    <div className="settings-item-description">Affects Pointer and Click-through modes</div>
                   </div>
 
                   <div className="settings-item-control">

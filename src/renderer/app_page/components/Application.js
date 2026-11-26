@@ -154,6 +154,8 @@ const Application = (settings) => {
   const [textEditorContainer, setTextEditorContainer] = useState(null);
   const [cursorType, setCursorType] = useState('crosshair');
   const [showToolbar, setShowToolbar] = useState(initialShowToolbar);
+  const [isClickThroughMode, setIsClickThroughMode] = useState(settings.click_through_mode);
+  const [isClickThroughSession, setIsClickThroughSession] = useState(settings.click_through_session);
   const [showWhiteboard, setShowWhiteboard] = useState(initialShowWhiteboard);
   const [whiteboardTheme, setWhiteboardTheme] = useState(initialWhiteboardTheme);
   const [whiteboardLayout, setWhiteboardLayout] = useState(initialWhiteboardLayout);
@@ -241,6 +243,8 @@ const Application = (settings) => {
   useEffect(() => {
     window.electronAPI.onResetScreen(handleReset);
     window.electronAPI.onToggleToolbar(handleToggleToolbar);
+    window.electronAPI.onClickThroughMode(setIsClickThroughMode);
+    window.electronAPI.onClickThroughSession(setIsClickThroughSession);
     window.electronAPI.onToggleWhiteboard(handleToggleWhiteboard);
     window.electronAPI.onRefreshSettings(handleRefreshSettings);
     window.electronAPI.onUpdateToolbarPosition(handleUpdateToolbarPosition);
@@ -1718,6 +1722,11 @@ const Application = (settings) => {
   }
 
   const handleEnablePointerMode = () => {
+    if (isClickThroughSession) {
+      window.electronAPI.invokeClickThroughMode();
+      return;
+    }
+
     if (clearDrawingsOnHide) {
       handleReset();
     }
@@ -2119,8 +2128,9 @@ const Application = (settings) => {
   }
 
   const manipulation = (isDrawing || isActiveFigureMoving()) ? "manipulation_mode" : "";
-  const canvasCursorType = cuteCursorMode === 'dot' && cursorType === 'crosshair' ? 'default' : cursorType;
+  const canvasCursorType = isClickThroughMode || (cuteCursorMode === 'dot' && cursorType === 'crosshair') ? 'default' : cursorType;
   const isCuteCursorVisible =
+    !isClickThroughMode &&
     isDocumentVisible &&
     ['permanent', 'fade', 'dot'].includes(cuteCursorMode) &&
     !(cuteCursorMode === 'dot' && canvasCursorType !== 'default');
@@ -2156,7 +2166,7 @@ const Application = (settings) => {
 
       {
         zoomInfo.status === 'inactive' && showDrawingBorder &&
-        <div id="zone_borders"></div>
+        <div id="zone_borders" className={isClickThroughMode ? 'click-through' : isClickThroughSession ? 'click-through-paint' : ''}></div>
       }
 
       {
@@ -2236,6 +2246,8 @@ const Application = (settings) => {
       {
         showToolbar &&
           <ToolBar
+            hidden={isClickThroughMode}
+            isClickThroughSession={isClickThroughSession}
             orientation={initialToolbarOrientation}
             position={toolbarPosition}
             setPosition={setToolbarPosition}

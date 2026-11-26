@@ -308,6 +308,8 @@ let settingsWindow
 let isQuitting = false
 let startAsHidden = false
 let drawingMode = false
+let clickThroughMode = false
+let clickThroughSession = false
 let zoomMode = false
 let zoomModeStarting = false
 
@@ -342,6 +344,7 @@ function updateContextMenu() {
 
   const show_tool_bar   = store.get('show_tool_bar')
   const show_whiteboard = store.get('show_whiteboard')
+  const canToggleWhiteboard = !clickThroughSession || show_whiteboard
 
   const key_show_hide_app        = store.get('key_binding_show_hide_app')
   const key_show_hide_toolbar    = store.get('key_binding_show_hide_toolbar')
@@ -370,18 +373,32 @@ function updateContextMenu() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: withAccelHint((drawingMode ? 'Enable Pointer Mode' : 'Enable Draw Mode'), key_show_hide_app),
+      label: withAccelHint(
+        clickThroughSession
+          ? (drawingMode ? 'Enable Click-through Mode' : 'Enable Paint Mode')
+          : (drawingMode ? 'Enable Pointer Mode' : 'Enable Draw Mode'),
+        key_show_hide_app
+      ),
       accelerator: accelForTray(key_show_hide_app),
       click: toggleDrawOrPointerMode
     },
+    {
+      label: clickThroughSession ? 'Exit Click-through Mode' : 'Start Click-through Mode',
+      click: clickThroughSession ? enableDrawMode : startClickThroughMode
+    },
+    ...(clickThroughSession ? [{
+      label: 'Enable Pointer Mode',
+      click: enablePointerMode
+    }] : []),
     {
       label: withAccelHint((show_tool_bar ? 'Hide Toolbar' : 'Show Toolbar'), key_show_hide_toolbar),
       accelerator: accelForTray(key_show_hide_toolbar),
       click: toggleToolbar
     },
     {
-      label: withAccelHint((show_whiteboard ? 'Hide Whiteboard' : 'Show Whiteboard'), key_show_hide_whiteboard),
-      accelerator: accelForTray(key_show_hide_whiteboard),
+      label: withAccelHint((show_whiteboard ? 'Hide Whiteboard' : 'Show Whiteboard'), canToggleWhiteboard ? key_show_hide_whiteboard : null),
+      accelerator: canToggleWhiteboard ? accelForTray(key_show_hide_whiteboard) : undefined,
+      enabled: canToggleWhiteboard,
       click: toggleWhiteboard
     },
     {
@@ -841,6 +858,8 @@ ipcMain.handle('get_settings', () => {
     fade_out_duration_time_ms: store.get('fade_out_duration_time_ms'),
     laser_time: store.get('laser_time'),
     clear_drawings_on_hide: store.get('clear_drawings_on_hide'),
+    click_through_mode: clickThroughMode,
+    click_through_session: clickThroughSession,
 
     key_binding_show_hide_toolbar:    normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_whiteboard: normalizeAcceleratorForUI(store.get('key_binding_show_hide_whiteboard')),
@@ -877,7 +896,14 @@ ipcMain.handle('close_app', () => {
 });
 
 ipcMain.handle('toggle_draw_or_pointer_window', () => {
-  toggleDrawOrPointerMode()
+  if (clickThroughSession && drawingMode) enablePointerMode()
+  else toggleDrawOrPointerMode()
+
+  return null
+});
+
+ipcMain.handle('enable_click_through_mode', () => {
+  if (clickThroughSession) enableClickThroughMode()
 
   return null
 });
@@ -1393,7 +1419,13 @@ function toggleDrawOrPointerMode() {
   withThrottle(() => {
     rawLog('Toggling draw mode...')
 
-    if (drawingMode) {
+    if (clickThroughSession) {
+      if (drawingMode) {
+        enableClickThroughMode()
+      } else {
+        enableDrawMode({ inClickThroughSession: true })
+      }
+    } else if (drawingMode) {
       enablePointerMode()
     } else {
       enableDrawMode()
@@ -1401,7 +1433,17 @@ function toggleDrawOrPointerMode() {
   });
 }
 
-function enableDrawMode() {
+function startClickThroughMode() {
+  enableDrawMode({ inClickThroughSession: true })
+}
+
+function setClickThroughSession(enabled) {
+  clickThroughSession = enabled
+  mainWindow.webContents.send('set_click_through_session', enabled)
+  extendedToolbarWindow.webContents.send('set_click_through_session', enabled)
+}
+
+function enableDrawMode({ inClickThroughSession = false } = {}) {
   if (zoomModeStarting) return
 
   rawLog('Enable drawing mode...')
@@ -1409,10 +1451,17 @@ function enableDrawMode() {
   exitZoomMode()
   flushExtendedToolbarPosition()
 
+  if (clickThroughMode) {
+    if (isMac || isWin) mainWindow.setFocusable(true)
+    mainWindow.setIgnoreMouseEvents(false)
+  }
   showMainWindow()
   hideWindow(extendedToolbarWindow)
 
   drawingMode = true
+  clickThroughMode = false
+  setClickThroughSession(inClickThroughSession)
+  mainWindow.webContents.send('set_click_through_mode', false)
   updateContextMenu()
 }
 
@@ -1424,13 +1473,44 @@ function enablePointerMode() {
   exitZoomMode()
   resetScreenOnHide()
 
-  showExtendedToolbarWindow()
+  if (clickThroughMode) {
+    if (isMac || isWin) mainWindow.setFocusable(true)
+    mainWindow.setIgnoreMouseEvents(false)
+  }
+
   hideWindow(mainWindow)
 
   drawingMode = false
+  clickThroughMode = false
+  setClickThroughSession(false)
+  mainWindow.webContents.send('set_click_through_mode', false)
+  showExtendedToolbarWindow()
   updateContextMenu()
 
   releaseFocusBack()
+}
+
+function enableClickThroughMode() {
+  if (zoomModeStarting) return
+
+  rawLog('Enable click-through mode...')
+
+  exitZoomMode()
+
+  if (isMac && app.isHidden()) app.show()
+  if (isMac || isWin) mainWindow.setFocusable(false)
+  mainWindow.setIgnoreMouseEvents(true)
+  showWindow(mainWindow, { inactive: true })
+  mainWindow.blur()
+  showExtendedToolbarWindow()
+
+  drawingMode = false
+  clickThroughMode = true
+  setClickThroughSession(true)
+  mainWindow.webContents.send('set_click_through_mode', true)
+  updateContextMenu()
+
+  releaseFocusBack({ keepWindowsVisible: true })
 }
 
 function hideApp() {
@@ -1441,10 +1521,18 @@ function hideApp() {
   exitZoomMode()
   resetScreenOnHide()
 
+  if (clickThroughMode) {
+    if (isMac || isWin) mainWindow.setFocusable(true)
+    mainWindow.setIgnoreMouseEvents(false)
+  }
+
   hideWindow(mainWindow)
   hideWindow(extendedToolbarWindow)
 
   drawingMode = false
+  clickThroughMode = false
+  setClickThroughSession(false)
+  mainWindow.webContents.send('set_click_through_mode', false)
   updateContextMenu()
 
   releaseFocusBack()
@@ -1486,6 +1574,8 @@ function toggleToolbar() {
 }
 
 function toggleWhiteboard() {
+  if (clickThroughSession && !store.get('show_whiteboard')) return
+
   withThrottle(() => {
     rawLog('Toggling whiteboard...')
 
@@ -1800,7 +1890,7 @@ function showWindow(targetWindow, { inactive = false } = {}) {
   }
 }
 
-function releaseFocusBack() {
+function releaseFocusBack({ keepWindowsVisible = false } = {}) {
   if (!isMac) return;
 
   if (settingsWindow) {
@@ -1814,6 +1904,12 @@ function releaseFocusBack() {
   }
 
   app.hide()
+  if (keepWindowsVisible) {
+    // Let macOS activate the previous app before showing the overlay again.
+    setTimeout(() => {
+      if (clickThroughMode && app.isHidden()) app.show()
+    }, 100)
+  }
 }
 
 function storeToolbarPositionFromExtendedWindow() {
