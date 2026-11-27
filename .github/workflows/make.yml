@@ -34,6 +34,7 @@ jobs:
           npm install -g appdmg@0.6.6
 
       - name: macOS certificate
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           APPLE_CERTIFICATE: ${{ secrets.DEVELOPER_ID_APPLICATION }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
@@ -48,7 +49,8 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
           rm -fr *.p12
 
-      - name: Run Make
+      - name: Run Make (signed)
+        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           PUBLIC_POSTHOG_KEY: ${{ secrets.PUBLIC_POSTHOG_KEY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -56,6 +58,10 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           npm run make
+
+      - name: Run Make (unsigned fork PR)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        run: npm run make -- . --no-sign
 
       - uses: actions/upload-artifact@v7.0.1
         with:
@@ -68,7 +74,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
 
     runs-on: ${{ matrix.os }}
 
