@@ -22,6 +22,7 @@ const isLinux = process.platform === 'linux'
 const isWin = process.platform === 'win32'
 
 const KEY_SHOW_HIDE_APP        = 'CmdOrCtrl+Shift+A'
+const KEY_CLICK_THROUGH        = 'CmdOrCtrl+Shift+G'
 const KEY_SHOW_HIDE_TOOLBAR    = 'CmdOrCtrl+T'
 const KEY_SHOW_HIDE_WHITEBOARD = 'CmdOrCtrl+E'
 const KEY_CLEAR_DESK           = 'CmdOrCtrl+K'
@@ -224,6 +225,10 @@ const schema = {
     type: 'string',
     default: KEY_SHOW_HIDE_APP
   },
+  key_binding_click_through: {
+    type: 'string',
+    default: KEY_CLICK_THROUGH
+  },
   key_binding_show_hide_toolbar: {
     type: 'string',
     default: KEY_SHOW_HIDE_TOOLBAR
@@ -347,6 +352,7 @@ function updateContextMenu() {
   const canToggleWhiteboard = !clickThroughSession || show_whiteboard
 
   const key_show_hide_app        = store.get('key_binding_show_hide_app')
+  const key_click_through        = store.get('key_binding_click_through')
   const key_show_hide_toolbar    = store.get('key_binding_show_hide_toolbar')
   const key_show_hide_whiteboard = store.get('key_binding_show_hide_whiteboard')
   const key_clear_desk           = store.get('key_binding_clear_desk')
@@ -383,8 +389,9 @@ function updateContextMenu() {
       click: toggleDrawOrPointerMode
     },
     {
-      label: clickThroughSession ? 'Exit Click-through Mode' : 'Start Click-through Mode',
-      click: clickThroughSession ? enableDrawMode : startClickThroughMode
+      label: withAccelHint(clickThroughSession ? 'Exit Click-through Mode' : 'Start Click-through Mode', key_click_through),
+      accelerator: accelForTray(key_click_through),
+      click: toggleClickThroughSession
     },
     ...(clickThroughSession ? [{
       label: 'Enable Pointer Mode',
@@ -1030,6 +1037,9 @@ ipcMain.handle('get_configuration', () => {
     key_binding_show_hide_app:                normalizeAcceleratorForUI(store.get('key_binding_show_hide_app')),
     key_binding_show_hide_app_default:        normalizeAcceleratorForUI(schema.key_binding_show_hide_app.default),
 
+    key_binding_click_through:                normalizeAcceleratorForUI(store.get('key_binding_click_through')),
+    key_binding_click_through_default:        normalizeAcceleratorForUI(schema.key_binding_click_through.default),
+
     key_binding_show_hide_toolbar:            normalizeAcceleratorForUI(store.get('key_binding_show_hide_toolbar')),
     key_binding_show_hide_toolbar_default:    normalizeAcceleratorForUI(schema.key_binding_show_hide_toolbar.default),
 
@@ -1137,6 +1147,7 @@ ipcMain.handle('can_register_shortcut', async (_event, key, value) => {
 
   const shortcutsInUse = [
     store.get('key_binding_show_hide_app'),
+    store.get('key_binding_click_through'),
     store.get('key_binding_show_hide_toolbar'),
     store.get('key_binding_show_hide_whiteboard'),
     store.get('key_binding_clear_desk'),
@@ -1149,7 +1160,7 @@ ipcMain.handle('can_register_shortcut', async (_event, key, value) => {
   if (accelerator === store.get(key)) return { success: false, message: 'Shortcut unchanged' };
   if (shortcutsInUse.includes(accelerator)) return { success: false, message: 'Shortcut already in use' };
 
-  if (key === 'key_binding_show_hide_app') {
+  if (key === 'key_binding_show_hide_app' || key === 'key_binding_click_through') {
     if (globalShortcut.isRegistered(accelerator)) return { success: false, message: 'Already registered by DrawPen' };
 
     try {
@@ -1389,6 +1400,9 @@ function registerGlobalShortcuts() {
 
   const keyApp = store.get('key_binding_show_hide_app')
   safeRegisterGlobalShortcut(keyApp, toggleDrawOrPointerMode)
+
+  const keyClickThrough = store.get('key_binding_click_through')
+  safeRegisterGlobalShortcut(keyClickThrough, toggleClickThroughSession)
 }
 
 function unRegisterGlobalShortcuts() {
@@ -1435,6 +1449,11 @@ function toggleDrawOrPointerMode() {
 
 function startClickThroughMode() {
   enableDrawMode({ inClickThroughSession: true })
+}
+
+function toggleClickThroughSession() {
+  if (clickThroughSession) hideApp()
+  else startClickThroughMode()
 }
 
 function setClickThroughSession(enabled) {
