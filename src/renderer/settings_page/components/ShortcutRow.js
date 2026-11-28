@@ -35,7 +35,7 @@ const HotkeyPill = ({ accelerator }) => {
   );
 };
 
-const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, onReset, onRemove, onError }) => {
+const ShortcutRow = ({ title, description, hint, wrapDescription = false, shortcut, onCheck, onChange, onReset, onRemove, onError }) => {
   const KEY_NULL = '[NULL]';
   const isMac = window.electronAPI.isMac;
 
@@ -181,7 +181,7 @@ const ShortcutRow = ({ title, description, hint, shortcut, onCheck, onChange, on
     : <HotkeyPill accelerator={shortcut.accelerator.split('+')} />;
 
   return (
-    <div className="settings-item">
+    <div className={`settings-item${wrapDescription ? ' settings-item--wrap-description' : ''}`}>
       {
         hint && <div className="settings-item-hint"><IoGlobeOutline className="icon" title={hint} /></div>
       }

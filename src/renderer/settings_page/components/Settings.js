@@ -68,6 +68,7 @@ const Settings = (config) => {
   const [screenshotDirectory, setScreenshotDirectory] = useState({ path: config.screenshot_directory, isDefault: config.screenshot_directory_is_default });
 
   const [showHideApp, setShowHideApp]               = useState({ accelerator: config.key_binding_show_hide_app,        init: config.key_binding_show_hide_app_default });
+  const [clickThrough, setClickThrough]             = useState({ accelerator: config.key_binding_click_through,        init: config.key_binding_click_through_default });
   const [showHideToolbar, setShowHideToolbar]       = useState({ accelerator: config.key_binding_show_hide_toolbar,    init: config.key_binding_show_hide_toolbar_default });
   const [showHideWhiteboard, setShowHideWhiteboard] = useState({ accelerator: config.key_binding_show_hide_whiteboard, init: config.key_binding_show_hide_whiteboard_default });
   const [clearDesk, setClearDesk]                   = useState({ accelerator: config.key_binding_clear_desk,           init: config.key_binding_clear_desk_default });
@@ -153,6 +154,9 @@ const Settings = (config) => {
       case 'key_binding_show_hide_app':
         setShowHideApp({ ...showHideApp, accelerator });
         break;
+      case 'key_binding_click_through':
+        setClickThrough({ ...clickThrough, accelerator });
+        break;
       case 'key_binding_show_hide_toolbar':
         setShowHideToolbar({ ...showHideToolbar, accelerator });
         break;
@@ -172,6 +176,9 @@ const Settings = (config) => {
       case 'key_binding_show_hide_app':
         setShowHideApp({ ...showHideApp, accelerator: showHideApp.init });
         break;
+      case 'key_binding_click_through':
+        setClickThrough({ ...clickThrough, accelerator: clickThrough.init });
+        break;
       case 'key_binding_show_hide_toolbar':
         setShowHideToolbar({ ...showHideToolbar, accelerator: showHideToolbar.init });
         break;
@@ -190,6 +197,9 @@ const Settings = (config) => {
     switch (key) {
       case 'key_binding_show_hide_app':
         setShowHideApp({ ...showHideApp, accelerator: '[NULL]' });
+        break;
+      case 'key_binding_click_through':
+        setClickThrough({ ...clickThrough, accelerator: '[NULL]' });
         break;
       case 'key_binding_show_hide_toolbar':
         setShowHideToolbar({ ...showHideToolbar, accelerator: '[NULL]' });
@@ -430,6 +440,31 @@ const Settings = (config) => {
                 />
 
                 <ShortcutRow
+                  title="Switch Mode"
+                  description="Uses the Show/Hide App shortcut to switch Paint and Click-through during a Click-through session"
+                  hint="Global shortcut"
+                  wrapDescription
+                  shortcut={showHideApp}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_show_hide_app', acc)}
+                  onChange={(acc) => applyShortcut('key_binding_show_hide_app', acc)}
+                  onReset={() => resetShortcut('key_binding_show_hide_app')}
+                  onRemove={() => removeShortcut('key_binding_show_hide_app')}
+                  onError={showToast}
+                />
+
+                <ShortcutRow
+                  title="Start/Exit Click-through Mode"
+                  description="Starts Click-through in Paint mode, or hides the app"
+                  hint="Global shortcut"
+                  shortcut={clickThrough}
+                  onCheck={(acc) => canRegisterShortcut('key_binding_click_through', acc)}
+                  onChange={(acc) => applyShortcut('key_binding_click_through', acc)}
+                  onReset={() => resetShortcut('key_binding_click_through')}
+                  onRemove={() => removeShortcut('key_binding_click_through')}
+                  onError={showToast}
+                />
+
+                <ShortcutRow
                   title="Show/Hide Toolbar"
                   description="Toggles the floating toolbar"
                   shortcut={showHideToolbar}
@@ -545,7 +580,7 @@ const Settings = (config) => {
                 <div className="settings-item">
                   <div className="settings-item-info">
                     <div className="settings-item-title">Hide Extended Toolbar</div>
-                    <div className="settings-item-description">Affects only Pointer Mode</div>
+                    <div className="settings-item-description">Affects Pointer and Click-through modes</div>
                   </div>
 
                   <div className="settings-item-control">

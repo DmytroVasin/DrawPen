@@ -283,6 +283,17 @@ html, body {
               padding: 12px 0;
               border-bottom: 1px solid var(--gray-300);
 
+              &.settings-item--wrap-description {
+                height: auto;
+                min-height: 30px;
+
+                .settings-item-info .settings-item-description {
+                  overflow: visible;
+                  text-overflow: clip;
+                  white-space: normal;
+                }
+              }
+
               &:last-child {
                 border-bottom: none;
               }
